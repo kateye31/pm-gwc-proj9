@@ -260,6 +260,29 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .row { display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: start; padding: 11px 0; border-top: 1px solid var(--line); }
 .row p { min-width: 0; overflow-wrap: anywhere; font-size: 15px; transition: color 200ms ease; }
 .row.is-done p { color: var(--parch-3); text-decoration: line-through; text-decoration-color: var(--parch-3); }
+/* Task details: where in the code, and what "done" looks like */
+.row-body { min-width: 0; display: grid; gap: 4px; }
+.row-where, .row-done { font-size: 14px; color: var(--parch-2); overflow-wrap: anywhere; }
+.row-where code, .helper-a code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13.5px; color: var(--parch); background: var(--night); border-radius: 5px; padding: 1px 6px; }
+.row-done b { color: var(--parch); font-weight: 700; }
+.row-ask { justify-self: start; margin-left: -4px; }
+.row.is-done .row-where, .row.is-done .row-done, .row.is-done .row-ask { display: none; }
+
+/* Ask for help */
+.helper { display: grid; gap: 14px; }
+.helper .chips .chip { height: 36px; font-size: 14.5px; }
+.helper-l { font-size: 15px; font-weight: 700; margin-bottom: -6px; }
+.helper textarea { width: 100%; font: inherit; font-size: 15.5px; line-height: 1.5; color: var(--parch); background: var(--night); border: 1px solid var(--plank); border-radius: 12px; padding: 12px 14px; resize: vertical; transition: border-color 160ms ease; }
+.helper textarea::placeholder { color: var(--parch-3); }
+.helper textarea:focus { outline: none; border-color: var(--torch); }
+#help-code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 14px; margin-top: 10px; }
+.helper-more summary { cursor: pointer; color: var(--parch-2); font-size: 15px; width: fit-content; text-decoration: underline; text-underline-offset: 3px; }
+.helper-more summary::marker { color: var(--parch-3); }
+.helper-a { background: var(--night); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; font-size: 15.5px; max-width: 75ch; white-space: pre-wrap; overflow-wrap: anywhere; transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+.helper-a.thinking { color: var(--parch-3); }
+.helper-a.err { color: var(--ember); }
+@starting-style { .helper-a { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .helper-a { transition: none; } }
 .tick { width: 24px; height: 24px; padding: 0; border: 0; background: none; border-radius: 50%; display: grid; place-items: center; color: var(--parch-3); }
 .tick svg { transition: filter 180ms ease, opacity 180ms ease; }
 .tick.swap svg { filter: blur(2px); opacity: .4; }
@@ -785,6 +808,25 @@ body.party-mode { overflow-x: hidden; }
             </div>
           </div>
         </div>
+        <form class="card helper" id="helper" autocomplete="off">
+          <div class="helper-top">
+            <div><h2>Stuck? Ask for help</h2><p class="sub">It knows our game's code and your tasks. It explains and gives hints first, so you still write your part.</p></div>
+          </div>
+          <div class="chips" id="help-starters" role="group" aria-label="Question starters"></div>
+          <label class="helper-l" for="help-q">Your question</label>
+          <textarea id="help-q" rows="3" maxlength="1200" placeholder="Like: my task says &quot;victory screen&quot;. What line do I start on?"></textarea>
+          <details class="helper-more"><summary>Add code or an error (optional)</summary>
+            <textarea id="help-code" rows="5" maxlength="4000" spellcheck="false" placeholder="Paste the code you changed, or the red error from the browser console"></textarea>
+          </details>
+          <div class="controls helper-go">
+            <button class="btn solid press" type="submit" id="help-ask" hidden>Ask</button>
+            <button class="btn solid press" type="button" id="help-gpt">Ask in ChatGPT</button>
+            <button class="btn press" type="button" id="help-claude">Ask in Claude</button>
+            <button class="btn press" type="button" id="help-copy">Copy question</button>
+          </div>
+          <div class="helper-a" id="help-a" hidden aria-live="polite"></div>
+          <p class="foot">AI can be wrong, so test its Java or ask a teammate. Never paste your PIN. Still stuck after 15 minutes? Post in Discord.</p>
+        </form>
         <div class="card meet-strip" id="catchup" hidden>
           <div><h2>Catch up on the Council</h2><p class="sub" id="catchup-sub"></p></div>
           <div class="controls">
@@ -883,6 +925,8 @@ body.party-mode { overflow-x: hidden; }
         <input id="t-title" class="grow" required maxlength="140" placeholder="Add a task, like: write 2 hints for the Maze" aria-label="Task">
         <select id="t-owner" aria-label="Owner"></select>
         <input id="t-due" type="date" required aria-label="Due date">
+        <input id="t-where" maxlength="60" placeholder="Where (optional), like game.js:147" aria-label="Where in the code" style="flex:1 1 200px;min-width:0">
+        <input id="t-done" class="grow" maxlength="160" placeholder="Done when (optional), like: the Maze has 5 turns" aria-label="Done when">
         <button class="btn solid press" type="submit">Add</button>
       </form>
       <div class="chips" id="filters" role="group" aria-label="Show tasks for"></div>
@@ -1190,6 +1234,8 @@ window.p9SaveText = async (filename, text) => {
   try { await dl.save({ filename, data: new Blob([text], { type: "text/plain;charset=utf-8" }) }); return true; }
   catch (e) { return false; }
 };
+// The starter game's files, so "Ask for help" can point at real line numbers (build.py fills this in)
+window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file to change the story and puzzles.\n// Based on Tvishaa's Group 9 design roadmap: a warlock traps you in his dungeon,\n// and you escape through 4 chambers. Search for TODO to find open work.\n// OOP topics follow Sanjana's research (classes & objects, constructors & methods,\n// encapsulation, inheritance, polymorphism as the final boss).\n\n// ---------- Start screen ----------\nconst KNIGHTS = [\n  // TODO (design crew): name your knights and pick their colors\n  { name: \"Sir Byte\", color: \"#ffc21a\" },\n  { name: \"Dame Loop\", color: \"#c2ba52\" },\n  { name: \"Sir Null\", color: \"#f08a4b\" },\n];\n\n// Difficulty changes how many hints you get in each chamber\nconst DIFFICULTIES = [\n  { name: \"Squire\", hints: 3, about: \"New to OOP. Lots of help.\" },\n  { name: \"Knight\", hints: 2, about: \"Seen Java before.\" },\n  { name: \"Champion\", hints: 1, about: \"Ready for a challenge.\" },\n];\n\n// ---------- The warlock ----------\nconst WARLOCK = {\n  // TODO (story): give him a name and a personality (see the Council answers)\n  name: \"The Warlock\",\n  intro: \"Welcome to my dungeon, little knight. Four chambers stand between you and freedom. Each one is locked with code. Good luck... you'll need it.\",\n  taunts: [\"Wrong! Try again, if you dare.\", \"Ha! My dungeon grows stronger.\", \"Not quite. Think like a programmer.\"],\n  defeated: \"No! You've escaped my dungeon. You truly understand objects...\",\n};\n\n// ---------- Chamber 1: The Maze ----------\n// 5 turns. Each turn is a multiple-choice question; the right answer is the right direction.\nconst MAZE = {\n  title: \"The Maze\",\n  concept: \"Classes and objects\",\n  story: \"Stone walls twist in every direction. Choose the right path at each turn.\",\n  turns: [\n    {\n      code: \"class Knight {\\n    String name;\\n}\\n\\nKnight k = new Knight();\",\n      question: \"Which one is the OBJECT?\",\n      choices: [\"\u2b05\ufe0f Knight\", \"\u2b06\ufe0f k\", \"\u27a1\ufe0f class\"],\n      answer: 1, // index into choices, 0 = first\n      hint: \"A class is the blueprint. What gets built FROM the blueprint?\",\n      explain: \"Knight is the class. k is an object made from it with new.\",\n    },\n    {\n      code: \"Knight a = new Knight();\\nKnight b = new Knight();\",\n      question: \"How many Knight objects exist?\",\n      choices: [\"\u2b05\ufe0f 1\", \"\u2b06\ufe0f 2\", \"\u27a1\ufe0f 0\"],\n      answer: 1,\n      hint: \"Count how many times you see the word new.\",\n      explain: \"Each new creates one object, so there are 2.\",\n    },\n    // TODO (Sanjana): write turns 3, 4 and 5. Ideas from your research:\n    //   - Constructors: \"Which line creates a Knight named Ava?\"  new Knight(\"Ava\") vs Knight(\"Ava\") vs new Knight\n    //   - Methods: which method call makes the knight attack?  k.attack() vs attack(k) vs Knight.attack\n    //   - Fields: after k.level = 3, what is k.level?\n  ],\n};\n\n// ---------- Chamber 2: The Alchemy Lab ----------\n// 4 steps. Guess what each snippet prints; the printed words join into the spell.\nconst LAB = {\n  title: \"The Alchemy Lab\",\n  concept: \"Methods and encapsulation\",\n  story: \"Bubbling potions line the shelves. Each one whispers a word when you read its code.\",\n  steps: [\n    {\n      code: 'class Potion {\\n    String word() { return \"OPEN\"; }\\n}\\n\\nSystem.out.println(new Potion().word());',\n      choices: [\"OPEN\", \"word\", \"Potion\"],\n      answer: 0,\n      hint: \"What does the word() method return?\",\n    },\n    {\n      code: 'String s = \"sesame\";\\nSystem.out.println(s.toUpperCase());',\n      choices: [\"sesame\", \"SESAME\", \"s\"],\n      answer: 1,\n      hint: \"toUpperCase() returns a new String in capital letters.\",\n    },\n    // TODO (Leslie/Sanjana): 2 more steps, so the spell has 4 words. Ideas from Sanjana's research:\n    //   - Encapsulation: a private field read through a public getter, e.g. getSecret() returns \"DOOR\"\n    //   - Constructor arguments: new Potion(\"RISE\").word() prints what?\n  ],\n};\n\n// ---------- Chamber 3: The Hall of Illusions ----------\n// 3 doors per round. They look alike, but only one has correct code.\nconst HALL = {\n  title: \"The Hall of Illusions\",\n  concept: \"Inheritance (plus a first look at polymorphism)\",\n  story: \"Three doors shimmer before you. Two are illusions. Only one is real.\",\n  rounds: [\n    {\n      question: \"Which door makes Wizard a child class of Character?\",\n      doors: [\n        \"class Wizard implements Character { }\",\n        \"class Wizard extends Character { }\",\n        \"class Wizard inherits Character { }\",\n      ],\n      answer: 1,\n      hint: \"Java uses one keyword to inherit from a class.\",\n      explain: \"extends is how a class inherits from another class.\",\n    },\n    {\n      question: 'Wizard overrides speak() to say \"Abracadabra\". Which door prints Abracadabra?',\n      doors: [\n        \"Character c = new Character();\\nc.speak();\",\n        \"Character c = new Wizard();\\nc.speak();\",\n        \"Wizard w = null;\\nw.speak();\",\n      ],\n      answer: 1,\n      hint: \"Java runs the method of the real object, not the variable's type.\",\n      explain: \"c is declared as Character but holds a Wizard, so Wizard's speak() runs. That's polymorphism.\",\n    },\n    // TODO (team): one more round. Sanjana's research saves polymorphism for the boss:\n    //   three doors call the same method on different objects; which one prints the right line?\n  ],\n};\n\n// ---------- Chamber 4: The Final Door ----------\n// Answer the warlock in your own words. Each answer earns a key (3 keys open the door).\nconst FINAL = {\n  title: \"The Final Door\",\n  concept: \"Polymorphism, the final boss: explain it in your own words\",\n  story: \"A giant door with three keyholes. The warlock appears: 'Answer me, and the keys are yours.'\",\n  questions: [\n    {\n      question: \"In your own words: what is the difference between a class and an object?\",\n      model: \"A class is a blueprint. An object is one thing built from that blueprint.\",\n      lookFor: [\"blueprint or template\", \"an object is made from the class\"],\n    },\n    {\n      question: \"Why would a Wizard class extend a Character class?\",\n      model: \"So Wizard gets everything Character has without rewriting it, and can add its own abilities.\",\n      lookFor: [\"reuse code\", \"Wizard gets Character's fields and methods\"],\n    },\n    {\n      question: \"What does polymorphism mean?\",\n      model: \"The same method call can do different things depending on the real object.\",\n      lookFor: [\"same call, different behavior\", \"depends on the actual object\"],\n    },\n  ],\n};\n", "game.js": "// Game logic. Content lives in rooms.js; this file shows one screen at a time.\n// Flow: start -> warlock intro -> Maze -> Alchemy Lab -> Hall of Illusions -> Final Door -> escape\n\nconst app = document.getElementById(\"app\");\nlet player = { knight: null, difficulty: null, hintsLeft: 0, keys: 0, spell: [] };\n\n// Small helper: put HTML on the screen\nfunction show(html) {\n  app.innerHTML = html;\n  window.scrollTo(0, 0);\n}\n\nfunction codeBlock(code) {\n  const safe = code.replace(/&/g, \"&amp;\").replace(/<\/g, \"&lt;\");\n  return `<pre><code>${safe}<\/code><\/pre>`;\n}\n\nfunction header(chamber, step, total) {\n  return `<p class=\"progress\">${chamber.title} \u00b7 ${step} of ${total} \u00b7 Keys: ${player.keys} \u00b7 Hints left: ${player.hintsLeft}<\/p>\n          <p class=\"concept\">${chamber.concept}<\/p>`;\n}\n\n// ---------- Start: choose knight, difficulty ----------\nfunction startScreen() {\n  player = { knight: null, difficulty: null, hintsLeft: 0, keys: 0, spell: [] };\n  const knights = KNIGHTS.map((k, i) =>\n    `<button class=\"choice\" style=\"border-color:${k.color}\" onclick=\"pickKnight(${i})\">${k.name}<\/button>`).join(\"\");\n  show(`<h1>Knight's Escape<\/h1>\n        <p>Choose your knight:<\/p><div class=\"choices\">${knights}<\/div>`);\n}\n\nfunction pickKnight(i) {\n  player.knight = KNIGHTS[i];\n  const levels = DIFFICULTIES.map((d, j) =>\n    `<button class=\"choice\" onclick=\"pickDifficulty(${j})\"><b>${d.name}<\/b><small>${d.about}<\/small><\/button>`).join(\"\");\n  show(`<h1>${player.knight.name}<\/h1><p>Choose your difficulty:<\/p><div class=\"choices\">${levels}<\/div>`);\n}\n\nfunction pickDifficulty(j) {\n  player.difficulty = DIFFICULTIES[j];\n  show(`<p class=\"warlock\">${WARLOCK.name}:<\/p>\n        <h2>\"${WARLOCK.intro}\"<\/h2>\n        <button onclick=\"mazeTurn(0)\">Enter the dungeon<\/button>`);\n}\n\n// Shared by every chamber: hint button and wrong-answer taunt\nfunction useHint(text) {\n  if (player.hintsLeft <= 0) { document.getElementById(\"hint\").textContent = \"No hints left in this chamber.\"; return; }\n  player.hintsLeft--;\n  document.getElementById(\"hint\").textContent = \"Hint: \" + text;\n}\n\nfunction taunt() {\n  const t = WARLOCK.taunts[Math.floor(Math.random() * WARLOCK.taunts.length)];\n  document.getElementById(\"feedback\").textContent = `${WARLOCK.name}: \"${t}\"`;\n}\n\n// ---------- Chamber 1: The Maze ----------\nfunction mazeTurn(n) {\n  if (n === 0) player.hintsLeft = player.difficulty.hints;\n  if (n >= MAZE.turns.length) return labStep(0);\n  const t = MAZE.turns[n];\n  const choices = t.choices.map((c, i) => `<button class=\"choice\" onclick=\"mazeAnswer(${n}, ${i})\">${c}<\/button>`).join(\"\");\n  show(`${header(MAZE, n + 1, MAZE.turns.length)}\n        ${n === 0 ? `<p class=\"story\">${MAZE.story}<\/p>` : \"\"}\n        ${codeBlock(t.code)}<h2>${t.question}<\/h2>\n        <div class=\"choices\">${choices}<\/div>\n        <button class=\"secondary\" onclick=\"useHint(MAZE.turns[${n}].hint)\">Hint<\/button>\n        <p id=\"hint\"><\/p><p id=\"feedback\"><\/p>`);\n}\n\nfunction mazeAnswer(n, i) {\n  const t = MAZE.turns[n];\n  if (i !== t.answer) return taunt();\n  show(`<h2>The path opens.<\/h2><p>${t.explain}<\/p><button onclick=\"mazeTurn(${n + 1})\">Keep going<\/button>`);\n}\n\n// ---------- Chamber 2: The Alchemy Lab ----------\nfunction labStep(n) {\n  if (n === 0) { player.hintsLeft = player.difficulty.hints; player.spell = []; }\n  if (n >= LAB.steps.length) {\n    return show(`<h2>The spell is complete:<\/h2><p class=\"spell\">${player.spell.join(\" \")}<\/p>\n                 <button onclick=\"hallRound(0)\">Cast it<\/button>`);\n  }\n  const s = LAB.steps[n];\n  const choices = s.choices.map((c, i) => `<button class=\"choice\" onclick=\"labAnswer(${n}, ${i})\">${c}<\/button>`).join(\"\");\n  show(`${header(LAB, n + 1, LAB.steps.length)}\n        ${n === 0 ? `<p class=\"story\">${LAB.story}<\/p>` : \"\"}\n        <p>Spell so far: <span class=\"spell\">${player.spell.join(\" \") || \"...\"}<\/span><\/p>\n        ${codeBlock(s.code)}<h2>What does this print?<\/h2>\n        <div class=\"choices\">${choices}<\/div>\n        <button class=\"secondary\" onclick=\"useHint(LAB.steps[${n}].hint)\">Hint<\/button>\n        <p id=\"hint\"><\/p><p id=\"feedback\"><\/p>`);\n}\n\nfunction labAnswer(n, i) {\n  const s = LAB.steps[n];\n  if (i !== s.answer) return taunt();\n  player.spell.push(s.choices[s.answer]);\n  labStep(n + 1);\n}\n\n// ---------- Chamber 3: The Hall of Illusions ----------\nfunction hallRound(n) {\n  if (n === 0) player.hintsLeft = player.difficulty.hints;\n  if (n >= HALL.rounds.length) return finalQuestion(0);\n  const r = HALL.rounds[n];\n  const doors = r.doors.map((code, i) =>\n    `<button class=\"door\" onclick=\"hallAnswer(${n}, ${i})\"><b>Door ${i + 1}<\/b>${codeBlock(code)}<\/button>`).join(\"\");\n  show(`${header(HALL, n + 1, HALL.rounds.length)}\n        ${n === 0 ? `<p class=\"story\">${HALL.story}<\/p>` : \"\"}\n        <h2>${r.question}<\/h2><div class=\"doors\">${doors}<\/div>\n        <button class=\"secondary\" onclick=\"useHint(HALL.rounds[${n}].hint)\">Hint<\/button>\n        <p id=\"hint\"><\/p><p id=\"feedback\"><\/p>`);\n}\n\nfunction hallAnswer(n, i) {\n  const r = HALL.rounds[n];\n  if (i !== r.answer) return taunt();\n  show(`<h2>The illusion fades. That door was real.<\/h2><p>${r.explain}<\/p><button onclick=\"hallRound(${n + 1})\">Walk through<\/button>`);\n}\n\n// ---------- Chamber 4: The Final Door ----------\n// Open-ended: the player writes an answer, compares it with a model answer, and checks themselves.\nfunction finalQuestion(n) {\n  if (n >= FINAL.questions.length) return escapeScreen();\n  const q = FINAL.questions[n];\n  show(`${header(FINAL, n + 1, FINAL.questions.length)}\n        ${n === 0 ? `<p class=\"story\">${FINAL.story}<\/p>` : \"\"}\n        <p class=\"warlock\">${WARLOCK.name} asks:<\/p><h2>${q.question}<\/h2>\n        <textarea id=\"answer\" rows=\"4\" placeholder=\"Answer in your own words...\"><\/textarea>\n        <button onclick=\"finalCheck(${n})\">Answer the warlock<\/button><p id=\"feedback\"><\/p>`);\n}\n\nfunction finalCheck(n) {\n  const text = document.getElementById(\"answer\").value.trim();\n  if (!text) { document.getElementById(\"feedback\").textContent = \"The warlock waits for an answer...\"; return; }\n  const q = FINAL.questions[n];\n  const list = q.lookFor.map((x) => `<li>${x}<\/li>`).join(\"\");\n  show(`<h2>Compare your answer<\/h2><p><b>You said:<\/b> ${text.replace(/<\/g, \"&lt;\")}<\/p>\n        <p><b>A strong answer:<\/b> ${q.model}<\/p><p>Did yours include:<\/p><ul>${list}<\/ul>\n        <button onclick=\"player.keys++; finalQuestion(${n + 1})\">Yes, take the key<\/button>\n        <button class=\"secondary\" onclick=\"finalQuestion(${n})\">Let me try again<\/button>`);\n}\n\n// ---------- Escape ----------\nfunction escapeScreen() {\n  // TODO (build crew): make this screen feel like a victory\n  show(`<h1>You escaped!<\/h1><p class=\"warlock\">${WARLOCK.name}: \"${WARLOCK.defeated}\"<\/p>\n        <p>${player.knight.name} \u00b7 ${player.difficulty.name} \u00b7 Keys: ${player.keys}<\/p>\n        <button onclick=\"startScreen()\">Play again<\/button>`);\n}\n\nstartScreen();\n", "style.css": "/* Design crew (Shirley + Tvishaa): this file is yours.\n   Change the colors here and the whole game updates.\n   Inspiration: the Group 9 design deck (torchlit dungeon, dark stone, warm gold). */\n:root {\n  --stone: #14100d;     /* TODO: dungeon background */\n  --panel: #241c16;     /* TODO: chamber panel */\n  --text: #f3e6cf;\n  --torch: #ffc21a;     /* main accent */\n  --warlock: #b98cff;   /* TODO: the warlock's color */\n}\n\nbody {\n  margin: 0;\n  background: var(--stone);\n  color: var(--text);\n  font-family: Georgia, \"Times New Roman\", serif; /* TODO: pick the game's fonts */\n}\n\nmain {\n  max-width: 760px;\n  margin: 40px auto;\n  padding: 28px;\n  background: var(--panel);\n  border-radius: 12px;\n}\n\nh1, h2 { line-height: 1.2; }\n.progress { color: #a08a70; font-size: 14px; }\n.concept { color: var(--torch); font-weight: bold; }\n.story { font-style: italic; }\n.warlock { color: var(--warlock); font-weight: bold; }\n.spell { color: var(--torch); font-weight: bold; letter-spacing: 2px; }\n\npre {\n  background: #000;\n  padding: 14px;\n  border-radius: 8px;\n  overflow-x: auto;\n  text-align: left;\n}\n\nbutton {\n  padding: 10px 16px;\n  margin: 4px 4px 4px 0;\n  border: none;\n  border-radius: 8px;\n  background: var(--torch);\n  color: #1a1000;\n  font-weight: bold;\n  font-size: 16px;\n  cursor: pointer;\n}\nbutton.secondary { background: transparent; color: var(--torch); border: 1px solid var(--torch); }\n\n.choices { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }\n.choice { background: transparent; color: var(--text); border: 2px solid var(--torch); }\n.choice small { display: block; font-weight: normal; }\n\n.doors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }\n.door { background: #3a2a1e; color: var(--text); text-align: left; }\n.door pre { font-size: 12px; }\n\ntextarea { width: 100%; box-sizing: border-box; padding: 10px; font: inherit; border-radius: 8px; }\n\n@media (max-width: 700px) { .doors { grid-template-columns: 1fr; } }\n", "index.html": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Knight's Escape<\/title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n<\/head>\n<body>\n  <main id=\"app\"><\/main>\n  <script src=\"rooms.js\"><\/script>\n  <script src=\"game.js\"><\/script>\n<\/body>\n<\/html>\n"};
 </script>
 <script>
 (() => {
@@ -1636,14 +1682,20 @@ window.p9SaveText = async (filename, text) => {
     const my = $("my-tasks"); my.innerHTML = "";
     const mine = tasks.filter((t) => t.owner === me).sort((a, b) => (a.status === "done") - (b.status === "done") || String(a.due).localeCompare(String(b.due)));
     if (!mine.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = "Nothing on your list yet. Claim one at the meeting."; my.appendChild(e); }
-    mine.forEach((t) => my.appendChild(row(t)));
+    mine.forEach((t) => my.appendChild(row(t, !PREVIEW)));
     renderPulse();
   }
-  function row(t) {
+  // "game.js · line 147 · escapeScreen()" so nobody has to guess where a task lives
+  const whereText = (t) => [t.file, t.line ? "line " + t.line : "", t.fn].filter(Boolean).join(" · ");
+  function row(t, ask) {
     const li = document.createElement("li"); const s = SAY[t.status] ? t.status : "todo"; const late = isLate(t);
     li.className = "row" + (s === "done" ? " is-done" : "");
-    li.innerHTML = `<button type="button" class="tick press" data-s="${s}">${TICK[s]}</button><p></p><span class="meta"><span class="date${late ? " late" : ""}">${late ? "Late · " : ""}${short(t.due)}</span></span>`;
+    li.innerHTML = `<button type="button" class="tick press" data-s="${s}">${TICK[s]}</button><div class="row-body"><p></p></div><span class="meta"><span class="date${late ? " late" : ""}">${late ? "Late · " : ""}${short(t.due)}</span></span>`;
     li.querySelector("p").textContent = t.title;
+    const body = li.querySelector(".row-body");
+    if (t.file) { const w = document.createElement("span"); w.className = "row-where"; w.innerHTML = "Where: <code></code>"; w.querySelector("code").textContent = whereText(t); body.appendChild(w); }
+    if (t.done) { const d = document.createElement("span"); d.className = "row-done"; d.innerHTML = "<b>Done when</b> "; d.append(t.done); body.appendChild(d); }
+    if (ask) { const a = document.createElement("button"); a.type = "button"; a.className = "link-btn row-ask"; a.textContent = "Ask about this task"; a.onclick = () => askAbout(t); body.appendChild(a); }
     const tk = li.querySelector(".tick"); tk.setAttribute("aria-label", `${SAY[s]}. Mark as ${SAY[NEXT[s]].toLowerCase()}`);
     const mine = owner || (me && t.owner === me);
     if (readOnly || !mine) { tk.disabled = true; tk.title = readOnly ? "" : `Only ${t.owner} can change this task`; return li; }
@@ -1671,8 +1723,100 @@ window.p9SaveText = async (filename, text) => {
     const title = $("t-title").value.trim(); if (!title || !ref) return;
     const who = $("t-owner").value;
     if (!owner && (!me || who !== me)) { toast(me ? "You can only add tasks to your own list." : "Sign in with your name and PIN to add tasks."); return; }
-    ref.add({ title, owner: who, due: $("t-due").value, status: "todo" }).then(() => { $("t-title").value = ""; toast(`Added to ${who}'s list`); }).catch(fail);
+    const task = { title, owner: who, due: $("t-due").value, status: "todo" };
+    // "game.js:147" or "game.js 147" -> file + line
+    const where = $("t-where").value.trim().match(/^([\w.\-/]+)(?:[:\s]+(\d+))?/);
+    if (where) { task.file = where[1]; if (where[2]) task.line = Number(where[2]); }
+    if ($("t-done").value.trim()) task.done = $("t-done").value.trim();
+    ref.add(task).then(() => { ["t-title", "t-where", "t-done"].forEach((id) => { $(id).value = ""; }); toast(`Added to ${who}'s list`); }).catch(fail);
   });
+
+  // ---------- Ask for help ----------
+  // Every question goes out with our project's context: the starter files (with line numbers) and her open tasks.
+  // On claude.ai it answers right here; on the public site it opens ChatGPT or Claude with the question filled in.
+  const STARTER = window.P9_STARTER || {};
+  const HELP_STARTERS = [
+    ["Explain my task", "Explain my task in simple steps. What do I do first?"],
+    ["Which line do I work on?", "Which file and which line do I start on for my task? Show me those lines."],
+    ["What does this error mean?", "What does this error mean, and where should I look? I pasted it below."],
+    ["Check my puzzle", "Is the Java in my puzzle correct, and does my answer number point to the right choice? Tell me what to fix, don't rewrite it."],
+    ["Explain a concept", "Explain the difference between a class and an object with an example that's not about knights. Then quiz me with one question."],
+  ];
+  const HELP_BRIEF = `You're helping a student on a Girls Who Code team building "Knight's Escape", a Java OOP escape room for college students. The game is plain HTML/CSS/JavaScript with no frameworks: rooms.js holds all the puzzles as data, game.js runs the screens (one function per screen), style.css is the look, index.html is the page. The puzzles show Java snippets. A warlock traps you and you escape through 4 chambers: the Maze (classes and objects), the Alchemy Lab (methods and encapsulation), the Hall of Illusions (inheritance), the Final Door (polymorphism). The team works in git branches and opens pull requests that their mentor Katrina reviews.
+
+How to answer: the student is a beginner. Use simple words and short steps. Point to the exact file and line numbers. Give hints and explain the idea first, show at most a few lines of code, and don't write her whole task for her. If something is already built, say so and show where. If you're not sure, say so.`;
+  const sayLines = (name, from, to) => (STARTER[name] || "").split("\n").slice(from, to).map((l, i) => String(from + i + 1).padStart(3) + "  " + l).join("\n");
+  const todos = () => Object.keys(STARTER).flatMap((f) => STARTER[f].split("\n").map((l, i) => /TODO/.test(l) && !/search for TODO/i.test(l) ? `${f} line ${i + 1}: ${l.trim().replace(/^(\/\/|\/\*)\s*/, "")}` : "")).filter(Boolean).join("\n");
+  let helpTask = null, helpRun = null, sample = null;
+  function helpPrompt(full) {
+    const q = $("help-q").value.trim(), pasted = $("help-code").value.trim();
+    const open = helpTask ? [helpTask] : tasks.filter((t) => t.owner === me && t.status !== "done");
+    const L = [HELP_BRIEF, "", `I'm ${me || "on the team"}.` + (open.length ? (helpTask ? " I'm asking about this task:" : " My open tasks:") : "")];
+    open.forEach((t) => L.push(`- "${t.title}"` + (t.due ? `, due ${short(t.due)}` : "") + (t.file ? `. Where: ${whereText(t)}` : "") + (t.done ? `. Done when: ${t.done}` : "")));
+    if (full) Object.keys(STARTER).forEach((f) => L.push("", `--- ${f} (with line numbers) ---`, sayLines(f, 0)));
+    else {
+      // A link can only carry so much, so send the lines around each task, or the list of TODOs
+      const near = open.filter((t) => t.file && t.line && STARTER[t.file]);
+      if (near.length) near.forEach((t) => L.push("", `--- ${t.file}, lines near ${t.line} ---`, sayLines(t.file, Math.max(0, t.line - 12), t.line + 10)));
+      else L.push("", "--- Open TODOs in the starter code ---", todos());
+    }
+    if (pasted) L.push("", "--- What I pasted ---", pasted);
+    L.push("", `My question: ${q}`);
+    return L.join("\n");
+  }
+  function helpReady() {
+    if ($("help-q").value.trim()) return true;
+    $("help-q").focus(); toast("Type your question first, or tap a starter."); return false;
+  }
+  function copyText(text, msg) {
+    const fallback = () => { $("help-q").select(); toast("Couldn't copy. Select the text and press Ctrl+C."); };
+    try { navigator.clipboard.writeText(text).then(() => toast(msg), fallback); } catch { fallback(); }
+  }
+  function openOut(base) {
+    if (!helpReady()) return;
+    const text = helpPrompt(false), url = base + encodeURIComponent(text);
+    if (url.length > 7500) { copyText(text, "Copied your question. Paste it into the chat."); }
+    const a = document.createElement("a"); a.href = url.length > 7500 ? base.split("?")[0] : url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
+  }
+  // Light formatting for answers: `code` and **bold**, everything else plain text
+  const helpHtml = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])).replace(/```\w*\n?/g, "").replace(/`([^`\n]+)`/g, "<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>");
+  function askAbout(t) {
+    helpTask = t;
+    $("help-q").value = `Help me with my task "${t.title}". What does it mean, which line do I start on, and what's my first step?`;
+    $("helper").scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" });
+    $("help-q").focus({ preventScroll: true });
+  }
+  HELP_STARTERS.forEach(([label, text]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip press"; b.textContent = label;
+    b.onclick = () => { helpTask = null; $("help-q").value = text; if (/pasted/.test(text)) $("helper").querySelector("details").open = true; $("help-q").focus(); };
+    $("help-starters").appendChild(b);
+  });
+  $("help-q").addEventListener("input", (e) => { if (!e.target.value.trim()) helpTask = null; });
+  $("help-gpt").onclick = () => openOut("https://chatgpt.com/?q=");
+  $("help-claude").onclick = () => openOut("https://claude.ai/new?q=");
+  $("help-copy").onclick = () => { if (helpReady()) copyText(helpPrompt(false), "Copied. Paste it into any AI chat."); };
+  $("helper").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    if (!sample || !helpReady()) return;
+    if (helpRun) helpRun.abort();
+    const run = helpRun = new AbortController(), out = $("help-a"), btn = $("help-ask");
+    out.hidden = false; out.className = "helper-a thinking"; out.textContent = "Thinking…"; btn.disabled = true; btn.textContent = "Answering…";
+    try {
+      const res = await sample(helpPrompt(true), { signal: run.signal, cache: false, onText: ({ text }) => { if (helpRun === run && text) { out.className = "helper-a"; out.innerHTML = helpHtml(text); } } });
+      if (helpRun === run) { out.className = "helper-a"; out.innerHTML = helpHtml(res.text); }
+    } catch (e) {
+      if (helpRun !== run || (e && e.name === "AbortError")) return;
+      out.className = "helper-a err";
+      if (e && e.code === "not_granted") { out.textContent = "Answers here aren't turned on for you. Use Ask in ChatGPT or Ask in Claude instead."; useLinks(); }
+      else if (e && e.code === "rate_limited") out.textContent = "Lots of questions at once. Wait a minute, then ask again.";
+      else out.textContent = "That didn't go through. Check your connection and try again, or use Copy question.";
+    } finally { if (helpRun === run) { btn.disabled = false; btn.textContent = "Ask"; helpRun = null; } }
+  });
+  function useLinks() { $("help-ask").hidden = true; $("help-gpt").hidden = false; $("help-claude").hidden = false; }
+  if (window.claude && window.claude.use) Promise.resolve().then(() => window.claude.use("sample")).then((s) => {
+    if (!s) return;
+    sample = s; $("help-ask").hidden = false; $("help-gpt").hidden = true; $("help-claude").hidden = true;
+  }).catch(() => {});
 
   // ---------- Live (owner only) ----------
   const ROUND_LABELS = ["Remember it", "Your own path", "Our helping hand", "The Maze", "Our warlock", "Our creative twist", "Proof it teaches", "My next small win"];

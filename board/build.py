@@ -32,6 +32,12 @@ src = src.replace("<!--@PARTY_HTML@-->", (HERE / "party.html").read_text(encodin
 src = src.replace("/*@PARTY_CSS@*/", (HERE / "party.css").read_text(encoding="utf-8"))
 src = src.replace("/*@PARTY_JS@*/", (HERE / "party.js").read_text(encoding="utf-8"))
 
+# The starter game's files, for the board's "Ask for help" (it quotes real line numbers)
+import json
+STARTER = HERE.parent / "escape-room-starter"
+files = {name: (STARTER / name).read_text(encoding="utf-8").replace("\r\n", "\n") for name in ("rooms.js", "game.js", "style.css", "index.html")}
+src = src.replace("/*@STARTER@*/{}", json.dumps(files).replace("</", "<\\/"))
+
 # Artwork: "@ART:name@" becomes a data URI for art/name.jpg
 for img in sorted((HERE / "art").iterdir()):
     if img.suffix.lower() not in (".jpg", ".png", ".webp"):

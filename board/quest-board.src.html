@@ -175,6 +175,29 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .row { display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: start; padding: 11px 0; border-top: 1px solid var(--line); }
 .row p { min-width: 0; overflow-wrap: anywhere; font-size: 15px; transition: color 200ms ease; }
 .row.is-done p { color: var(--parch-3); text-decoration: line-through; text-decoration-color: var(--parch-3); }
+/* Task details: where in the code, and what "done" looks like */
+.row-body { min-width: 0; display: grid; gap: 4px; }
+.row-where, .row-done { font-size: 14px; color: var(--parch-2); overflow-wrap: anywhere; }
+.row-where code, .helper-a code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13.5px; color: var(--parch); background: var(--night); border-radius: 5px; padding: 1px 6px; }
+.row-done b { color: var(--parch); font-weight: 700; }
+.row-ask { justify-self: start; margin-left: -4px; }
+.row.is-done .row-where, .row.is-done .row-done, .row.is-done .row-ask { display: none; }
+
+/* Ask for help */
+.helper { display: grid; gap: 14px; }
+.helper .chips .chip { height: 36px; font-size: 14.5px; }
+.helper-l { font-size: 15px; font-weight: 700; margin-bottom: -6px; }
+.helper textarea { width: 100%; font: inherit; font-size: 15.5px; line-height: 1.5; color: var(--parch); background: var(--night); border: 1px solid var(--plank); border-radius: 12px; padding: 12px 14px; resize: vertical; transition: border-color 160ms ease; }
+.helper textarea::placeholder { color: var(--parch-3); }
+.helper textarea:focus { outline: none; border-color: var(--torch); }
+#help-code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 14px; margin-top: 10px; }
+.helper-more summary { cursor: pointer; color: var(--parch-2); font-size: 15px; width: fit-content; text-decoration: underline; text-underline-offset: 3px; }
+.helper-more summary::marker { color: var(--parch-3); }
+.helper-a { background: var(--night); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; font-size: 15.5px; max-width: 75ch; white-space: pre-wrap; overflow-wrap: anywhere; transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+.helper-a.thinking { color: var(--parch-3); }
+.helper-a.err { color: var(--ember); }
+@starting-style { .helper-a { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .helper-a { transition: none; } }
 .tick { width: 24px; height: 24px; padding: 0; border: 0; background: none; border-radius: 50%; display: grid; place-items: center; color: var(--parch-3); }
 .tick svg { transition: filter 180ms ease, opacity 180ms ease; }
 .tick.swap svg { filter: blur(2px); opacity: .4; }
@@ -471,6 +494,25 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
             </div>
           </div>
         </div>
+        <form class="card helper" id="helper" autocomplete="off">
+          <div class="helper-top">
+            <div><h2>Stuck? Ask for help</h2><p class="sub">It knows our game's code and your tasks. It explains and gives hints first, so you still write your part.</p></div>
+          </div>
+          <div class="chips" id="help-starters" role="group" aria-label="Question starters"></div>
+          <label class="helper-l" for="help-q">Your question</label>
+          <textarea id="help-q" rows="3" maxlength="1200" placeholder="Like: my task says &quot;victory screen&quot;. What line do I start on?"></textarea>
+          <details class="helper-more"><summary>Add code or an error (optional)</summary>
+            <textarea id="help-code" rows="5" maxlength="4000" spellcheck="false" placeholder="Paste the code you changed, or the red error from the browser console"></textarea>
+          </details>
+          <div class="controls helper-go">
+            <button class="btn solid press" type="submit" id="help-ask" hidden>Ask</button>
+            <button class="btn solid press" type="button" id="help-gpt">Ask in ChatGPT</button>
+            <button class="btn press" type="button" id="help-claude">Ask in Claude</button>
+            <button class="btn press" type="button" id="help-copy">Copy question</button>
+          </div>
+          <div class="helper-a" id="help-a" hidden aria-live="polite"></div>
+          <p class="foot">AI can be wrong, so test its Java or ask a teammate. Never paste your PIN. Still stuck after 15 minutes? Post in Discord.</p>
+        </form>
         <div class="card meet-strip" id="catchup" hidden>
           <div><h2>Catch up on the Council</h2><p class="sub" id="catchup-sub"></p></div>
           <div class="controls">
@@ -518,6 +560,8 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
         <input id="t-title" class="grow" required maxlength="140" placeholder="Add a task, like: write 2 hints for the Maze" aria-label="Task">
         <select id="t-owner" aria-label="Owner"></select>
         <input id="t-due" type="date" required aria-label="Due date">
+        <input id="t-where" maxlength="60" placeholder="Where (optional), like game.js:147" aria-label="Where in the code" style="flex:1 1 200px;min-width:0">
+        <input id="t-done" class="grow" maxlength="160" placeholder="Done when (optional), like: the Maze has 5 turns" aria-label="Done when">
         <button class="btn solid press" type="submit">Add</button>
       </form>
       <div class="chips" id="filters" role="group" aria-label="Show tasks for"></div>
@@ -718,6 +762,8 @@ window.p9SaveText = async (filename, text) => {
   try { await dl.save({ filename, data: new Blob([text], { type: "text/plain;charset=utf-8" }) }); return true; }
   catch (e) { return false; }
 };
+// The starter game's files, so "Ask for help" can point at real line numbers (build.py fills this in)
+window.P9_STARTER = /*@STARTER@*/{};
 </script>
 <script>
 (() => {
@@ -1164,14 +1210,20 @@ window.p9SaveText = async (filename, text) => {
     const my = $("my-tasks"); my.innerHTML = "";
     const mine = tasks.filter((t) => t.owner === me).sort((a, b) => (a.status === "done") - (b.status === "done") || String(a.due).localeCompare(String(b.due)));
     if (!mine.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = "Nothing on your list yet. Claim one at the meeting."; my.appendChild(e); }
-    mine.forEach((t) => my.appendChild(row(t)));
+    mine.forEach((t) => my.appendChild(row(t, !PREVIEW)));
     renderPulse();
   }
-  function row(t) {
+  // "game.js · line 147 · escapeScreen()" so nobody has to guess where a task lives
+  const whereText = (t) => [t.file, t.line ? "line " + t.line : "", t.fn].filter(Boolean).join(" · ");
+  function row(t, ask) {
     const li = document.createElement("li"); const s = SAY[t.status] ? t.status : "todo"; const late = isLate(t);
     li.className = "row" + (s === "done" ? " is-done" : "");
-    li.innerHTML = `<button type="button" class="tick press" data-s="${s}">${TICK[s]}</button><p></p><span class="meta"><span class="date${late ? " late" : ""}">${late ? "Late · " : ""}${short(t.due)}</span></span>`;
+    li.innerHTML = `<button type="button" class="tick press" data-s="${s}">${TICK[s]}</button><div class="row-body"><p></p></div><span class="meta"><span class="date${late ? " late" : ""}">${late ? "Late · " : ""}${short(t.due)}</span></span>`;
     li.querySelector("p").textContent = t.title;
+    const body = li.querySelector(".row-body");
+    if (t.file) { const w = document.createElement("span"); w.className = "row-where"; w.innerHTML = "Where: <code></code>"; w.querySelector("code").textContent = whereText(t); body.appendChild(w); }
+    if (t.done) { const d = document.createElement("span"); d.className = "row-done"; d.innerHTML = "<b>Done when</b> "; d.append(t.done); body.appendChild(d); }
+    if (ask) { const a = document.createElement("button"); a.type = "button"; a.className = "link-btn row-ask"; a.textContent = "Ask about this task"; a.onclick = () => askAbout(t); body.appendChild(a); }
     const tk = li.querySelector(".tick"); tk.setAttribute("aria-label", `${SAY[s]}. Mark as ${SAY[NEXT[s]].toLowerCase()}`);
     const mine = owner || (me && t.owner === me);
     if (readOnly || !mine) { tk.disabled = true; tk.title = readOnly ? "" : `Only ${t.owner} can change this task`; return li; }
@@ -1199,8 +1251,100 @@ window.p9SaveText = async (filename, text) => {
     const title = $("t-title").value.trim(); if (!title || !ref) return;
     const who = $("t-owner").value;
     if (!owner && (!me || who !== me)) { toast(me ? "You can only add tasks to your own list." : "Sign in with your name and PIN to add tasks."); return; }
-    ref.add({ title, owner: who, due: $("t-due").value, status: "todo" }).then(() => { $("t-title").value = ""; toast(`Added to ${who}'s list`); }).catch(fail);
+    const task = { title, owner: who, due: $("t-due").value, status: "todo" };
+    // "game.js:147" or "game.js 147" -> file + line
+    const where = $("t-where").value.trim().match(/^([\w.\-/]+)(?:[:\s]+(\d+))?/);
+    if (where) { task.file = where[1]; if (where[2]) task.line = Number(where[2]); }
+    if ($("t-done").value.trim()) task.done = $("t-done").value.trim();
+    ref.add(task).then(() => { ["t-title", "t-where", "t-done"].forEach((id) => { $(id).value = ""; }); toast(`Added to ${who}'s list`); }).catch(fail);
   });
+
+  // ---------- Ask for help ----------
+  // Every question goes out with our project's context: the starter files (with line numbers) and her open tasks.
+  // On claude.ai it answers right here; on the public site it opens ChatGPT or Claude with the question filled in.
+  const STARTER = window.P9_STARTER || {};
+  const HELP_STARTERS = [
+    ["Explain my task", "Explain my task in simple steps. What do I do first?"],
+    ["Which line do I work on?", "Which file and which line do I start on for my task? Show me those lines."],
+    ["What does this error mean?", "What does this error mean, and where should I look? I pasted it below."],
+    ["Check my puzzle", "Is the Java in my puzzle correct, and does my answer number point to the right choice? Tell me what to fix, don't rewrite it."],
+    ["Explain a concept", "Explain the difference between a class and an object with an example that's not about knights. Then quiz me with one question."],
+  ];
+  const HELP_BRIEF = `You're helping a student on a Girls Who Code team building "Knight's Escape", a Java OOP escape room for college students. The game is plain HTML/CSS/JavaScript with no frameworks: rooms.js holds all the puzzles as data, game.js runs the screens (one function per screen), style.css is the look, index.html is the page. The puzzles show Java snippets. A warlock traps you and you escape through 4 chambers: the Maze (classes and objects), the Alchemy Lab (methods and encapsulation), the Hall of Illusions (inheritance), the Final Door (polymorphism). The team works in git branches and opens pull requests that their mentor Katrina reviews.
+
+How to answer: the student is a beginner. Use simple words and short steps. Point to the exact file and line numbers. Give hints and explain the idea first, show at most a few lines of code, and don't write her whole task for her. If something is already built, say so and show where. If you're not sure, say so.`;
+  const sayLines = (name, from, to) => (STARTER[name] || "").split("\n").slice(from, to).map((l, i) => String(from + i + 1).padStart(3) + "  " + l).join("\n");
+  const todos = () => Object.keys(STARTER).flatMap((f) => STARTER[f].split("\n").map((l, i) => /TODO/.test(l) && !/search for TODO/i.test(l) ? `${f} line ${i + 1}: ${l.trim().replace(/^(\/\/|\/\*)\s*/, "")}` : "")).filter(Boolean).join("\n");
+  let helpTask = null, helpRun = null, sample = null;
+  function helpPrompt(full) {
+    const q = $("help-q").value.trim(), pasted = $("help-code").value.trim();
+    const open = helpTask ? [helpTask] : tasks.filter((t) => t.owner === me && t.status !== "done");
+    const L = [HELP_BRIEF, "", `I'm ${me || "on the team"}.` + (open.length ? (helpTask ? " I'm asking about this task:" : " My open tasks:") : "")];
+    open.forEach((t) => L.push(`- "${t.title}"` + (t.due ? `, due ${short(t.due)}` : "") + (t.file ? `. Where: ${whereText(t)}` : "") + (t.done ? `. Done when: ${t.done}` : "")));
+    if (full) Object.keys(STARTER).forEach((f) => L.push("", `--- ${f} (with line numbers) ---`, sayLines(f, 0)));
+    else {
+      // A link can only carry so much, so send the lines around each task, or the list of TODOs
+      const near = open.filter((t) => t.file && t.line && STARTER[t.file]);
+      if (near.length) near.forEach((t) => L.push("", `--- ${t.file}, lines near ${t.line} ---`, sayLines(t.file, Math.max(0, t.line - 12), t.line + 10)));
+      else L.push("", "--- Open TODOs in the starter code ---", todos());
+    }
+    if (pasted) L.push("", "--- What I pasted ---", pasted);
+    L.push("", `My question: ${q}`);
+    return L.join("\n");
+  }
+  function helpReady() {
+    if ($("help-q").value.trim()) return true;
+    $("help-q").focus(); toast("Type your question first, or tap a starter."); return false;
+  }
+  function copyText(text, msg) {
+    const fallback = () => { $("help-q").select(); toast("Couldn't copy. Select the text and press Ctrl+C."); };
+    try { navigator.clipboard.writeText(text).then(() => toast(msg), fallback); } catch { fallback(); }
+  }
+  function openOut(base) {
+    if (!helpReady()) return;
+    const text = helpPrompt(false), url = base + encodeURIComponent(text);
+    if (url.length > 7500) { copyText(text, "Copied your question. Paste it into the chat."); }
+    const a = document.createElement("a"); a.href = url.length > 7500 ? base.split("?")[0] : url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
+  }
+  // Light formatting for answers: `code` and **bold**, everything else plain text
+  const helpHtml = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])).replace(/```\w*\n?/g, "").replace(/`([^`\n]+)`/g, "<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>");
+  function askAbout(t) {
+    helpTask = t;
+    $("help-q").value = `Help me with my task "${t.title}". What does it mean, which line do I start on, and what's my first step?`;
+    $("helper").scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" });
+    $("help-q").focus({ preventScroll: true });
+  }
+  HELP_STARTERS.forEach(([label, text]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip press"; b.textContent = label;
+    b.onclick = () => { helpTask = null; $("help-q").value = text; if (/pasted/.test(text)) $("helper").querySelector("details").open = true; $("help-q").focus(); };
+    $("help-starters").appendChild(b);
+  });
+  $("help-q").addEventListener("input", (e) => { if (!e.target.value.trim()) helpTask = null; });
+  $("help-gpt").onclick = () => openOut("https://chatgpt.com/?q=");
+  $("help-claude").onclick = () => openOut("https://claude.ai/new?q=");
+  $("help-copy").onclick = () => { if (helpReady()) copyText(helpPrompt(false), "Copied. Paste it into any AI chat."); };
+  $("helper").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    if (!sample || !helpReady()) return;
+    if (helpRun) helpRun.abort();
+    const run = helpRun = new AbortController(), out = $("help-a"), btn = $("help-ask");
+    out.hidden = false; out.className = "helper-a thinking"; out.textContent = "Thinking…"; btn.disabled = true; btn.textContent = "Answering…";
+    try {
+      const res = await sample(helpPrompt(true), { signal: run.signal, cache: false, onText: ({ text }) => { if (helpRun === run && text) { out.className = "helper-a"; out.innerHTML = helpHtml(text); } } });
+      if (helpRun === run) { out.className = "helper-a"; out.innerHTML = helpHtml(res.text); }
+    } catch (e) {
+      if (helpRun !== run || (e && e.name === "AbortError")) return;
+      out.className = "helper-a err";
+      if (e && e.code === "not_granted") { out.textContent = "Answers here aren't turned on for you. Use Ask in ChatGPT or Ask in Claude instead."; useLinks(); }
+      else if (e && e.code === "rate_limited") out.textContent = "Lots of questions at once. Wait a minute, then ask again.";
+      else out.textContent = "That didn't go through. Check your connection and try again, or use Copy question.";
+    } finally { if (helpRun === run) { btn.disabled = false; btn.textContent = "Ask"; helpRun = null; } }
+  });
+  function useLinks() { $("help-ask").hidden = true; $("help-gpt").hidden = false; $("help-claude").hidden = false; }
+  if (window.claude && window.claude.use) Promise.resolve().then(() => window.claude.use("sample")).then((s) => {
+    if (!s) return;
+    sample = s; $("help-ask").hidden = false; $("help-gpt").hidden = true; $("help-claude").hidden = true;
+  }).catch(() => {});
 
   // ---------- Live (owner only) ----------
   const ROUND_LABELS = ["Remember it", "Your own path", "Our helping hand", "The Maze", "Our warlock", "Our creative twist", "Proof it teaches", "My next small win"];
