@@ -728,6 +728,7 @@ window.p9SaveText = async (filename, text) => {
   function showOwnerNav() {
     document.querySelectorAll('[data-go="mentor"]').forEach((el) => { if (el.closest(".nav,.tabbar")) el.hidden = !owner; });
     $("preview-pick").hidden = !owner;
+    if (typeof syncOwnerPicker === "function") { syncOwnerPicker(); renderTasks(); }
     $("tabbar").style.gridTemplateColumns = `repeat(${owner ? 5 : 4}, 1fr)`;
   }
   let screen = "";
@@ -771,6 +772,7 @@ window.p9SaveText = async (filename, text) => {
   if (!PEOPLE.includes(me)) me = "";
   const startScreen = PREVIEW ? "today" : linked ? (linked === "Katrina" ? "mentor" : "today") : (location.hash || "").slice(1);
   function renderMe() {
+    if (typeof syncOwnerPicker === "function") syncOwnerPicker();
     $("hello").hidden = !!me;
     $("today-body").hidden = !me;
     $("today-title").textContent = me ? `Hi, ${me}` : "Welcome, knight";
@@ -1087,7 +1089,12 @@ window.p9SaveText = async (filename, text) => {
   };
   const X = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
   let tasks = [], ref = null, readOnly = false, filter = store.get("p9-filter", "all");
-  $("t-owner").innerHTML = PEOPLE.map((p) => `<option>${p}</option>`).join("");
+  function syncOwnerPicker() {
+    const list = owner ? PEOPLE : me ? [me] : [];
+    $("t-owner").innerHTML = list.map((p) => `<option>${p}</option>`).join("");
+    $("t-owner").disabled = !owner;
+  }
+  syncOwnerPicker();
   const soon = day0(); soon.setDate(soon.getDate() + 3); $("t-due").value = iso(soon);
   const short = (s) => { const d = new Date(s + "T00:00"); return isNaN(d) ? "" : d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); };
   const isLate = (t) => t.status !== "done" && t.due && new Date(t.due + "T23:59:59") < new Date();
@@ -1122,7 +1129,8 @@ window.p9SaveText = async (filename, text) => {
     li.innerHTML = `<button type="button" class="tick press" data-s="${s}">${TICK[s]}</button><p></p><span class="meta"><span class="date${late ? " late" : ""}">${late ? "Late · " : ""}${short(t.due)}</span></span>`;
     li.querySelector("p").textContent = t.title;
     const tk = li.querySelector(".tick"); tk.setAttribute("aria-label", `${SAY[s]}. Mark as ${SAY[NEXT[s]].toLowerCase()}`);
-    if (readOnly) { tk.disabled = true; return li; }
+    const mine = owner || (me && t.owner === me);
+    if (readOnly || !mine) { tk.disabled = true; tk.title = readOnly ? "" : `Only ${t.owner} can change this task`; return li; }
     tk.onclick = () => {
       const n = NEXT[s]; tk.classList.add("swap");
       setTimeout(() => { tk.dataset.s = n; tk.innerHTML = TICK[n]; tk.classList.remove("swap"); }, 120);
@@ -1145,8 +1153,9 @@ window.p9SaveText = async (filename, text) => {
   $("composer").addEventListener("submit", (ev) => {
     ev.preventDefault();
     const title = $("t-title").value.trim(); if (!title || !ref) return;
-    const owner = $("t-owner").value;
-    ref.add({ title, owner, due: $("t-due").value, status: "todo" }).then(() => { $("t-title").value = ""; toast(`Added to ${owner}'s list`); }).catch(fail);
+    const who = $("t-owner").value;
+    if (!owner && who !== me) { toast("You can only add tasks to your own list."); return; }
+    ref.add({ title, owner: who, due: $("t-due").value, status: "todo" }).then(() => { $("t-title").value = ""; toast(`Added to ${who}'s list`); }).catch(fail);
   });
 
   // ---------- Live (owner only) ----------
