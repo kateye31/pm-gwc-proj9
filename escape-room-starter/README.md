@@ -4,6 +4,8 @@ A Java OOP escape room for college students. A warlock traps you in his dungeon;
 you escape through 4 chambers by reading and reasoning about code.
 Design: Tvishaa's Group 9 design roadmap. Demo: Thursday, Nov 12.
 
+🏰 Team board: https://kateye31.github.io/pm-gwc-proj9/ · 📖 New here? Start with the [Team Guide](TEAM-GUIDE.md): setup, git steps, every-week checklist and how to ask AI good questions.
+
 ## Run it
 
 Open `index.html` in your browser. No installs.
