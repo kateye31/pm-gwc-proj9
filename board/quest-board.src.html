@@ -26,7 +26,12 @@
   --on-torch: #2a1300;
   --ember: #f08a4b;
   --moss: #c2ba52;
-  --shadow: 0 1px 0 rgba(255,230,190,.04) inset, 0 20px 40px -24px rgba(0,0,0,.9);
+  /* Depth: several soft, offset shadows tinted with the wood (never pure black), plus a lit top edge */
+  --shadow: inset 0 1px 0 rgba(255,230,190,.05), 0 1px 2px rgba(10,6,3,.45), 0 6px 12px -4px rgba(10,6,3,.4), 0 20px 36px -18px rgba(10,6,3,.75);
+  --shadow-lift: inset 0 1px 0 rgba(255,255,255,.28), 0 1px 2px rgba(10,6,3,.4), 0 6px 14px -6px rgba(240,160,14,.45);
+  --lantern: linear-gradient(180deg, rgba(255,214,150,.035), rgba(255,214,150,0) 140px);
+  /* Spacing scale: every gap and padding is a step of 8 */
+  --s1: 8px; --s2: 16px; --s3: 24px; --s4: 32px;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --display: "Beanzo", "Atkinson Hyperlegible", "Arial Narrow", sans-serif;
   --body: "Atkinson Hyperlegible", "Times New Roman", Times, serif;
@@ -77,14 +82,15 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .topbar, .tabbar { display: none; }
 
 /* Surfaces */
-.card { background: var(--wood); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px; box-shadow: var(--shadow); min-width: 0; }
+.card { background: var(--lantern), var(--wood); border: 1px solid var(--line); border-radius: 18px; padding: var(--s3); box-shadow: var(--shadow); min-width: 0; }
 .card > h2, .card > .head > h2 { font-family: var(--display); font-weight: 400; font-size: 21px; line-height: 1.05; letter-spacing: .01em; }
-.grid-2 { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 20px; align-items: start; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: var(--s3); align-items: start; }
 .stack { display: grid; gap: 16px; align-content: start; }
 .btn { height: 42px; padding: 0 18px; border-radius: 11px; border: 1px solid var(--plank); background: var(--wood-2); font-size: 15.5px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
 @media (hover: hover) and (pointer: fine) { .btn:hover:not(:disabled) { border-color: var(--parch-3); } }
-.btn.solid { background: var(--torch); color: var(--on-torch); border-color: var(--torch); }
-@media (hover: hover) and (pointer: fine) { .btn.solid:hover:not(:disabled) { background: #ffcd45; border-color: #ffcd45; } }
+.btn { box-shadow: inset 0 1px 0 rgba(255,230,190,.05), 0 1px 2px rgba(10,6,3,.35); }
+.btn.solid { background: linear-gradient(180deg, #ffcd45, var(--torch)); color: var(--on-torch); border-color: var(--torch); box-shadow: var(--shadow-lift); }
+@media (hover: hover) and (pointer: fine) { .btn.solid:hover:not(:disabled) { background: linear-gradient(180deg, #ffd65e, #ffc832); border-color: #ffcd45; } }
 .btn:disabled { opacity: .4; cursor: default; }
 .controls { display: flex; flex-wrap: wrap; gap: 8px; }
 .tag { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 13px; font-weight: 700; line-height: 1.5; }
@@ -98,7 +104,7 @@ a { color: var(--parch); text-underline-offset: 3px; }
 @media (hover: hover) and (pointer: fine) { .chip:hover:not([aria-pressed="true"]) { border-color: var(--parch-3); color: var(--parch); } }
 
 /* Who-are-you banner */
-.hello { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; background: var(--wood-2); border: 1px solid var(--plank); border-radius: 18px; padding: 18px 22px; }
+.hello { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2) var(--s3); background: var(--lantern), var(--wood-2); border: 1px solid var(--plank); border-radius: 18px; padding: var(--s3); box-shadow: var(--shadow); }
 .hello p { font-size: 17px; }
 
 /* Check-in */
@@ -117,7 +123,7 @@ a { color: var(--parch); text-underline-offset: 3px; }
 @media (hover: hover) and (pointer: fine) { .scale button:hover:not([aria-checked="true"]) { background: var(--wood-2); color: var(--parch); } }
 .scale-ends { display: flex; justify-content: space-between; font-size: 13px; color: var(--parch-3); }
 .checkin-go { margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.here { display: flex; flex-wrap: wrap; gap: 14px 10px; }
+.here { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s1); }
 .here figure { margin: 0; display: grid; justify-items: center; gap: 4px; width: 60px; }
 .here svg { width: 48px; height: 48px; }
 .here .away { width: 48px; height: 48px; border-radius: 50%; border: 1.5px dashed var(--plank); }
@@ -126,6 +132,7 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .g-row { display: grid; gap: 2px; }
 .g-row .lbl { display: flex; justify-content: space-between; gap: 8px; font-size: 15px; }
 .g-row .lbl b { color: var(--torch); font-size: 16px; }
+.g-row .lbl b.flat { color: var(--parch-3); font-family: var(--body); font-size: 14px; font-weight: 400; }
 .g-row svg { width: 100%; height: 36px; overflow: visible; font-family: var(--body); }
 
 /* Meeting runner */
@@ -159,32 +166,39 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .step span { min-width: 36px; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; }
 
 /* Tasks */
-.composer { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border-radius: 16px; }
+.composer { display: grid; grid-template-columns: minmax(0, 1fr) 150px 170px; gap: var(--s1); padding: var(--s1); border-radius: 16px; }
+.composer .where { grid-column: 1 / 2; } .composer .done { grid-column: 2 / 4; }
+.composer .grow { grid-column: 1 / 2; }
+.composer .btn { grid-column: 3; grid-row: 3; }
+@media (min-width: 1100px) { .composer { grid-template-columns: minmax(0, 1fr) 150px 170px 110px; } .composer .done { grid-column: 2 / 4; } .composer .btn { grid-column: 4; grid-row: 1 / 3; height: auto; } }
+@media (max-width: 640px) { .composer { grid-template-columns: 1fr 1fr; } .composer .grow, .composer .where, .composer .done { grid-column: 1 / -1; } .composer .btn { grid-column: 1 / -1; grid-row: auto; } }
 .composer input, .composer select { font: inherit; font-size: 15px; height: 42px; border-radius: 10px; border: 1px solid transparent; background: var(--night); color: var(--parch); padding: 0 12px; }
 .composer input::placeholder { color: var(--parch-3); }
 .composer input:focus, .composer select:focus { outline: none; border-color: var(--torch); }
-.composer .grow { flex: 1 1 260px; min-width: 0; }
-.people { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
-.person { padding: 18px 20px 8px; }
+.composer input, .composer select { min-width: 0; width: 100%; }
+.people { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--s3); }
+.person { padding: var(--s3) var(--s3) var(--s1); }
 .person-h { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 8px; }
 .person-h b { font-family: var(--display); font-weight: 400; font-size: 20px; letter-spacing: .01em; }
 .person-h span { font-size: 13px; color: var(--parch-3); }
 .bar-mini { height: 3px; border-radius: 2px; background: var(--plank); overflow: hidden; margin-bottom: 4px; }
 .bar-mini i { display: block; height: 100%; background: var(--moss); transform-origin: left; transition: transform 400ms var(--ease-out); }
 .rows { list-style: none; margin: 0; padding: 0; }
-.row { display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: start; padding: 11px 0; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 24px 1fr auto; gap: 12px; align-items: start; padding: 12px 0; border-top: 1px solid var(--line); }
 .row p { min-width: 0; overflow-wrap: anywhere; font-size: 15px; transition: color 200ms ease; }
 .row.is-done p { color: var(--parch-3); text-decoration: line-through; text-decoration-color: var(--parch-3); }
 /* Task details: where in the code, and what "done" looks like */
 .row-body { min-width: 0; display: grid; gap: 4px; }
 .row-where, .row-done { font-size: 14px; color: var(--parch-2); overflow-wrap: anywhere; }
+.row-where { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; }
+.row-where code { white-space: nowrap; }
 .row-where code, .helper-a code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13.5px; color: var(--parch); background: var(--night); border-radius: 5px; padding: 1px 6px; }
 .row-done b { color: var(--parch); font-weight: 700; }
 .row-ask { justify-self: start; margin-left: -4px; }
 .row.is-done .row-where, .row.is-done .row-done, .row.is-done .row-ask { display: none; }
 
 /* Ask for help */
-.helper { display: grid; gap: 14px; }
+.helper { display: grid; gap: var(--s2); }
 .helper .chips .chip { height: 36px; font-size: 14.5px; }
 .helper-l { font-size: 15px; font-weight: 700; margin-bottom: -6px; }
 .helper textarea { width: 100%; font: inherit; font-size: 15.5px; line-height: 1.5; color: var(--parch); background: var(--night); border: 1px solid var(--plank); border-radius: 12px; padding: 12px 14px; resize: vertical; transition: border-color 160ms ease; }
@@ -249,8 +263,38 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .tbl { width: 100%; border-collapse: collapse; font-size: 15px; }
 .tbl th { text-align: left; font-weight: 400; color: var(--parch-3); font-size: 13px; padding: 0 12px 10px 0; }
 .tbl td { padding: 11px 12px 11px 0; border-top: 1px solid var(--line); vertical-align: top; }
-.tbl.raci td:not(:first-child), .tbl.raci th:not(:first-child) { text-align: center; }
-.tbl.raci td:not(:first-child) { font-weight: 700; }
+/* Who does what (RACI): a chip per cell, weighted A > R > C > I so it reads even in grayscale */
+.raci-key { list-style: none; margin: var(--s2) 0 var(--s3); padding: 0; display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); }
+.raci-key li { display: flex; align-items: center; gap: var(--s1); font-size: 14.5px; color: var(--parch-2); }
+.raci-key .rc { width: 30px; height: 28px; font-size: 13.5px; border-radius: 8px; }
+.raci { display: grid; }
+.raci-row { display: grid; grid-template-columns: minmax(200px, 1.6fr) repeat(5, minmax(64px, 1fr)); align-items: stretch; border-top: 1px solid var(--line); }
+.raci-row.raci-head { border-top: 0; }
+.raci-row > * { display: grid; place-items: center; padding: 12px 4px; min-width: 0; }
+.raci-row > .raci-work { place-items: center start; padding-left: 0; }
+.raci-work b { font-weight: 700; font-size: 15.5px; }
+.raci-work small { display: block; color: var(--parch-3); font-size: 13.5px; line-height: 1.4; }
+.raci-who { gap: 2px; text-align: center; }
+.raci-who b { font-size: 15px; }
+.raci-who small { color: var(--parch-3); font-size: 13px; }
+.raci-row > .me { background: rgba(255, 194, 26, .055); }
+.raci-head > .me { border-radius: 12px 12px 0 0; }
+.raci-row:last-child > .me { border-radius: 0 0 12px 12px; }
+.raci-who.me b { color: var(--torch); }
+@media (hover: hover) and (pointer: fine) { .raci-row:not(.raci-head):hover > * { background-color: rgba(246, 232, 207, .03); } .raci-row:not(.raci-head):hover > .me { background-color: rgba(255, 194, 26, .085); } }
+.rc { width: 42px; height: 36px; border-radius: 10px; display: inline-grid; place-items: center; font-weight: 700; font-size: 15px; line-height: 1; }
+.rc.A { background: linear-gradient(180deg, #ffcd45, var(--torch)); color: var(--on-torch); box-shadow: var(--shadow-lift); }
+.rc.R { background: linear-gradient(180deg, #f6a06b, var(--ember)); color: var(--mortar); box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 1px 2px rgba(10,6,3,.4), 0 6px 14px -6px rgba(240,138,75,.45); }
+.rc.C { border: 1.5px solid var(--moss); color: var(--moss); }
+.rc.I { border: 1px dashed var(--plank); color: var(--parch-3); font-weight: 400; }
+@media (max-width: 640px) {
+  .raci-head { display: none; }
+  .raci-row { grid-template-columns: repeat(5, minmax(0, 1fr)); padding: var(--s2) 0 var(--s1); }
+  .raci-row > .raci-work { grid-column: 1 / -1; padding: 0 0 var(--s1); }
+  .raci-row > .rc-cell { gap: 4px; padding: 4px 0; }
+  .raci-row > .rc-cell::after { content: attr(data-who); font-size: 12.5px; color: var(--parch-3); }
+  .raci-row > .me { background: none; } .raci-row > .me::after { color: var(--torch); font-weight: 700; }
+}
 .lvl { display: inline-block; font-size: 13px; font-weight: 700; padding: 0 8px; border-radius: 5px; white-space: nowrap; }
 .lvl.hi { background: var(--ember); color: var(--mortar); }
 .lvl.md { background: var(--torch); color: var(--on-torch); }
@@ -275,9 +319,9 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .name-btn { height: 72px; border-radius: 14px; border: 1px solid var(--plank); background: var(--night); font-family: var(--display); font-size: 22px; letter-spacing: .01em; color: var(--parch); }
 @media (hover: hover) and (pointer: fine) { .name-btn:hover { border-color: var(--torch); background: var(--wood); } }
 .link-btn { border: 0; background: none; color: var(--parch-2); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 4px; }
-.meet-strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; }
+.meet-strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2) var(--s3); }
 .meet-strip h2 { font-family: var(--display); font-weight: 400; font-size: 21px; }
-.pulse { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.pulse { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s2); }
 .kid { display: grid; gap: 10px; align-content: start; }
 .kid-top { display: flex; align-items: center; gap: 12px; }
 .kid-top svg, .kid-top .away { width: 44px; height: 44px; flex: none; }
@@ -331,7 +375,7 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
 .pin-back { border: 0; background: none; color: var(--parch-3); text-decoration: underline; text-underline-offset: 3px; font-size: 14px; padding: 6px; }
 
 /* Council results on Live */
-.results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-top: 14px; }
+.results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--s2); margin-top: var(--s2); }
 .rres { background: var(--night); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
 .rres-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .rres-h b { font-size: 15.5px; }
@@ -448,7 +492,7 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
         <div class="names" id="hello-chips" role="group" aria-label="Your name"></div>
       </div>
 
-      <div class="stack" id="today-body" style="gap:20px">
+      <div class="stack" id="today-body" style="gap:var(--s3)">
         <div class="grid-2">
         <form class="card" id="checkin">
           <h2>Check in · 20 seconds</h2>
@@ -478,7 +522,7 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
           </div>
         </form>
 
-          <div class="stack">
+          <div class="stack" style="gap:var(--s3)">
             <div class="card">
               <div class="head"><h2>My tasks</h2><button type="button" class="link-btn" data-go="tasks">All team tasks</button></div>
               <ul class="rows" id="my-tasks" style="margin-top:10px"></ul>
@@ -560,8 +604,8 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
         <input id="t-title" class="grow" required maxlength="140" placeholder="Add a task, like: write 2 hints for the Maze" aria-label="Task">
         <select id="t-owner" aria-label="Owner"></select>
         <input id="t-due" type="date" required aria-label="Due date">
-        <input id="t-where" maxlength="60" placeholder="Where (optional), like game.js:147" aria-label="Where in the code" style="flex:1 1 200px;min-width:0">
-        <input id="t-done" class="grow" maxlength="160" placeholder="Done when (optional), like: the Maze has 5 turns" aria-label="Done when">
+        <input id="t-where" class="where" maxlength="60" placeholder="Where, like game.js:147" aria-label="Where in the code (optional)">
+        <input id="t-done" class="done" maxlength="160" placeholder="Done when, like: the Maze has 5 turns" aria-label="Done when (optional)">
         <button class="btn solid press" type="submit">Add</button>
       </form>
       <div class="chips" id="filters" role="group" aria-label="Show tasks for"></div>
@@ -635,19 +679,14 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
         </div>
         <div class="card">
           <h2>Who does what</h2>
-          <p class="foot" style="margin:4px 0 12px">R does it · A approves and owns it · C gives input · I is kept in the loop. One A per row; change it together.</p>
-          <div class="tbl-wrap"><table class="tbl raci">
-            <thead><tr><th>Work</th><th>Leslie</th><th>Sanjana</th><th>Shirley</th><th>Tvishaa</th><th>Katrina</th></tr></thead>
-            <tbody>
-              <tr><td>Game logic</td><td>A</td><td>R</td><td>I</td><td>I</td><td>C</td></tr>
-              <tr><td>Java puzzles</td><td>C</td><td>A</td><td>I</td><td>C</td><td>C</td></tr>
-              <tr><td>Look and feel</td><td>I</td><td>I</td><td>A</td><td>R</td><td>C</td></tr>
-              <tr><td>Story and art</td><td>I</td><td>C</td><td>R</td><td>A</td><td>C</td></tr>
-              <tr><td>Playtests</td><td>R</td><td>R</td><td>R</td><td>R</td><td>A</td></tr>
-              <tr><td>Schedule, check-ins</td><td>I</td><td>I</td><td>I</td><td>I</td><td>A</td></tr>
-              <tr><td>Demo day</td><td>R</td><td>R</td><td>R</td><td>R</td><td>A</td></tr>
-            </tbody>
-          </table></div>
+          <p class="sub" style="margin-top:var(--s1)">One owner per row. If it needs to change, change it together at a meeting.</p>
+          <ul class="raci-key" aria-label="What the letters mean">
+            <li><span class="rc R" aria-hidden="true">R</span>Does the work</li>
+            <li><span class="rc A" aria-hidden="true">A</span>Owns it and says it's done</li>
+            <li><span class="rc C" aria-hidden="true">C</span>Gives input</li>
+            <li><span class="rc I" aria-hidden="true">I</span>Kept in the loop</li>
+          </ul>
+          <div class="raci" id="raci" role="table" aria-label="Who does what"></div>
         </div>
         <div class="card">
           <h2>Risk register</h2>
@@ -859,7 +898,26 @@ window.P9_STARTER = /*@STARTER@*/{};
   }
   if (!PEOPLE.includes(me)) me = "";
   const startScreen = ORGANIZER ? "plan" : PREVIEW ? "today" : linked ? (linked === "Katrina" ? "mentor" : "today") : (location.hash || "").slice(1);
+  // Who does what. Letters follow the order of RACI_WHO. Change it together at a meeting, then here.
+  function renderRaci() {
+    const box = $("raci"); if (!box) return;
+    const WHO = [["Leslie", "Build"], ["Sanjana", "Build"], ["Shirley", "Design"], ["Tvishaa", "Design"], ["Katrina", "Mentor"]];
+    const ROWS = [
+      ["Game logic", "game.js: how the screens run", "ARIIC"],
+      ["Java puzzles", "rooms.js: every question and hint", "RAICC"],
+      ["Look and feel", "style.css: colors, fonts, layout", "IIARC"],
+      ["Story and art", "The warlock, the chambers, the art", "ICRAC"],
+      ["Playtests", "4 testers outside the team by Nov 9", "RRRRA"],
+      ["Schedule, check-ins", "When2meet, Wednesday posts, this board", "IIIIA"],
+      ["Demo day", "Live on Thursday, Nov 12", "RRRRA"],
+    ];
+    const SAY = { R: "does the work", A: "owns it", C: "gives input", I: "kept in the loop" };
+    const mine = (i) => (WHO[i][0] === me ? " me" : "");
+    box.innerHTML = `<div class="raci-row raci-head" role="row"><span class="raci-work" role="columnheader"><small>Work</small></span>${WHO.map(([n, r], i) => `<span class="raci-who${mine(i)}" role="columnheader"><b>${n}</b><small>${WHO[i][0] === me ? "You" : r}</small></span>`).join("")}</div>`
+      + ROWS.map(([work, what, letters]) => `<div class="raci-row" role="row"><span class="raci-work" role="rowheader"><span><b>${work}</b><small>${what}</small></span></span>${[...letters].map((l, i) => `<span class="rc-cell${mine(i)}" role="cell" data-who="${WHO[i][0]}"><span class="rc ${l}" aria-label="${WHO[i][0]} ${SAY[l]}">${l}</span></span>`).join("")}</div>`).join("");
+  }
   function renderMe() {
+    renderRaci();
     if (typeof syncOwnerPicker === "function") syncOwnerPicker();
     $("hello").hidden = !!me;
     $("today-body").hidden = !me;
@@ -1016,7 +1074,9 @@ window.P9_STARTER = /*@STARTER@*/{};
     const first = people.reduce((a, v) => a + v[0], 0) / people.length;
     const now = people.reduce((a, v) => a + v[v.length - 1], 0) / people.length;
     const pct = Math.round((now - first) / first * 100);
-    el.querySelector("b").textContent = (pct > 0 ? "+" : "") + pct + "%";
+    // Gold only for growth; "same so far" stays quiet instead of shouting 0%
+    el.querySelector("b").textContent = pct ? (pct > 0 ? "+" : "") + pct + "%" : "same so far";
+    el.querySelector("b").classList.toggle("flat", !pct);
     const x = (v) => ((v - 1) / 4 * 100).toFixed(2) + "%";
     el.insertAdjacentHTML("beforeend", `<svg role="img" aria-label="${label}: from ${first.toFixed(1)} to ${now.toFixed(1)} out of 5">
       <line x1="0" x2="100%" y1="12" y2="12" stroke="#3a2e24" stroke-width="2" stroke-linecap="round"/>
@@ -1221,7 +1281,12 @@ window.P9_STARTER = /*@STARTER@*/{};
     li.innerHTML = `<button type="button" class="tick press" data-s="${s}">${TICK[s]}</button><div class="row-body"><p></p></div><span class="meta"><span class="date${late ? " late" : ""}">${late ? "Late · " : ""}${short(t.due)}</span></span>`;
     li.querySelector("p").textContent = t.title;
     const body = li.querySelector(".row-body");
-    if (t.file) { const w = document.createElement("span"); w.className = "row-where"; w.innerHTML = "Where: <code></code>"; w.querySelector("code").textContent = whereText(t); body.appendChild(w); }
+    if (t.file) {
+      // One chip per part so "line 80" never splits across lines
+      const w = document.createElement("span"); w.className = "row-where"; w.textContent = "Where";
+      [t.file + (t.line ? ", line " + t.line : ""), t.fn].filter(Boolean).forEach((part) => { const c = document.createElement("code"); c.textContent = part; w.appendChild(c); });
+      body.appendChild(w);
+    }
     if (t.done) { const d = document.createElement("span"); d.className = "row-done"; d.innerHTML = "<b>Done when</b> "; d.append(t.done); body.appendChild(d); }
     if (ask) { const a = document.createElement("button"); a.type = "button"; a.className = "link-btn row-ask"; a.textContent = "Ask about this task"; a.onclick = () => askAbout(t); body.appendChild(a); }
     const tk = li.querySelector(".tick"); tk.setAttribute("aria-label", `${SAY[s]}. Mark as ${SAY[NEXT[s]].toLowerCase()}`);
