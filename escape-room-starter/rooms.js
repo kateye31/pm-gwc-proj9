@@ -1,4 +1,4 @@
-// ALL GAME CONTENT LIVES HERE. Edit this file to change the story and puzzles.
+﻿// ALL GAME CONTENT LIVES HERE. Edit this file to change the story and puzzles.
 // Based on Tvishaa's Group 9 design roadmap: a warlock traps you in his dungeon,
 // and you escape through 4 chambers. Search for TODO to find open work.
 // OOP topics follow Sanjana's research (classes & objects, constructors & methods,
@@ -38,7 +38,7 @@ const MAZE = {
     {
       code: "class Knight {\n    String name;\n}\n\nKnight k = new Knight();",
       question: "Which one is the OBJECT?",
-      choices: ["⬅️ Knight", "⬆️ k", "➡️ class"],
+      choices: ["â¬…ï¸ Knight", "â¬†ï¸ k", "âž¡ï¸ class"],
       answer: 1, // index into choices, 0 = first
       hint: "A class is the blueprint. What gets built FROM the blueprint?",
       explain: "Knight is the class. k is an object made from it with new.",
@@ -46,7 +46,7 @@ const MAZE = {
     {
       code: "Knight a = new Knight();\nKnight b = new Knight();",
       question: "How many Knight objects exist?",
-      choices: ["⬅️ 1", "⬆️ 2", "➡️ 0"],
+      choices: ["â¬…ï¸ 1", "â¬†ï¸ 2", "âž¡ï¸ 0"],
       answer: 1,
       hint: "Count how many times you see the word new.",
       explain: "Each new creates one object, so there are 2.",
@@ -77,7 +77,7 @@ const LAB = {
       answer: 1,
       hint: "toUpperCase() returns a new String in capital letters.",
     },
-    // TODO (Leslie/Sanjana): 2 more steps, so the spell has 4 words. Ideas from Sanjana's research:
+    // TODO (Leslie): 2 more steps, so the spell has 4 words. Ideas from Sanjana's research:
     //   - Encapsulation: a private field read through a public getter, e.g. getSecret() returns "DOOR"
     //   - Constructor arguments: new Potion("RISE").word() prints what?
   ],
