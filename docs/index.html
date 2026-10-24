@@ -372,6 +372,9 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .preview-pick select { font: inherit; font-size: 14px; height: 36px; border-radius: 9px; border: 1px solid var(--plank); background: var(--night); color: var(--parch); padding: 0 8px; }
 .preview-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
+/* Read-only views: no seat picking or answering on the Council screen */
+body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-readonly .council-host, body.p9-readonly #council-options, body.p9-readonly .council-label, body.p9-readonly #council-idea { display: none !important; }
+
 /* PIN keypad */
 .pin { display: grid; justify-items: center; gap: 14px; padding: 6px 0 4px; }
 .pin h2 { font-family: var(--display); font-weight: 400; font-size: 26px; text-align: center; }
@@ -1042,6 +1045,8 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
         <h2>See the site as…</h2>
         <p class="foot" style="margin:4px 0 0">Opens a read-only preview in a new tab. Nothing saves, and you stay signed in here.</p>
         <div class="preview-list" id="preview-list"></div>
+        <p class="foot" style="margin-top:14px">For GWC mentors and organizers (read-only, no PIN):</p>
+        <ul class="links" id="org-link"></ul>
       </div>
       <div class="card">
         <h2>Send each girl her link</h2>
@@ -1180,7 +1185,9 @@ window.p9SaveText = async (filename, text) => {
   // Preview (#preview or #preview-leslie): Katrina sees what a new visitor or one girl sees.
   // Read-only, and it never touches who this device is signed in as.
   const previewMatch = (location.hash || "").match(/^#preview(?:-([a-z]+))?$/i);
-  const PREVIEW = !!previewMatch;
+  // #organizer: read-only view for GWC mentors and organizers (no sign-in, no editing, no personal page)
+  const ORGANIZER = /^#organizer$/i.test(location.hash || "");
+  const PREVIEW = !!previewMatch || ORGANIZER;
   const PREVIEW_AS = previewMatch && previewMatch[1] ? PEOPLE.find((p) => p.toLowerCase() === previewMatch[1].toLowerCase()) || "" : "";
   const IDENTITY = ["p9-me", "p9-verified", "p9-council-person", "p9-party"];
   const store = {
@@ -1226,6 +1233,7 @@ window.p9SaveText = async (filename, text) => {
   function go(k, animate) {
     if (!SCREENS.some(([s]) => s === k)) k = "today";
     if (k === "mentor" && !owner) k = "today";
+    if (ORGANIZER && k === "today") k = "plan";
     if (k === screen) return;
     screen = k;
     document.querySelectorAll(".screen").forEach((s) => { s.hidden = s.dataset.s !== k; });
@@ -1261,7 +1269,7 @@ window.p9SaveText = async (filename, text) => {
     else { me = ""; pending = linked; }
   }
   if (!PEOPLE.includes(me)) me = "";
-  const startScreen = PREVIEW ? "today" : linked ? (linked === "Katrina" ? "mentor" : "today") : (location.hash || "").slice(1);
+  const startScreen = ORGANIZER ? "plan" : PREVIEW ? "today" : linked ? (linked === "Katrina" ? "mentor" : "today") : (location.hash || "").slice(1);
   function renderMe() {
     if (typeof syncOwnerPicker === "function") syncOwnerPicker();
     $("hello").hidden = !!me;
@@ -1816,12 +1824,27 @@ window.p9SaveText = async (filename, text) => {
     $("links").appendChild(li);
   });
 
+  if (PREVIEW) document.body.classList.add("p9-readonly");
   if (PREVIEW) {
     const bar = document.createElement("div"); bar.className = "preview-bar"; bar.setAttribute("role", "status");
     bar.innerHTML = `<span></span><button type="button">Exit preview</button>`;
-    bar.querySelector("span").textContent = PREVIEW_AS ? `Preview: what ${PREVIEW_AS} sees · read-only` : "Preview: what a new visitor sees · read-only";
-    bar.querySelector("button").onclick = () => { location.replace(location.href.split("#")[0] + "#mentor"); location.reload(); };
+    bar.querySelector("span").textContent = ORGANIZER ? "Organizer view · read-only" : PREVIEW_AS ? `Preview: what ${PREVIEW_AS} sees · read-only` : "Preview: what a new visitor sees · read-only";
+    if (ORGANIZER) {
+      bar.querySelector("button").remove();
+      document.querySelectorAll('.nav [data-go="today"], .tabbar [data-go="today"]').forEach((el) => { el.hidden = true; });
+      $("tabbar").style.gridTemplateColumns = "repeat(3, 1fr)";
+      document.querySelector(".whoami").hidden = true;
+    }
+    const exitBtn = bar.querySelector("button");
+    if (exitBtn) exitBtn.onclick = () => { location.replace(location.href.split("#")[0] + "#mentor"); location.reload(); };
     document.body.appendChild(bar);
+  }
+  {
+    const li = document.createElement("li"); const link = `${BOARD}#organizer`;
+    li.innerHTML = `<b>Organizers</b><code></code><button class="btn press" type="button">Copy link</button>`;
+    li.querySelector("code").textContent = link;
+    li.querySelector("button").onclick = () => { try { navigator.clipboard.writeText(link).then(() => toast("Copied the organizer link"), () => toast("Select the link and press Ctrl+C.")); } catch { toast("Select the link and press Ctrl+C."); } };
+    $("org-link").appendChild(li);
   }
   [["preview", "A new visitor (blank)"], ...PEOPLE.filter((p) => p !== "Katrina").map((p) => ["preview-" + p.toLowerCase(), p])].forEach(([tok, label]) => {
     const a = document.createElement("a"); a.className = "btn press"; a.href = `${BOARD}#${tok}`; a.target = "_blank"; a.rel = "noopener"; a.textContent = label;
