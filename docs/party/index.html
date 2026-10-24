@@ -418,6 +418,30 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 0); background: var(--parch); color: var(--mortar); font-size: 15px; font-weight: 700; padding: 10px 16px; border-radius: 12px; box-shadow: 0 18px 40px -12px rgba(0,0,0,.8); transition: transform 300ms var(--ease-out), opacity 300ms var(--ease-out); z-index: 40; max-width: calc(100vw - 32px); }
 .toast.hide { transform: translate(-50%, 160%); opacity: 0; transition-duration: 200ms; }
 
+/* Task count badge on the Team tasks nav */
+.badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--ember); color: var(--mortar); font: 700 12.5px/20px var(--body); font-variant-numeric: tabular-nums; text-align: center; font-style: normal; box-shadow: 0 1px 2px rgba(10,6,3,.4); }
+.nav .badge { margin-left: auto; }
+.tabbar button { position: relative; }
+.tabbar .badge { position: absolute; top: 2px; left: calc(50% + 4px); min-width: 18px; height: 18px; line-height: 18px; font-size: 11.5px; padding: 0 5px; box-shadow: 0 0 0 2px var(--wood); }
+
+/* Reminder: one quiet notification per visit, like a system notification */
+.nudge { position: fixed; top: calc(20px + env(safe-area-inset-top, 0px)); right: 20px; z-index: 45; width: min(380px, calc(100vw - 24px)); display: grid; gap: var(--s2); padding: var(--s2); border-radius: 20px; border: 1px solid rgba(246, 232, 207, .1);
+  background: rgba(38, 30, 24, .84); -webkit-backdrop-filter: blur(20px) saturate(1.3); backdrop-filter: blur(20px) saturate(1.3);
+  box-shadow: inset 0 1px 0 rgba(255,230,190,.06), 0 2px 4px rgba(10,6,3,.35), 0 12px 24px -8px rgba(10,6,3,.55), 0 32px 64px -24px rgba(10,6,3,.8);
+  transition: transform 260ms var(--ease-out), opacity 260ms var(--ease-out); transform-origin: top right; }
+.nudge.out { opacity: 0; transform: translateY(-10px) scale(.98); transition-duration: 180ms; }
+.nudge-top { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: start; }
+.nudge-ic { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; background: linear-gradient(180deg, #ffcd45, var(--torch)); color: var(--on-torch); box-shadow: var(--shadow-lift); }
+.nudge-txt b { display: block; font-size: 16px; line-height: 1.3; }
+.nudge-txt p { margin-top: 2px; font-size: 14.5px; line-height: 1.45; color: var(--parch-2); overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.nudge-txt .late { color: var(--ember); font-weight: 700; }
+.nudge-go { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s1); }
+.nudge-go .btn { height: 40px; padding: 0 12px; font-size: 14.5px; }
+.nudge-off { justify-self: center; margin-top: -6px; padding: 4px 8px; border: 0; border-radius: 6px; background: none; color: var(--parch-3); font-size: 13.5px; }
+@media (hover: hover) and (pointer: fine) { .nudge-off:hover { color: var(--parch); } }
+@media (max-width: 860px) { .nudge { top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; transform-origin: top center; } }
+@media (prefers-reduced-motion: reduce) { .nudge, .nudge.out { transform: none; transition: opacity 160ms ease; } }
+
 /* Sign-in, personal page, live page */
 .hello { display: grid; gap: 8px; padding: 28px; }
 .hello h2 { font-family: var(--display); font-weight: 400; font-size: 28px; }
@@ -1288,6 +1312,17 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
 
 
 <div class="toast hide" id="toast" role="status" aria-live="polite"></div>
+<div class="nudge out" id="nudge" role="dialog" aria-labelledby="nudge-t" aria-describedby="nudge-s" hidden>
+  <div class="nudge-top">
+    <span class="nudge-ic" id="nudge-ic"></span>
+    <div class="nudge-txt"><b id="nudge-t"></b><p id="nudge-s"></p></div>
+  </div>
+  <div class="nudge-go">
+    <button class="btn solid press" type="button" id="nudge-view">View my tasks</button>
+    <button class="btn press" type="button" id="nudge-later">Remind me tomorrow</button>
+  </div>
+  <button class="nudge-off" type="button" id="nudge-off">Don't remind me again</button>
+</div>
 
 <script>
 // The viewer blocks plain download links; files go through the `downloads` capability, which asks the viewer to confirm.
@@ -1346,6 +1381,7 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
     const b = document.createElement("button"); b.type = "button"; b.dataset.go = k;
     b.innerHTML = icon(k, 22) + `<span>${{ "Game plan": "Plan", "My quest": "Me", "Team tasks": "Tasks" }[label] || label}</span>`; $("tabbar").appendChild(b);
     if (k === "mentor") { a.hidden = true; b.hidden = true; }
+    if (k === "tasks") [a, b].forEach((el) => el.insertAdjacentHTML("beforeend", '<i class="badge" hidden></i>'));
   });
   function showOwnerNav() {
     document.querySelectorAll('[data-go="mentor"]').forEach((el) => { if (el.closest(".nav,.tabbar")) el.hidden = !owner; });
@@ -1783,6 +1819,7 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
     const mine = tasks.filter((t) => t.owner === me).sort((a, b) => (a.status === "done") - (b.status === "done") || String(a.due).localeCompare(String(b.due)));
     if (!mine.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = "Nothing on your list yet. Claim one at the meeting."; my.appendChild(e); }
     mine.forEach((t) => my.appendChild(row(t, { ask: !PREVIEW, open: true })));
+    renderBadges(); maybeNudge();
     renderPulse();
   }
   // "game.js · line 147 · escapeScreen()" so nobody has to guess where a task lives
@@ -1849,6 +1886,51 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
   });
 
   $("adder").addEventListener("toggle", () => { if ($("adder").open) $("t-title").focus(); });
+
+  // ---------- Your unfinished tasks: nav badge + one reminder per visit ----------
+  const myOpen = () => tasks.filter((t) => t.owner === me && t.status !== "done").sort((a, b) => String(a.due || "9").localeCompare(String(b.due || "9")));
+  function renderBadges() {
+    const n = me && !PREVIEW ? myOpen().length : 0;
+    document.querySelectorAll('[data-go="tasks"] .badge').forEach((el) => { el.hidden = !n; el.textContent = n > 9 ? "9+" : String(n); });
+    document.querySelectorAll('.nav [data-go="tasks"], .tabbar [data-go="tasks"]').forEach((el) => { if (n) el.setAttribute("aria-label", `Team tasks, ${n} to do`); else el.removeAttribute("aria-label"); });
+  }
+  // "Remind me tomorrow" snoozes until the next day; "Don't remind me again" turns it off on this device. The badge stays either way.
+  const REMIND = "p9-remind";
+  let nudged = false, nudgeT = 0;
+  const dueSay = (t) => {
+    if (!t.due) return "";
+    const d = new Date(t.due + "T00:00"), days = Math.round((d - day0()) / 864e5);
+    if (isLate(t)) return `late since ${short(t.due)}`;
+    return days === 0 ? "due today" : days === 1 ? "due tomorrow" : `due ${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`;
+  };
+  function maybeNudge() {
+    if (nudged || !me || PREVIEW || ORGANIZER || document.body.classList.contains("party-mode")) return;
+    const st = store.get(REMIND, {}) || {};
+    if (st.off || (st.snooze && st.snooze > todayKey)) return;
+    const open = myOpen(); if (!open.length) return;
+    nudged = true;
+    const late = open.filter(isLate).length, next = open[0];
+    $("nudge-ic").innerHTML = icon("tasks", 22);
+    $("nudge-t").textContent = late ? `${late} task${late === 1 ? " is" : "s are"} late` : `${open.length} task${open.length === 1 ? "" : "s"} to do`;
+    const s = $("nudge-s"); s.textContent = "Next: " + next.title + (next.due ? " · " : "");
+    if (next.due) { const w = document.createElement("span"); w.textContent = dueSay(next); if (isLate(next)) w.className = "late"; s.appendChild(w); }
+    nudgeT = setTimeout(() => { const n = $("nudge"); n.hidden = false; requestAnimationFrame(() => requestAnimationFrame(() => n.classList.remove("out"))); }, 900);
+  }
+  function closeNudge(save) {
+    clearTimeout(nudgeT);
+    if (save) store.set(REMIND, save);
+    const n = $("nudge"); if (n.hidden) return;
+    n.classList.add("out"); setTimeout(() => { n.hidden = true; }, 190);
+  }
+  $("nudge-view").onclick = () => {
+    closeNudge();
+    go("tasks", true);
+    const card = [...document.querySelectorAll("#people .person")].find((c) => c.querySelector(".person-h b").textContent === me);
+    if (card) card.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" });
+  };
+  $("nudge-later").onclick = () => { const t = day0(); t.setDate(t.getDate() + 1); closeNudge({ snooze: iso(t) }); toast("Okay, I'll remind you tomorrow."); };
+  $("nudge-off").onclick = () => { closeNudge({ off: true }); toast("Reminders off. The number on Team tasks stays."); };
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("nudge").hidden) closeNudge(); });
 
   // ---------- Ask for help ----------
   // Every question goes out with our project's context: the starter files (with line numbers) and her open tasks.
