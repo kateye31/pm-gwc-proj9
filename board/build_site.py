@@ -18,11 +18,13 @@ tmp.unlink()
 shim = (HERE / "site" / "shim.js").read_text(encoding="utf-8")
 
 
-def page(config_src, extra=""):
+def page(config_src, extra="", icon="icon-board.png", title="Knight's Escape"):
     # The artifact host normally adds this skeleton; on GitHub Pages we write it ourselves.
     return (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
+        # Tab icons are crops of the public-domain paintings (board: the Green Knight, party: Beowulf)
+        f'<link rel="icon" type="image/png" href="{icon}"><link rel="apple-touch-icon" href="{icon}">'
         '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}'
         "body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>"
         # Open-licensed fonts for the public site (Beanzo is personal-use only)
@@ -37,7 +39,9 @@ def page(config_src, extra=""):
 DOCS.mkdir(exist_ok=True)
 (DOCS / "party").mkdir(exist_ok=True)
 (DOCS / "index.html").write_text(page("config.js"), encoding="utf-8")
-(DOCS / "party" / "index.html").write_text(page("../config.js", '<script>window.P9_PARTY_DEFAULT="play"</script>'), encoding="utf-8")
+(DOCS / "party" / "index.html").write_text(page("../config.js", '<script>window.P9_PARTY_DEFAULT="play"</script>', icon="../icon-party.png"), encoding="utf-8")
+shutil.copy(HERE / "art" / "icon-board.png", DOCS / "icon-board.png")
+shutil.copy(HERE / "art" / "icon-party.png", DOCS / "icon-party.png")
 if not (DOCS / "config.js").exists():
     shutil.copy(HERE / "site" / "config.js", DOCS / "config.js")
 (DOCS / ".nojekyll").write_text("", encoding="utf-8")

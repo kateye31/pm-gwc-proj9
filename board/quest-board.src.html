@@ -283,6 +283,8 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .preview-bar { position: fixed; z-index: 60; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 16px; border-radius: 999px; background: var(--torch); color: var(--on-torch); font-size: 14px; font-weight: 700; box-shadow: 0 10px 30px -10px rgba(0,0,0,.8); max-width: calc(100vw - 24px); }
 .preview-bar button { border: 0; border-radius: 999px; padding: 6px 12px; background: var(--mortar); color: var(--parch); font-size: 13px; font-weight: 700; }
 @media (max-width: 860px) { .preview-bar { bottom: calc(78px + env(safe-area-inset-bottom, 0px)); font-size: 12.5px; } }
+.preview-pick { display: grid; gap: 6px; font-size: 13px; color: var(--parch-3); }
+.preview-pick select { font: inherit; font-size: 14px; height: 36px; border-radius: 9px; border: 1px solid var(--plank); background: var(--night); color: var(--parch); padding: 0 8px; }
 .preview-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
 /* PIN keypad */
@@ -366,6 +368,16 @@ a { color: var(--parch); text-underline-offset: 3px; }
     <nav class="nav" id="nav"></nav>
     <div class="side-foot">
       <div class="days"><b class="js-days">–</b><span>days until<br>demo, Nov 12</span></div>
+      <label class="preview-pick" id="preview-pick" hidden for="preview-as">Preview as
+        <select id="preview-as">
+          <option value="">Choose…</option>
+          <option value="preview">A new visitor (blank)</option>
+          <option value="preview-leslie">Leslie</option>
+          <option value="preview-sanjana">Sanjana</option>
+          <option value="preview-shirley">Shirley</option>
+          <option value="preview-tvishaa">Tvishaa</option>
+        </select>
+      </label>
       <div class="whoami"><span id="whoami-t">Not picked yet</span><button type="button" id="whoami-change">Change</button></div>
     </div>
   </aside>
@@ -715,6 +727,7 @@ window.p9SaveText = async (filename, text) => {
   });
   function showOwnerNav() {
     document.querySelectorAll('[data-go="mentor"]').forEach((el) => { if (el.closest(".nav,.tabbar")) el.hidden = !owner; });
+    $("preview-pick").hidden = !owner;
     $("tabbar").style.gridTemplateColumns = `repeat(${owner ? 5 : 4}, 1fr)`;
   }
   let screen = "";
@@ -1278,6 +1291,13 @@ window.p9SaveText = async (filename, text) => {
   [["preview", "A new visitor (blank)"], ...PEOPLE.filter((p) => p !== "Katrina").map((p) => ["preview-" + p.toLowerCase(), p])].forEach(([tok, label]) => {
     const a = document.createElement("a"); a.className = "btn press"; a.href = `${BOARD}#${tok}`; a.target = "_blank"; a.rel = "noopener"; a.textContent = label;
     a.style.textDecoration = "none"; $("preview-list").appendChild(a);
+  });
+
+  // Sidebar "Preview as" setting (mentor only): opens the read-only preview in a new tab
+  $("preview-as").addEventListener("change", (e) => {
+    const tok = e.target.value; e.target.value = "";
+    if (!tok) return;
+    const a = document.createElement("a"); a.href = `${BOARD}#${tok}`; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
   });
 
   renderMe(); renderHere(); renderTasks();
