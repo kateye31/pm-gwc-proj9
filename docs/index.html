@@ -785,6 +785,12 @@ body.party-mode { overflow-x: hidden; }
             </div>
           </div>
         </div>
+        <div class="card meet-strip" id="catchup" hidden>
+          <div><h2>Catch up on the Council</h2><p class="sub" id="catchup-sub"></p></div>
+          <div class="controls">
+            <button class="btn solid press" type="button" onclick="window.P9_PARTY && window.P9_PARTY('play', true)">Answer now</button>
+          </div>
+        </div>
         <div class="card meet-strip">
           <div><h2>Meetings are on the weekend</h2><p class="sub">We pick the time each week with When2meet, so watch Discord for the link. 40 minutes: check in first, then play the Council on your phone while Katrina streams the big screen.</p></div>
           <div class="controls">
@@ -1137,8 +1143,11 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
   <section class="p-play" id="p-play" hidden>
     <form class="p-joinform" id="j-form" autocomplete="off">
       <span class="p-brand">Knight's Escape <i>Council</i></span>
-      <label class="p-lbl" for="j-code">Room code</label>
-      <input class="p-in" id="j-code" maxlength="4" placeholder="Enter 4-letter code" autocapitalize="characters" spellcheck="false">
+      <p class="p-lbl" id="j-note" hidden>No live Council right now. Sign in to answer the rounds you missed, at your own pace.</p>
+      <div id="j-code-row" style="display:grid;gap:10px">
+        <label class="p-lbl" for="j-code">Room code</label>
+        <input class="p-in" id="j-code" maxlength="4" placeholder="Enter 4-letter code" autocapitalize="characters" spellcheck="false">
+      </div>
       <label class="p-lbl" for="j-name">Name</label>
       <input class="p-in" id="j-name" maxlength="12" placeholder="Enter your name" spellcheck="false">
       <div id="j-pin-row" style="display:grid;gap:10px">
@@ -1298,7 +1307,7 @@ window.p9SaveText = async (filename, text) => {
     }
     syncCheckinBtn();
   }
-  $("whoami-change").onclick = () => { me = ""; pending = ""; store.set("p9-me", ""); store.set("p9-verified", ""); renderMe(); go("today", true); };
+  $("whoami-change").onclick = () => { me = ""; pending = ""; store.set("p9-me", ""); store.set("p9-verified", ""); renderMe(); renderCatchup(); go("today", true); };
 
   // Phone-style keypad: digits with their letters, like a real phone
   const KEYS = [["1", ""], ["2", "ABC"], ["3", "DEF"], ["4", "GHI"], ["5", "JKL"], ["6", "MNO"], ["7", "PQRS"], ["8", "TUV"], ["9", "WXYZ"], ["", ""], ["0", "+"], ["del", ""]];
@@ -1331,7 +1340,7 @@ window.p9SaveText = async (filename, text) => {
     }
     me = pending; pending = ""; pinEntry = "";
     store.set("p9-me", me); store.set("p9-verified", me); store.set("p9-council-person", me);
-    renderMe(); loadMine(); renderTasks(); renderHere(); toast(`Hi ${me}!`);
+    renderMe(); loadMine(); renderTasks(); renderHere(); renderCatchup(); toast(`Hi ${me}!`);
     anim($("today-body").children, { y: 10, opacity: 0, duration: .32, stagger: .05, ease: "power3.out", clearProps: "transform,opacity" });
   }
   document.addEventListener("keydown", (e) => {
@@ -1704,9 +1713,18 @@ window.p9SaveText = async (filename, text) => {
       grid.appendChild(card);
     });
   }
+  // Missed the meeting? Once the live Council is over, she answers the rounds she skipped right here, no screenshare.
+  function renderCatchup() {
+    const box = $("catchup"); if (!box) return;
+    const core = (window.P9_ROUNDS || []).filter((r) => !r.optional);
+    const over = session && typeof session.round === "number" && session.round >= core.length;
+    const left = me && me !== "Katrina" && !PREVIEW ? core.filter((r) => !answers.some((a) => a.round === r.id && a.name === me)) : [];
+    box.hidden = !over || !left.length;
+    $("catchup-sub").textContent = `You have ${left.length} question${left.length === 1 ? "" : "s"} from the last meeting. No timer and no big screen, about 5 minutes. Your answers join the team's.`;
+  }
   function renderPulse() {
     if (typeof renderNotes === "function") renderNotes();
-    renderResults();
+    renderResults(); renderCatchup();
     const box = $("pulse"); if (!box) return; box.innerHTML = "";
     PEOPLE.filter((p) => p !== "Katrina").forEach((p) => {
       const c = checkins.find((x) => x.name === p && x.date === todayKey);
@@ -2452,7 +2470,7 @@ window.p9SaveText = async (filename, text) => {
   const catchUp = () => finished() && missing().length > 0;
   const playRound = () => catchUp() ? missing()[0] : round();
   function renderPlay() {
-    if (!me) return;
+    if (!me) { syncJoin(); return; }
     $("j-form").hidden = true; $("j-phone").hidden = false;
     $("j-av").outerHTML = `<span class="p-av" id="j-av" style="background:${COLOR[me]}">${face(4)}</span>`;
     $("j-name-t").textContent = me; $("j-code-t").innerHTML = `Room <b>${CODE}</b>`;
@@ -2489,6 +2507,12 @@ window.p9SaveText = async (filename, text) => {
     }
     syncPicks(); paintPlayTimer();
   }
+  // The room code only matters during a live meeting. Afterwards anyone can sign in and catch up on her own.
+  function syncJoin() {
+    const live = !finished();
+    $("j-code-row").hidden = !live; $("j-note").hidden = live;
+    $("j-go").textContent = live ? "Play" : "Catch up";
+  }
   function syncPicks() { [...$("j-picks").children].forEach((b) => b.setAttribute("aria-checked", String(b.dataset.id === draft.pick))); }
   function paintPlayTimer() {
     if (mode !== "play" || $("j-answer").hidden) return;
@@ -2503,13 +2527,14 @@ window.p9SaveText = async (filename, text) => {
     const verified = store.get("p9-verified", "");
     if (STUDENTS.includes(verified)) { $("j-name").value = verified; $("j-pin-row").hidden = true; }
     if (saved && saved.date === today && saved.code === CODE && STUDENTS.includes(saved.name) && saved.name === verified) { me = saved.name; join(false); }
+    else autoSignIn();
     $("j-name").addEventListener("input", () => { $("j-pin-row").hidden = $("j-name").value.trim().toLowerCase() === verified.toLowerCase() && !!verified; });
     $("j-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const code = $("j-code").value.trim().toUpperCase();
       const typed = $("j-name").value.trim().toLowerCase();
       const name = STUDENTS.find((n) => n.toLowerCase() === typed);
-      if (code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
+      if (!finished() && code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
       if (typed === "katrina") { $("j-err").textContent = "Katrina, you're the host. Open the host screen instead."; return; }
       if (!name) { $("j-err").textContent = "Type your first name as it is on the team list."; return; }
       if (store.get("p9-verified", "") !== name) {
@@ -2518,7 +2543,7 @@ window.p9SaveText = async (filename, text) => {
         if (!ok) { $("j-err").textContent = "That PIN doesn't match. Ask Katrina if you forgot it."; $("j-pin").value = ""; return; }
         store.set("p9-verified", name);
       }
-      me = name; store.set("p9-party", { code, name, date: today }); store.set("p9-me", name); store.set("p9-council-person", name);
+      me = name; store.set("p9-party", { code: CODE, name, date: today }); store.set("p9-me", name); store.set("p9-council-person", name);
       join(true);
     });
     $("j-idea").addEventListener("input", () => { draft.idea = $("j-idea").value; });
@@ -2534,6 +2559,12 @@ window.p9SaveText = async (filename, text) => {
       catch { $("j-msg").textContent = "That didn't send. Check your connection and try again."; }
     });
   }
+  // The board's catch-up button: she already signed in there with her PIN, so skip the form
+  function autoSignIn() {
+    const verified = store.get("p9-verified", "");
+    if (!autoJoin || me || !STUDENTS.includes(verified)) return;
+    me = verified; store.set("p9-party", { code: CODE, name: me, date: today }); join(false);
+  }
   function join(fresh) {
     renderPlay();
     if (playRef) playRef.doc(`${today}_${me}`).set({ name: me, date: today, joinedAt: Date.now() }).catch(() => {});
@@ -2546,7 +2577,7 @@ window.p9SaveText = async (filename, text) => {
     mode = m;
     document.body.classList.add("party-mode");
     $("party").hidden = false; $("p-host").hidden = m !== "host"; $("p-play").hidden = m !== "play";
-    if (started) { render(); return; }
+    if (started) { if (m === "play") autoSignIn(); render(); return; }
     started = true;
     if (m === "host") hostControls(); else playControls();
     render();
@@ -2567,7 +2598,8 @@ window.p9SaveText = async (filename, text) => {
       render();
     });
   }
-  window.P9_PARTY = (m) => { try { history.replaceState(null, "", "#" + m); } catch {} start(m); };
+  let autoJoin = false;
+  window.P9_PARTY = (m, catchup) => { autoJoin = !!catchup; try { history.replaceState(null, "", "#" + m); } catch {} start(m); };
   const h = (location.hash || "").slice(1).toLowerCase();
   if (h === "host" || h === "play") start(h);
   else if (window.P9_PARTY_DEFAULT) start(window.P9_PARTY_DEFAULT); // the /party/ page on the public site

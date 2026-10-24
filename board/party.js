@@ -163,7 +163,7 @@
   const catchUp = () => finished() && missing().length > 0;
   const playRound = () => catchUp() ? missing()[0] : round();
   function renderPlay() {
-    if (!me) return;
+    if (!me) { syncJoin(); return; }
     $("j-form").hidden = true; $("j-phone").hidden = false;
     $("j-av").outerHTML = `<span class="p-av" id="j-av" style="background:${COLOR[me]}">${face(4)}</span>`;
     $("j-name-t").textContent = me; $("j-code-t").innerHTML = `Room <b>${CODE}</b>`;
@@ -200,6 +200,12 @@
     }
     syncPicks(); paintPlayTimer();
   }
+  // The room code only matters during a live meeting. Afterwards anyone can sign in and catch up on her own.
+  function syncJoin() {
+    const live = !finished();
+    $("j-code-row").hidden = !live; $("j-note").hidden = live;
+    $("j-go").textContent = live ? "Play" : "Catch up";
+  }
   function syncPicks() { [...$("j-picks").children].forEach((b) => b.setAttribute("aria-checked", String(b.dataset.id === draft.pick))); }
   function paintPlayTimer() {
     if (mode !== "play" || $("j-answer").hidden) return;
@@ -214,13 +220,14 @@
     const verified = store.get("p9-verified", "");
     if (STUDENTS.includes(verified)) { $("j-name").value = verified; $("j-pin-row").hidden = true; }
     if (saved && saved.date === today && saved.code === CODE && STUDENTS.includes(saved.name) && saved.name === verified) { me = saved.name; join(false); }
+    else autoSignIn();
     $("j-name").addEventListener("input", () => { $("j-pin-row").hidden = $("j-name").value.trim().toLowerCase() === verified.toLowerCase() && !!verified; });
     $("j-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const code = $("j-code").value.trim().toUpperCase();
       const typed = $("j-name").value.trim().toLowerCase();
       const name = STUDENTS.find((n) => n.toLowerCase() === typed);
-      if (code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
+      if (!finished() && code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
       if (typed === "katrina") { $("j-err").textContent = "Katrina, you're the host. Open the host screen instead."; return; }
       if (!name) { $("j-err").textContent = "Type your first name as it is on the team list."; return; }
       if (store.get("p9-verified", "") !== name) {
@@ -229,7 +236,7 @@
         if (!ok) { $("j-err").textContent = "That PIN doesn't match. Ask Katrina if you forgot it."; $("j-pin").value = ""; return; }
         store.set("p9-verified", name);
       }
-      me = name; store.set("p9-party", { code, name, date: today }); store.set("p9-me", name); store.set("p9-council-person", name);
+      me = name; store.set("p9-party", { code: CODE, name, date: today }); store.set("p9-me", name); store.set("p9-council-person", name);
       join(true);
     });
     $("j-idea").addEventListener("input", () => { draft.idea = $("j-idea").value; });
@@ -245,6 +252,12 @@
       catch { $("j-msg").textContent = "That didn't send. Check your connection and try again."; }
     });
   }
+  // The board's catch-up button: she already signed in there with her PIN, so skip the form
+  function autoSignIn() {
+    const verified = store.get("p9-verified", "");
+    if (!autoJoin || me || !STUDENTS.includes(verified)) return;
+    me = verified; store.set("p9-party", { code: CODE, name: me, date: today }); join(false);
+  }
   function join(fresh) {
     renderPlay();
     if (playRef) playRef.doc(`${today}_${me}`).set({ name: me, date: today, joinedAt: Date.now() }).catch(() => {});
@@ -257,7 +270,7 @@
     mode = m;
     document.body.classList.add("party-mode");
     $("party").hidden = false; $("p-host").hidden = m !== "host"; $("p-play").hidden = m !== "play";
-    if (started) { render(); return; }
+    if (started) { if (m === "play") autoSignIn(); render(); return; }
     started = true;
     if (m === "host") hostControls(); else playControls();
     render();
@@ -278,7 +291,8 @@
       render();
     });
   }
-  window.P9_PARTY = (m) => { try { history.replaceState(null, "", "#" + m); } catch {} start(m); };
+  let autoJoin = false;
+  window.P9_PARTY = (m, catchup) => { autoJoin = !!catchup; try { history.replaceState(null, "", "#" + m); } catch {} start(m); };
   const h = (location.hash || "").slice(1).toLowerCase();
   if (h === "host" || h === "play") start(h);
   else if (window.P9_PARTY_DEFAULT) start(window.P9_PARTY_DEFAULT); // the /party/ page on the public site

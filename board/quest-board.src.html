@@ -471,6 +471,12 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
             </div>
           </div>
         </div>
+        <div class="card meet-strip" id="catchup" hidden>
+          <div><h2>Catch up on the Council</h2><p class="sub" id="catchup-sub"></p></div>
+          <div class="controls">
+            <button class="btn solid press" type="button" onclick="window.P9_PARTY && window.P9_PARTY('play', true)">Answer now</button>
+          </div>
+        </div>
         <div class="card meet-strip">
           <div><h2>Meetings are on the weekend</h2><p class="sub">We pick the time each week with When2meet, so watch Discord for the link. 40 minutes: check in first, then play the Council on your phone while Katrina streams the big screen.</p></div>
           <div class="controls">
@@ -829,7 +835,7 @@ window.p9SaveText = async (filename, text) => {
     }
     syncCheckinBtn();
   }
-  $("whoami-change").onclick = () => { me = ""; pending = ""; store.set("p9-me", ""); store.set("p9-verified", ""); renderMe(); go("today", true); };
+  $("whoami-change").onclick = () => { me = ""; pending = ""; store.set("p9-me", ""); store.set("p9-verified", ""); renderMe(); renderCatchup(); go("today", true); };
 
   // Phone-style keypad: digits with their letters, like a real phone
   const KEYS = [["1", ""], ["2", "ABC"], ["3", "DEF"], ["4", "GHI"], ["5", "JKL"], ["6", "MNO"], ["7", "PQRS"], ["8", "TUV"], ["9", "WXYZ"], ["", ""], ["0", "+"], ["del", ""]];
@@ -862,7 +868,7 @@ window.p9SaveText = async (filename, text) => {
     }
     me = pending; pending = ""; pinEntry = "";
     store.set("p9-me", me); store.set("p9-verified", me); store.set("p9-council-person", me);
-    renderMe(); loadMine(); renderTasks(); renderHere(); toast(`Hi ${me}!`);
+    renderMe(); loadMine(); renderTasks(); renderHere(); renderCatchup(); toast(`Hi ${me}!`);
     anim($("today-body").children, { y: 10, opacity: 0, duration: .32, stagger: .05, ease: "power3.out", clearProps: "transform,opacity" });
   }
   document.addEventListener("keydown", (e) => {
@@ -1235,9 +1241,18 @@ window.p9SaveText = async (filename, text) => {
       grid.appendChild(card);
     });
   }
+  // Missed the meeting? Once the live Council is over, she answers the rounds she skipped right here, no screenshare.
+  function renderCatchup() {
+    const box = $("catchup"); if (!box) return;
+    const core = (window.P9_ROUNDS || []).filter((r) => !r.optional);
+    const over = session && typeof session.round === "number" && session.round >= core.length;
+    const left = me && me !== "Katrina" && !PREVIEW ? core.filter((r) => !answers.some((a) => a.round === r.id && a.name === me)) : [];
+    box.hidden = !over || !left.length;
+    $("catchup-sub").textContent = `You have ${left.length} question${left.length === 1 ? "" : "s"} from the last meeting. No timer and no big screen, about 5 minutes. Your answers join the team's.`;
+  }
   function renderPulse() {
     if (typeof renderNotes === "function") renderNotes();
-    renderResults();
+    renderResults(); renderCatchup();
     const box = $("pulse"); if (!box) return; box.innerHTML = "";
     PEOPLE.filter((p) => p !== "Katrina").forEach((p) => {
       const c = checkins.find((x) => x.name === p && x.date === todayKey);

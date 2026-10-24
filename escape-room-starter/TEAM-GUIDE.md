@@ -159,7 +159,7 @@ Then start your next task with a **new** branch (Step 2).
 | Oct 31 – Nov 6 | "Play the Maze for 5 minutes. Where did you get stuck?" |
 | Nov 7 – 11 | "After playing: explain class vs. object in your own words." |
 
-**Missed a meeting?** Open the party link on your phone. It walks you through the questions you missed (catch-up mode), with no timer.
+**Missed a meeting?** No screenshare needed. Open the team board with your link and tap **Answer now** on the "Catch up on the Council" card. It works on a laptop or a phone, walks you through the questions you missed, and has no timer. (The party link works too: after the meeting it skips the room code.)
 
 ---
 
