@@ -1,0 +1,16 @@
+# Personal-use font packs: never publish these
+escape-room-starter/*.zip
+escape-room-starter/fonts-src/
+board/fonts/
+# Generated / scratch
+board/site/_bundle.html
+board/quest-board.v*.src.html
+board/council.v1.js
+board/checks/*.v1.cjs
+board/checks/*.png
+# Private: mentor notes, the font-embedded Claude build, the mentor-only Discord kit
+board/MEETING-1.md
+board/MENTOR-PLAN.md
+board/quest-board.html
+board/discord-kit.src.html
+board/art/quest-council.png

@@ -1,0 +1,1204 @@
+<title>Project 9 Quest Board</title>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+/*@FONTS@*/
+/* Knight's Escape team board.
+   Layout: app shell. Sidebar nav on desktop, bottom tab bar on phones; one screen, one job.
+   Look: lantern-lit but quiet. Warm near-black surfaces, hairline dividers, torch gold only for
+   what is live or primary. Beanzo (the team's font) for titles and big numbers only;
+   Atkinson Hyperlegible for everything people read. */
+:root {
+  --night: #14100d;
+  --wood: #1d1712;
+  --wood-2: #261e18;
+  --plank: #3a2e24;
+  --line: rgba(246, 232, 207, .08);
+  --mortar: #2d1200;
+  --brick: #7a2e06;
+  --parch: #f3e6cf;
+  --parch-2: #c2b09a;
+  --parch-3: #93816c;
+  --torch: #ffc21a;
+  --torch-2: #f0a00e;
+  --on-torch: #2a1300;
+  --ember: #f08a4b;
+  --moss: #c2ba52;
+  --shadow: 0 1px 0 rgba(255,230,190,.04) inset, 0 20px 40px -24px rgba(0,0,0,.9);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --display: "Beanzo", "Atkinson Hyperlegible", "Arial Narrow", sans-serif;
+  --body: "Atkinson Hyperlegible", "Times New Roman", Times, serif;
+  --hand: "Atkinson Hyperlegible", "Times New Roman", serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--night); color: var(--parch); font: 16px/1.55 var(--body); -webkit-font-smoothing: antialiased; }
+::selection { background: var(--torch); color: var(--on-torch); }
+:focus-visible { outline: 2px solid var(--torch); outline-offset: 3px; border-radius: 8px; }
+::-webkit-scrollbar { width: 10px; height: 10px; } ::-webkit-scrollbar-thumb { background: var(--plank); border-radius: 5px; } ::-webkit-scrollbar-track { background: transparent; }
+h1, h2, h3, h4, p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+a { color: var(--parch); text-underline-offset: 3px; }
+.sub { color: var(--parch-2); }
+.faint, .foot { color: var(--parch-3); font-size: 14px; }
+.label { color: var(--parch-2); font-size: 14px; }
+.press { transition: transform 140ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease, opacity 160ms ease; }
+.press:active:not(:disabled) { transform: scale(0.97); }
+
+/* Shell */
+.app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100%; }
+.side { position: sticky; top: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 28px; padding: 26px 18px 20px; border-right: 1px solid var(--line); background: var(--wood); }
+.brand { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+.brand b { display: block; font-family: var(--display); font-weight: 400; font-size: 21px; line-height: 1; letter-spacing: .01em; }
+.brand small { display: block; font-size: 13px; color: var(--parch-3); margin-top: 3px; }
+.nav { display: grid; gap: 2px; }
+.nav button { display: flex; align-items: center; gap: 12px; width: 100%; height: 42px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: var(--parch-2); font-size: 15.5px; text-align: left; }
+@media (hover: hover) and (pointer: fine) { .nav button:hover { background: var(--wood-2); color: var(--parch); } }
+.nav button[aria-current="page"] { background: var(--wood-2); color: var(--parch); box-shadow: inset 0 0 0 1px var(--line); }
+.nav button[aria-current="page"] svg { color: var(--torch); }
+.nav svg { flex: none; }
+.side-foot { margin-top: auto; display: grid; gap: 14px; padding: 0 8px; }
+.days { display: flex; align-items: baseline; gap: 8px; }
+.days b { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1; color: var(--torch); }
+.days span { font-size: 13px; color: var(--parch-2); line-height: 1.25; }
+.whoami { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 14px; color: var(--parch-2); }
+.whoami button { border: 0; background: none; color: var(--parch-3); text-decoration: underline; text-underline-offset: 3px; font-size: 13px; padding: 4px; }
+.whoami b { color: var(--parch); font-weight: 700; }
+
+.main { min-width: 0; padding: 40px 48px 96px; }
+.screen { max-width: 1040px; margin: 0 auto; display: grid; gap: 26px; }
+.screen[hidden] { display: none !important; }
+.screen-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 10px 24px; }
+.screen-head h1 { font-family: var(--display); font-weight: 400; font-size: clamp(34px, 4.4vw, 50px); line-height: .95; letter-spacing: .005em; text-wrap: balance; }
+.screen-head p { max-width: 52ch; color: var(--parch-2); }
+.topbar, .tabbar { display: none; }
+
+/* Surfaces */
+.card { background: var(--wood); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px; box-shadow: var(--shadow); min-width: 0; }
+.card > h2, .card > .head > h2 { font-family: var(--display); font-weight: 400; font-size: 21px; line-height: 1.05; letter-spacing: .01em; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 20px; align-items: start; }
+.stack { display: grid; gap: 16px; align-content: start; }
+.btn { height: 42px; padding: 0 18px; border-radius: 11px; border: 1px solid var(--plank); background: var(--wood-2); font-size: 15.5px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; }
+@media (hover: hover) and (pointer: fine) { .btn:hover:not(:disabled) { border-color: var(--parch-3); } }
+.btn.solid { background: var(--torch); color: var(--on-torch); border-color: var(--torch); }
+@media (hover: hover) and (pointer: fine) { .btn.solid:hover:not(:disabled) { background: #ffcd45; border-color: #ffcd45; } }
+.btn:disabled { opacity: .4; cursor: default; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 13px; font-weight: 700; line-height: 1.5; }
+.tag.torch { background: var(--torch); color: var(--on-torch); }
+.tag.moss { background: var(--moss); color: #1f2310; }
+.tag.ember { background: var(--ember); color: var(--mortar); }
+.head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 8px 20px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { height: 38px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--plank); background: transparent; color: var(--parch-2); font-size: 15px; }
+.chip[aria-pressed="true"] { background: var(--parch); border-color: var(--parch); color: var(--mortar); font-weight: 700; }
+@media (hover: hover) and (pointer: fine) { .chip:hover:not([aria-pressed="true"]) { border-color: var(--parch-3); color: var(--parch); } }
+
+/* Who-are-you banner */
+.hello { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; background: var(--wood-2); border: 1px solid var(--plank); border-radius: 18px; padding: 18px 22px; }
+.hello p { font-size: 17px; }
+
+/* Check-in */
+.q { display: grid; gap: 10px; }
+.q + .q { margin-top: 22px; }
+.faces-pick { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.face-btn { display: grid; justify-items: center; gap: 6px; padding: 10px 4px 8px; border-radius: 14px; border: 1px solid var(--line); background: var(--night); color: var(--parch-3); font-size: 13px; }
+.face-btn svg { width: 46px; height: 46px; transition: transform 220ms var(--ease-out), filter 220ms ease; filter: saturate(.55) brightness(.85); }
+@media (hover: hover) and (pointer: fine) { .face-btn:hover svg { filter: none; transform: translateY(-2px); } }
+.face-btn[aria-checked="true"] { border-color: var(--torch); background: var(--wood-2); color: var(--parch); }
+.face-btn[aria-checked="true"] svg { filter: none; transform: scale(1.08); }
+.scale { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid var(--plank); border-radius: 12px; overflow: hidden; }
+.scale button { height: 42px; border: 0; background: var(--night); color: var(--parch-2); font-size: 16px; font-weight: 700; border-left: 1px solid var(--plank); }
+.scale button:first-child { border-left: 0; }
+.scale button[aria-checked="true"] { background: var(--torch); color: var(--on-torch); }
+@media (hover: hover) and (pointer: fine) { .scale button:hover:not([aria-checked="true"]) { background: var(--wood-2); color: var(--parch); } }
+.scale-ends { display: flex; justify-content: space-between; font-size: 13px; color: var(--parch-3); }
+.checkin-go { margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.here { display: flex; flex-wrap: wrap; gap: 14px 10px; }
+.here figure { margin: 0; display: grid; justify-items: center; gap: 4px; width: 60px; }
+.here svg { width: 48px; height: 48px; }
+.here .away { width: 48px; height: 48px; border-radius: 50%; border: 1.5px dashed var(--plank); }
+.here figcaption { font-size: 13px; color: var(--parch-2); }
+.growth { display: grid; gap: 16px; }
+.g-row { display: grid; gap: 2px; }
+.g-row .lbl { display: flex; justify-content: space-between; gap: 8px; font-size: 15px; }
+.g-row .lbl b { color: var(--torch); font-size: 16px; }
+.g-row svg { width: 100%; height: 36px; overflow: visible; font-family: var(--body); }
+
+/* Meeting runner */
+.runner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); padding: 0; overflow: hidden; }
+.runner-now { padding: 24px; display: grid; gap: 16px; border-right: 1px solid var(--line); align-content: start; }
+.runner-top { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--parch-3); }
+.live { display: inline-flex; align-items: center; gap: 8px; }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--plank); }
+.live.on { color: var(--torch); }
+.live.on i { background: var(--torch); box-shadow: 0 0 0 4px color-mix(in srgb, var(--torch) 25%, transparent); }
+.clock { font-family: var(--display); font-size: clamp(72px, 9vw, 108px); line-height: .85; color: var(--torch); display: flex; }
+.clock span { display: inline-block; width: .6em; text-align: center; }
+.clock span.c { width: .3em; }
+.clock.over { color: var(--ember); }
+.clock.word span { width: auto; }
+.now-title { font-size: 20px; font-weight: 700; }
+.now-who { color: var(--parch-2); font-size: 15px; }
+.track { display: flex; gap: 3px; height: 6px; }
+.seg { position: relative; border-radius: 3px; background: var(--plank); overflow: hidden; }
+.seg b { position: absolute; inset: 0; background: var(--torch); transform-origin: left; transform: scaleX(0); }
+.seg.done b { transform: scaleX(1); background: var(--parch-3); }
+.agenda { list-style: none; margin: 0; padding: 10px 12px; display: grid; align-content: start; }
+.item { display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 12px; transition: opacity 200ms ease, background-color 200ms ease; }
+.item .t { font-size: 14px; color: var(--parch-3); font-variant-numeric: tabular-nums; }
+.item .n small { display: block; font-size: 13px; color: var(--parch-3); }
+.item.active { background: var(--wood-2); }
+.item.active .t { color: var(--torch); font-weight: 700; }
+.item.past { opacity: .4; }
+.step { display: inline-flex; align-items: center; border: 1px solid var(--plank); border-radius: 9px; height: 30px; }
+.step button { width: 28px; height: 28px; border: 0; background: none; color: var(--parch-2); font-size: 17px; line-height: 1; border-radius: 8px; }
+.step span { min-width: 36px; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; }
+
+/* Tasks */
+.composer { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border-radius: 16px; }
+.composer input, .composer select { font: inherit; font-size: 15px; height: 42px; border-radius: 10px; border: 1px solid transparent; background: var(--night); color: var(--parch); padding: 0 12px; }
+.composer input::placeholder { color: var(--parch-3); }
+.composer input:focus, .composer select:focus { outline: none; border-color: var(--torch); }
+.composer .grow { flex: 1 1 260px; min-width: 0; }
+.people { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.person { padding: 18px 20px 8px; }
+.person-h { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 8px; }
+.person-h b { font-family: var(--display); font-weight: 400; font-size: 20px; letter-spacing: .01em; }
+.person-h span { font-size: 13px; color: var(--parch-3); }
+.bar-mini { height: 3px; border-radius: 2px; background: var(--plank); overflow: hidden; margin-bottom: 4px; }
+.bar-mini i { display: block; height: 100%; background: var(--moss); transform-origin: left; transition: transform 400ms var(--ease-out); }
+.rows { list-style: none; margin: 0; padding: 0; }
+.row { display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: start; padding: 11px 0; border-top: 1px solid var(--line); }
+.row p { min-width: 0; overflow-wrap: anywhere; font-size: 15px; transition: color 200ms ease; }
+.row.is-done p { color: var(--parch-3); text-decoration: line-through; text-decoration-color: var(--parch-3); }
+.tick { width: 24px; height: 24px; padding: 0; border: 0; background: none; border-radius: 50%; display: grid; place-items: center; color: var(--parch-3); }
+.tick svg { transition: filter 180ms ease, opacity 180ms ease; }
+.tick.swap svg { filter: blur(2px); opacity: .4; }
+.tick[data-s="doing"] { color: var(--torch); }
+.tick[data-s="done"] { color: var(--moss); }
+.meta { display: flex; align-items: center; gap: 4px; padding-top: 2px; }
+.date { font-size: 13px; color: var(--parch-3); white-space: nowrap; }
+.date.late { color: var(--ember); font-weight: 700; }
+.del { width: 26px; height: 26px; border: 0; background: none; border-radius: 7px; color: var(--parch-3); display: grid; place-items: center; opacity: 0; }
+.row:hover .del, .del:focus-visible, .del.armed { opacity: 1; }
+@media (hover: none) { .del { opacity: .6; } }
+.del.armed { color: var(--mortar); background: var(--ember); width: auto; padding: 0 9px; font-size: 13px; }
+.empty { padding: 12px 0 14px; color: var(--parch-3); border-top: 1px solid var(--line); font-size: 15px; }
+.note { font-size: 15px; color: var(--parch-3); }
+.note.err { color: var(--ember); }
+
+/* Game plan */
+.seg-ctl { position: relative; display: inline-flex; padding: 4px; background: var(--wood); border: 1px solid var(--line); border-radius: 12px; justify-self: start; max-width: 100%; overflow-x: auto; }
+.seg-ctl button { position: relative; z-index: 1; height: 36px; padding: 0 16px; border: 0; background: none; border-radius: 9px; color: var(--parch-2); font-size: 15px; white-space: nowrap; transition: color 200ms ease; }
+.seg-ctl button[aria-selected="true"] { color: var(--on-torch); font-weight: 700; }
+.seg-ctl .pill { position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 0; width: 0; border-radius: 9px; background: var(--torch); transition: transform 260ms var(--ease-out), width 260ms var(--ease-out); }
+.panel[hidden] { display: none !important; }
+.flow { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.stage { position: relative; display: grid; gap: 8px; align-content: start; padding: 0 10px; min-width: 0; }
+.stage .node { position: relative; height: 54px; display: flex; align-items: center; }
+.stage .node::before { content: ""; position: absolute; left: 0; right: -20px; top: 50%; height: 2px; background: var(--plank); }
+.stage:last-child .node::before { display: none; }
+.stage .dot { position: relative; width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; background: var(--wood-2); border: 1px solid var(--plank); color: var(--parch-2); }
+.stage.chamber .dot { background: var(--brick); border-color: #9a4012; color: var(--torch); }
+.stage .dot svg { width: 26px; height: 26px; }
+.stage h3 { font-family: var(--display); font-weight: 400; font-size: 18px; line-height: 1.05; }
+.stage p { font-size: 14px; color: var(--parch-2); }
+.stage .oop { font-size: 13px; color: var(--moss); }
+.legs { display: grid; gap: 18px; margin-top: 18px; }
+.tl { position: relative; min-width: 640px; padding-top: 30px; }
+.tl-scroll { overflow-x: auto; }
+.tl-bar { display: flex; height: 8px; gap: 3px; }
+.tl-bar div { height: 100%; border-radius: 4px; background: var(--plank); }
+.tl-bar div.cur { background: var(--torch); }
+.today { position: absolute; top: 0; bottom: 0; width: 0; }
+.today span { position: absolute; top: 0; left: 0; font-size: 13px; font-weight: 700; color: var(--torch); white-space: nowrap; }
+.today::after { content: ""; position: absolute; top: 22px; left: -1px; width: 2px; height: 22px; background: var(--parch); border-radius: 1px; }
+.leg { min-width: 0; display: grid; gap: 4px; align-content: start; }
+.leg .when { font-size: 13px; color: var(--parch-3); }
+.leg b { font-family: var(--display); font-weight: 400; font-size: 18px; line-height: 1.1; }
+.leg ul { margin: 2px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--parch-2); display: grid; gap: 3px; }
+.leg.cur .when { color: var(--torch); font-weight: 700; }
+.tbl-wrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 15px; }
+.tbl th { text-align: left; font-weight: 400; color: var(--parch-3); font-size: 13px; padding: 0 12px 10px 0; }
+.tbl td { padding: 11px 12px 11px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.tbl.raci td:not(:first-child), .tbl.raci th:not(:first-child) { text-align: center; }
+.tbl.raci td:not(:first-child) { font-weight: 700; }
+.lvl { display: inline-block; font-size: 13px; font-weight: 700; padding: 0 8px; border-radius: 5px; white-space: nowrap; }
+.lvl.hi { background: var(--ember); color: var(--mortar); }
+.lvl.md { background: var(--torch); color: var(--on-torch); }
+.lvl.lo { background: var(--moss); color: #1f2310; }
+.ap { color: var(--moss); } .col { color: var(--ember); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 32px; }
+.two h3 { font-size: 15px; color: var(--torch); margin: 10px 0 6px; }
+.two ul { margin: 0; padding-left: 18px; color: var(--parch-2); display: grid; gap: 4px; }
+.scroll-note { position: relative; background: var(--parch); color: var(--mortar); border-radius: 10px; padding: 16px 18px; font-size: 16px; line-height: 1.7; white-space: pre-wrap; }
+.scroll-note .btn { position: absolute; top: 10px; right: 10px; height: 32px; padding: 0 12px; font-size: 14px; background: var(--mortar); color: var(--parch); border-color: var(--mortar); }
+.sources { display: grid; gap: 4px; font-size: 14px; }
+.sources a { color: var(--parch-2); }
+
+/* Toast */
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 0); background: var(--parch); color: var(--mortar); font-size: 15px; font-weight: 700; padding: 10px 16px; border-radius: 12px; box-shadow: 0 18px 40px -12px rgba(0,0,0,.8); transition: transform 300ms var(--ease-out), opacity 300ms var(--ease-out); z-index: 40; max-width: calc(100vw - 32px); }
+.toast.hide { transform: translate(-50%, 160%); opacity: 0; transition-duration: 200ms; }
+
+/* Sign-in, personal page, live page */
+.hello { display: grid; gap: 8px; padding: 28px; }
+.hello h2 { font-family: var(--display); font-weight: 400; font-size: 28px; }
+.names { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
+.name-btn { height: 72px; border-radius: 14px; border: 1px solid var(--plank); background: var(--night); font-family: var(--display); font-size: 22px; letter-spacing: .01em; color: var(--parch); }
+@media (hover: hover) and (pointer: fine) { .name-btn:hover { border-color: var(--torch); background: var(--wood); } }
+.link-btn { border: 0; background: none; color: var(--parch-2); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 4px; }
+.meet-strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; }
+.meet-strip h2 { font-family: var(--display); font-weight: 400; font-size: 21px; }
+.pulse { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.kid { display: grid; gap: 10px; align-content: start; }
+.kid-top { display: flex; align-items: center; gap: 12px; }
+.kid-top svg, .kid-top .away { width: 44px; height: 44px; flex: none; }
+.kid-top .away { border-radius: 50%; border: 1.5px dashed var(--plank); }
+.kid-top b { font-family: var(--display); font-weight: 400; font-size: 20px; display: block; }
+.kid-top small { font-size: 13px; color: var(--parch-3); }
+.kid dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
+.kid dt { color: var(--parch-3); }
+.kid dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.kid dd.warn { color: var(--ember); font-weight: 700; }
+.kid .next { font-size: 13.5px; color: var(--parch-2); border-top: 1px solid var(--line); padding-top: 8px; }
+.cl-round { font-size: 18px; font-weight: 700; }
+.cl-phase { font-size: 14px; color: var(--parch-3); margin: 2px 0 12px; }
+.cl-seats { display: flex; flex-wrap: wrap; gap: 6px; }
+.cl-seats span { padding: 3px 10px; border-radius: 999px; font-size: 13px; border: 1px dashed var(--plank); color: var(--parch-3); }
+.cl-seats span.in { border-style: solid; border-color: var(--moss); color: var(--moss); }
+.links { list-style: none; margin: 0; padding: 0; }
+.links li { display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.links b { font-weight: 700; }
+.links code { font-size: 13px; color: var(--parch-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.links .btn { height: 34px; padding: 0 14px; font-size: 14px; }
+@media (max-width: 1000px) { .pulse { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .pulse { grid-template-columns: 1fr; } .links li { grid-template-columns: 1fr auto; } .links code { grid-column: 1 / -1; grid-row: 2; } }
+
+/* Council notes */
+.md { margin-top: 16px; max-height: 560px; overflow: auto; padding: 18px 20px; border-radius: 14px; background: var(--night); border: 1px solid var(--line); font-size: 15px; line-height: 1.6; }
+.md h1 { font-family: var(--display); font-weight: 400; font-size: 24px; margin: 0 0 10px; }
+.md h2 { font-size: 17px; margin: 18px 0 6px; color: var(--torch); }
+.md h3 { font-size: 15.5px; margin: 14px 0 4px; }
+.md p { margin: 4px 0; }
+.md ul { margin: 4px 0; padding-left: 20px; }
+.md li { margin: 2px 0; }
+.md blockquote { margin: 8px 0; padding: 10px 14px; border-radius: 10px; background: var(--wood-2); color: var(--parch); }
+.md strong { color: #fff3dc; }
+.md .done { color: var(--moss); }
+
+/* Already decided */
+.decided-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; border-top: 1px solid var(--line); }
+.decided-list li { display: grid; gap: 2px; padding: 14px 16px 12px 0; border-bottom: 1px solid var(--line); }
+.decided-list b { font-size: 13px; font-weight: 400; color: var(--parch-3); }
+.decided-list span { font-size: 16px; font-weight: 700; color: var(--parch); }
+.decided-list small { font-size: 13px; color: var(--moss); }
+
+/*@COUNCIL_CSS@*/
+/* Council inside the new shell */
+.council { border-color: var(--line); border-radius: 20px; }
+.council-hero { min-height: 190px; padding: 0; }
+.council-hero::before { background: linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--night) 70%, transparent)); }
+.council-hero > div { display: none; }
+.council-ribbon { display: none; }
+.council-entry h3, .council-question > h3 { font-family: var(--display); font-weight: 400; }
+
+/*@PARTY_CSS@*/
+
+/* Phone */
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .side { display: none; }
+  .topbar { display: flex; position: sticky; top: 0; z-index: 30; align-items: center; justify-content: space-between; gap: 10px; padding: calc(12px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)); background: color-mix(in srgb, var(--night) 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .topbar .brand { padding: 0; }
+  .topbar .days b { font-size: 26px; }
+  .topbar .days span { font-size: 12px; }
+  .tabbar { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); background: color-mix(in srgb, var(--wood) 94%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
+  .tabbar button { display: grid; justify-items: center; gap: 2px; padding: 6px 0; border: 0; background: none; color: var(--parch-3); font-size: 12px; }
+  .tabbar button[aria-current="page"] { color: var(--torch); font-weight: 700; }
+  .main { padding: 24px max(16px, env(safe-area-inset-right, 0px)) calc(96px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  .grid-2, .runner { grid-template-columns: 1fr; }
+  .runner-now { border-right: 0; border-bottom: 1px solid var(--line); }
+  .card { padding: 18px; }
+  .people { grid-template-columns: 1fr; }
+  .flow { grid-template-columns: 1fr; }
+  .stage { grid-template-columns: 54px 1fr; column-gap: 14px; padding: 0 0 18px; }
+  .stage .node { grid-row: span 3; height: auto; align-items: flex-start; }
+  .stage .node::before { left: 26px; right: auto; top: 54px; bottom: -18px; width: 2px; height: auto; }
+}
+@media (max-width: 400px) { .face-btn { font-size: 11px; } .face-btn svg { width: 38px; height: 38px; } }
+@media (prefers-reduced-motion: reduce) { .press, .toast, .seg-ctl .pill, .face-btn svg { transition-duration: 0ms; } }
+</style>
+
+<div class="app">
+  <aside class="side" aria-label="Board navigation">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="1" y="1" width="32" height="32" rx="9" fill="#7a2e06"/><path d="M9 29V13.5L17 7l8 6.5V29" fill="#2d1200"/><rect x="13" y="14" width="8" height="7" fill="#ffc21a"/><path d="M17 14v7M13 17.5h8" stroke="#2d1200" stroke-width="1.4"/></svg>
+      <div><b>Knight's Escape</b><small>Project 9 · Girls Who Code</small></div>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="side-foot">
+      <div class="days"><b class="js-days">–</b><span>days until<br>demo, Nov 12</span></div>
+      <div class="whoami"><span id="whoami-t">Not picked yet</span><button type="button" id="whoami-change">Change</button></div>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <div class="brand">
+      <svg width="30" height="30" viewBox="0 0 34 34" aria-hidden="true"><rect x="1" y="1" width="32" height="32" rx="9" fill="#7a2e06"/><path d="M9 29V13.5L17 7l8 6.5V29" fill="#2d1200"/><rect x="13" y="14" width="8" height="7" fill="#ffc21a"/><path d="M17 14v7M13 17.5h8" stroke="#2d1200" stroke-width="1.4"/></svg>
+      <div><b>Knight's Escape</b></div>
+    </div>
+    <div class="days"><b class="js-days">–</b><span>days to<br>demo</span></div>
+  </header>
+
+  <main class="main">
+    <!-- TODAY -->
+    <section class="screen" id="s-today" data-s="today">
+      <div class="screen-head">
+        <h1 id="today-title">Today</h1>
+        <p id="today-sub">Check in, then run the meeting from here.</p>
+      </div>
+
+      <div class="hello" id="hello" hidden>
+        <h2>Who are you?</h2>
+        <p class="sub">Tap your name. This device remembers you, and your own link opens straight to your page.</p>
+        <div class="names" id="hello-chips" role="group" aria-label="Your name"></div>
+      </div>
+
+      <div class="stack" id="today-body" style="gap:20px">
+        <div class="grid-2">
+        <form class="card" id="checkin">
+          <h2>Check in · 20 seconds</h2>
+          <p class="foot" style="margin:4px 0 20px">Four taps. We ask the same questions every meeting, so you can see how far you've come.</p>
+          <div class="q">
+            <span id="q-mood">How are you feeling?</span>
+            <div class="faces-pick" id="mood" role="radiogroup" aria-labelledby="q-mood"></div>
+          </div>
+          <div class="q">
+            <span id="q-git">How comfortable are you with GitHub?</span>
+            <div class="scale" id="git" role="radiogroup" aria-labelledby="q-git"></div>
+            <div class="scale-ends"><span>Never used it</span><span>Could teach it</span></div>
+          </div>
+          <div class="q">
+            <span id="q-vsc">How comfortable are you with VS Code?</span>
+            <div class="scale" id="vsc" role="radiogroup" aria-labelledby="q-vsc"></div>
+            <div class="scale-ends"><span>Never opened it</span><span>Could teach it</span></div>
+          </div>
+          <div class="q">
+            <span id="q-oop">How well do you get classes and objects?</span>
+            <div class="scale" id="oop" role="radiogroup" aria-labelledby="q-oop"></div>
+            <div class="scale-ends"><span>No idea yet</span><span>Could teach it</span></div>
+          </div>
+          <div class="checkin-go">
+            <button class="btn solid press" type="submit" id="checkin-go" disabled>Pick your name first</button>
+            <span class="foot" id="checkin-state"></span>
+          </div>
+        </form>
+
+          <div class="stack">
+            <div class="card">
+              <div class="head"><h2>My tasks</h2><button type="button" class="link-btn" data-go="tasks">All team tasks</button></div>
+              <ul class="rows" id="my-tasks" style="margin-top:10px"></ul>
+            </div>
+            <div class="card">
+              <h2>Who's here</h2>
+              <div class="here" id="here" style="margin-top:14px"></div>
+            </div>
+            <div class="card">
+              <h2>Your growth</h2>
+              <p class="foot" style="margin:4px 0 14px">Your first check-in vs. your latest, out of 5.</p>
+              <div class="growth" id="my-growth"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card meet-strip">
+          <div><h2>Meetings are Saturdays at 11:00</h2><p class="sub">40 minutes. Check in first, then play the Council on your phone while Katrina streams the big screen.</p></div>
+          <div class="controls">
+            <button class="btn solid press" type="button" onclick="window.P9_PARTY && window.P9_PARTY('play')">Play on this phone</button>
+            <button class="btn press" type="button" data-go="council">Council screen</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COUNCIL -->
+    <section class="screen" id="s-council" data-s="council" hidden>
+      <div class="screen-head">
+        <h1>Quest Council</h1>
+        <p>Six quick rounds on what's still open. Everyone answers on their own, then we reveal together. 12 minutes, then we build.</p>
+      </div>
+      <div class="card decided">
+        <h2>You already decided</h2>
+        <p class="foot" style="margin:4px 0 14px">From your Discord polls and Shirley's Group 9 design deck. Today's rounds only ask what's still open.</p>
+        <ul class="decided-list">
+          <li><b>Who it's for</b><span>College students</span><small>All 4 of you ranked it first</small></li>
+          <li><b>The problem</b><span>Personalized help and remembering</span><small>#1 for Shirley, Sanjana, Tvishaa · #1 for Leslie</small></li>
+          <li><b>The topic</b><span>Object-oriented programming</span><small>Poll winner, Oct 19</small></li>
+          <li><b>The game</b><span>Coding escape room</span><small>Poll winner, Oct 19</small></li>
+          <li><b>The story</b><span>A warlock's dungeon, 4 chambers</span><small>Shirley's Group 9 design deck</small></li>
+        </ul>
+      </div>
+      <!--@COUNCIL_HTML@-->
+    </section>
+
+    <!-- TASKS -->
+    <section class="screen" id="s-tasks" data-s="tasks" hidden>
+      <div class="screen-head">
+        <h1>Tasks</h1>
+        <p>Tap the circle to move a task along: to do, doing, done.</p>
+      </div>
+      <form class="card composer" id="composer" hidden>
+        <input id="t-title" class="grow" required maxlength="140" placeholder="Add a task, like: write 2 hints for the Maze" aria-label="Task">
+        <select id="t-owner" aria-label="Owner"></select>
+        <input id="t-due" type="date" required aria-label="Due date">
+        <button class="btn solid press" type="submit">Add</button>
+      </form>
+      <div class="chips" id="filters" role="group" aria-label="Show tasks for"></div>
+      <div class="people" id="people"></div>
+      <p class="note" id="note">Loading the team's tasks…</p>
+    </section>
+
+    <!-- GAME PLAN -->
+    <section class="screen" id="s-plan" data-s="plan" hidden>
+      <div class="screen-head">
+        <h1>Game plan</h1>
+        <p>Shirley's design for the game, the schedule to Nov 12, and who owns what.</p>
+      </div>
+      <div class="seg-ctl" role="tablist" aria-label="Game plan sections" id="plan-tabs">
+        <span class="pill" id="plan-pill"></span>
+        <button type="button" role="tab" data-p="dungeon" aria-selected="true">The dungeon</button>
+        <button type="button" role="tab" data-p="schedule" aria-selected="false">Schedule</button>
+        <button type="button" role="tab" data-p="charter" aria-selected="false">Charter</button>
+      </div>
+
+      <div class="panel stack" id="p-dungeon">
+        <div class="card">
+          <h2>A warlock traps you in his dungeon</h2>
+          <p class="sub" style="margin:6px 0 24px;max-width:62ch">He tricks you in every chamber. Answer through code to open the next door. Designed by Shirley in the Group 9 design roadmap.</p>
+          <ol class="flow" id="flow"></ol>
+        </div>
+        <p class="foot">The OOP topic under each chamber is a suggestion. The team decides.</p>
+      </div>
+
+      <div class="panel stack" id="p-schedule" hidden>
+        <div class="card">
+          <h2>The road to Nov 12</h2>
+          <div class="tl-scroll"><div class="tl"><div class="today" id="today"><span>You are here</span></div><div class="tl-bar" id="tl-bar"></div><div class="legs" id="legs"></div></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2>Wednesday check-in</h2>
+            <p class="foot" style="margin:4px 0 14px">Post in Discord #general by 8pm.</p>
+            <div class="scroll-note" id="tpl">Did: …
+Next: …
+Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Copy</button></div>
+          </div>
+          <div class="card">
+            <h2>Crews</h2>
+            <table class="tbl" style="margin-top:12px"><tbody>
+              <tr><td>Build</td><td class="sub">Leslie, Sanjana · game.js, Java puzzles</td></tr>
+              <tr><td>Design</td><td class="sub">Shirley, Tvishaa · style.css, art, story</td></tr>
+              <tr><td>Mentor</td><td class="sub">Katrina · plan, unblocking, check-ins</td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel stack" id="p-charter" hidden>
+        <div class="card">
+          <h2>Project charter</h2>
+          <p style="margin:10px 0 6px;font-size:18px;max-width:60ch">Ship a playable 4-chamber Java escape room and demo it live on Thursday, Nov 12.</p>
+          <div class="two">
+            <div><h3>Done means</h3><ul><li>A new player escapes all 4 chambers in under 15 minutes</li><li>Every puzzle has two hints and an explanation</li><li>4 playtesters outside the team tried it before Nov 9</li><li>Every student can explain the part they built</li></ul></div>
+            <div><h3>In scope</h3><ul><li>Knight select, 4 chambers, escape screen</li><li>Computer browsers only</li></ul><h3>Out of scope</h3><ul><li>Phones and tablets</li><li>Accounts, saved progress, leaderboards</li></ul></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Who does what</h2>
+          <p class="foot" style="margin:4px 0 12px">R does it · A approves and owns it · C gives input · I is kept in the loop. One A per row; change it together.</p>
+          <div class="tbl-wrap"><table class="tbl raci">
+            <thead><tr><th>Work</th><th>Leslie</th><th>Sanjana</th><th>Shirley</th><th>Tvishaa</th><th>Katrina</th></tr></thead>
+            <tbody>
+              <tr><td>Game logic</td><td>A</td><td>R</td><td>I</td><td>I</td><td>C</td></tr>
+              <tr><td>Java puzzles</td><td>C</td><td>A</td><td>I</td><td>C</td><td>C</td></tr>
+              <tr><td>Look and feel</td><td>I</td><td>I</td><td>A</td><td>R</td><td>C</td></tr>
+              <tr><td>Story and art</td><td>I</td><td>C</td><td>R</td><td>A</td><td>C</td></tr>
+              <tr><td>Playtests</td><td>R</td><td>R</td><td>R</td><td>R</td><td>A</td></tr>
+              <tr><td>Schedule, check-ins</td><td>I</td><td>I</td><td>I</td><td>I</td><td>A</td></tr>
+              <tr><td>Demo day</td><td>R</td><td>R</td><td>R</td><td>R</td><td>A</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <h2>Risk register</h2>
+          <p class="foot" style="margin:4px 0 12px">Reviewed every Saturday.</p>
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>Risk</th><th>Likely</th><th>Impact</th><th>Plan</th><th>Owner</th></tr></thead>
+            <tbody>
+              <tr><td>Low attendance</td><td><span class="lvl hi">High</span></td><td><span class="lvl hi">High</span></td><td class="sub">Tasks live on the board; Wednesday check-in; DM absent people</td><td>Katrina</td></tr>
+              <tr><td>Scope creep</td><td><span class="lvl hi">High</span></td><td><span class="lvl md">Med</span></td><td class="sub">New ideas go on a later list; feature freeze Nov 9</td><td>Katrina</td></tr>
+              <tr><td>Starter won't run</td><td><span class="lvl md">Med</span></td><td><span class="lvl md">Med</span></td><td class="sub">Pair with whoever has it running</td><td>Leslie</td></tr>
+              <tr><td>Puzzles too hard</td><td><span class="lvl md">Med</span></td><td><span class="lvl hi">High</span></td><td class="sub">Week-2 playtests; two hints per puzzle</td><td>Sanjana</td></tr>
+              <tr><td>Demo breaks</td><td><span class="lvl lo">Low</span></td><td><span class="lvl hi">High</span></td><td class="sub">Backup video recorded by Nov 11</td><td>Katrina</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <h2>What each chamber teaches</h2>
+          <p class="foot" style="margin:4px 0 12px">Matched to the College Board's AP Computer Science A (revised 2025–26) and Oracle's Java Tutorials.</p>
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>Chamber</th><th>Concept</th><th>Source</th></tr></thead>
+            <tbody>
+              <tr><td>The Maze</td><td>Classes and objects</td><td class="ap">AP CSA Unit 1 and Unit 3</td></tr>
+              <tr><td>Alchemy Lab</td><td>Methods and return values</td><td class="ap">AP CSA Unit 1: Using Objects and Methods</td></tr>
+              <tr><td>Hall of Illusions</td><td>Inheritance, polymorphism</td><td class="col">College intro OOP. No longer in AP CSA since 2025–26</td></tr>
+              <tr><td>Final Door</td><td>Explain it in your own words</td><td class="sub">Checks understanding, not memory</td></tr>
+            </tbody>
+          </table></div>
+          <div class="sources" style="margin-top:14px">
+            <a href="https://apcentral.collegeboard.org/courses/ap-computer-science-a/future-revisions" target="_blank" rel="noopener">College Board: AP Computer Science A revisions</a>
+            <a href="https://docs.oracle.com/javase/tutorial/java/javaOO/index.html" target="_blank" rel="noopener">Oracle Java Tutorials: Classes and Objects</a>
+            <a href="https://docs.oracle.com/javase/tutorial/java/IandI/index.html" target="_blank" rel="noopener">Oracle Java Tutorials: Interfaces and Inheritance</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- LIVE (owner only) -->
+    <section class="screen" id="s-mentor" data-s="mentor" hidden>
+      <div class="screen-head">
+        <h1>Live</h1>
+        <p>Only you see this page. It updates on its own as the team checks in, ticks tasks and answers the Council.</p>
+      </div>
+      <div class="pulse" id="pulse"></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="head"><h2>Council right now</h2><button class="btn solid press" type="button" onclick="window.P9_PARTY && window.P9_PARTY('host')">Open host screen</button></div>
+          <div id="council-live" style="margin-top:12px"></div>
+          <p class="foot" style="margin-top:14px">Stream the host screen. Players open their link, tap Play on this phone, and enter the room code.</p>
+        </div>
+        <div class="card">
+          <h2>Team growth</h2>
+          <p class="foot" style="margin:4px 0 14px">Average self-rating, first check-in vs. latest, out of 5.</p>
+          <div class="growth" id="growth"></div>
+        </div>
+      </div>
+      <div class="card runner">
+        <div class="runner-now">
+          <div class="runner-top"><span class="live" id="live"><i></i><span id="live-t">Not started</span></span><span id="block-of">4 blocks · 40 min</span></div>
+          <div class="clock" id="clock" aria-live="off"></div>
+          <div><p class="now-title" id="now-title">Check-in</p><p class="now-who" id="now-who">Everyone</p></div>
+          <div class="track" id="track"></div>
+          <div class="controls">
+            <button class="btn solid press" id="start" type="button">Start meeting</button>
+            <button class="btn press" id="next" type="button" disabled>Next block</button>
+            <button class="btn press" id="reset" type="button">Reset</button>
+          </div>
+        </div>
+        <ol class="agenda" id="agenda"></ol>
+      </div>
+      <div class="card notes">
+        <div class="head">
+          <div><h2>Council notes</h2><p class="foot" style="margin-top:4px">Writes itself as answers come in. Short, skimmable, saved as a Markdown file.</p></div>
+          <div class="controls"><button class="btn press" type="button" id="notes-copy">Copy</button><button class="btn solid press" type="button" id="notes-save">Download .md</button></div>
+        </div>
+        <div class="md" id="notes-view"></div>
+      </div>
+      <div class="card">
+        <h2>Send each girl her link</h2>
+        <p class="foot" style="margin:4px 0 12px">Each link opens her own page with her name already picked. Share the board with them first.</p>
+        <ul class="links" id="links"></ul>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar" id="tabbar" aria-label="Board navigation"></nav>
+</div>
+
+<!--@PARTY_HTML@-->
+
+<div class="toast hide" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// The viewer blocks plain download links; files go through the `downloads` capability, which asks the viewer to confirm.
+window.p9SaveText = async (filename, text) => {
+  const dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null;
+  if (!dl) return false;
+  try { await dl.save({ filename, data: new Blob([text], { type: "text/plain;charset=utf-8" }) }); return true; }
+  catch (e) { return false; }
+};
+</script>
+<script>
+(() => {
+  const PEOPLE = ["Leslie", "Sanjana", "Shirley", "Tvishaa", "Katrina"];
+  const $ = (id) => document.getElementById(id);
+  const day0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const iso = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const store = {
+    get(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch { return f; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // GSAP for the few entrances worth animating; without it (or with reduced motion) things just appear
+  const anim = (targets, vars) => { if (window.gsap && !calm && targets && (targets.length === undefined || targets.length)) window.gsap.from(targets, vars); };
+
+  let toastT;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.remove("hide"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.add("hide"), 2200); }
+
+  document.querySelectorAll(".js-days").forEach((el) => { el.textContent = Math.max(0, Math.round((new Date(2026, 10, 12) - day0()) / 864e5)); });
+
+  // ---------- Navigation ----------
+  const ICONS = {
+    today: '<path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/><circle cx="12" cy="12" r="4"/>',
+    council: '<circle cx="12" cy="12" r="5"/><circle cx="12" cy="3.5" r="1.6"/><circle cx="20.5" cy="12" r="1.6"/><circle cx="12" cy="20.5" r="1.6"/><circle cx="3.5" cy="12" r="1.6"/>',
+    tasks: '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.2l2.4 2.4 4.6-4.9"/>',
+    plan: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9.5 20v-5a2.5 2.5 0 0 1 5 0v5"/>',
+    mentor: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+  };
+  const SCREENS = [["today", "My quest"], ["council", "Council"], ["tasks", "Team tasks"], ["plan", "Game plan"], ["mentor", "Live"]];
+  // On GitHub Pages, site/shim.js sets P9_BASE so the girls' links point at the public site
+  const BOARD = window.P9_BASE || "https://claude.ai/artifact/UrpAbfWJajpaH2bgAimNvh";
+  let owner = false;
+  const icon = (k, s = 20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+  SCREENS.forEach(([k, label]) => {
+    const a = document.createElement("button"); a.type = "button"; a.className = "press"; a.dataset.go = k;
+    a.innerHTML = icon(k) + `<span>${label}</span>`; $("nav").appendChild(a);
+    const b = document.createElement("button"); b.type = "button"; b.dataset.go = k;
+    b.innerHTML = icon(k, 22) + `<span>${{ "Game plan": "Plan", "My quest": "Me", "Team tasks": "Tasks" }[label] || label}</span>`; $("tabbar").appendChild(b);
+    if (k === "mentor") { a.hidden = true; b.hidden = true; }
+  });
+  function showOwnerNav() {
+    document.querySelectorAll('[data-go="mentor"]').forEach((el) => { if (el.closest(".nav,.tabbar")) el.hidden = !owner; });
+    $("tabbar").style.gridTemplateColumns = `repeat(${owner ? 5 : 4}, 1fr)`;
+  }
+  let screen = "";
+  function go(k, animate) {
+    if (!SCREENS.some(([s]) => s === k)) k = "today";
+    if (k === "mentor" && !owner) k = "today";
+    if (k === screen) return;
+    screen = k;
+    document.querySelectorAll(".screen").forEach((s) => { s.hidden = s.dataset.s !== k; });
+    document.querySelectorAll(".nav [data-go], .tabbar [data-go]").forEach((b) => b.setAttribute("aria-current", b.dataset.go === k ? "page" : "false"));
+    // #host and #play belong to party mode (party.js reads them after this script), so leave them alone
+    if (!/^#(host|play)$/i.test(location.hash)) { try { history.replaceState(null, "", "#" + k); } catch {} }
+    if (animate) { window.scrollTo(0, 0); anim($("s-" + k).children, { y: 10, opacity: 0, duration: .32, stagger: .04, ease: "power3.out", clearProps: "transform,opacity" }); }
+    if (k === "plan") requestAnimationFrame(placePill);
+  }
+  document.addEventListener("click", (e) => { const t = e.target.closest("[data-go]"); if (t) { e.preventDefault(); go(t.dataset.go, true); } });
+
+  // ---------- Who am I ----------
+  // A personal link (#leslie, #sanjana, #shirley, #tvishaa, #katrina) signs that person in on this device.
+  let me = store.get("p9-me", "");
+  const linked = PEOPLE.find((p) => p.toLowerCase() === (location.hash || "").slice(1).toLowerCase());
+  if (linked) { me = linked; store.set("p9-me", me); store.set("p9-council-person", me); }
+  if (!PEOPLE.includes(me)) me = "";
+  const startScreen = linked ? (linked === "Katrina" ? "mentor" : "today") : (location.hash || "").slice(1);
+  function renderMe() {
+    $("hello").hidden = !!me;
+    $("today-body").hidden = !me;
+    $("today-title").textContent = me ? `Hi, ${me}` : "Welcome, knight";
+    $("whoami-t").innerHTML = me ? `You're <b></b>` : "Not picked yet";
+    if (me) $("whoami-t").querySelector("b").textContent = me;
+    const c = $("hello-chips"); c.innerHTML = "";
+    PEOPLE.forEach((p) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "name-btn press"; b.textContent = p;
+      b.onclick = () => {
+        me = p; store.set("p9-me", p); store.set("p9-council-person", p);
+        renderMe(); loadMine(); renderTasks(); renderHere(); toast(`Hi ${p}!`);
+        anim($("today-body").children, { y: 10, opacity: 0, duration: .32, stagger: .05, ease: "power3.out", clearProps: "transform,opacity" });
+      };
+      c.appendChild(b);
+    });
+    syncCheckinBtn();
+  }
+  $("whoami-change").onclick = () => { me = ""; store.set("p9-me", ""); renderMe(); go("today", true); };
+
+  // ---------- Check-in ----------
+  const MOODS = ["Wiped out", "Meh", "Okay", "Good", "Fired up"];
+  const HEAD = "M32 6C47 5 58 17 58 32C59 47 47 58 32 58C17 59 6 47 6 32C5 17 17 7 32 6Z";
+  function face(n) {
+    const eyes = n === 1 ? '<path d="M19 27h8M37 27h8" stroke="#2d1200" stroke-width="3" stroke-linecap="round"/>'
+      : n === 5 ? '<circle cx="23" cy="27" r="5" fill="#2d1200"/><circle cx="41" cy="27" r="5" fill="#2d1200"/><circle cx="24.6" cy="25.4" r="1.6" fill="#f6e8cf"/><circle cx="42.6" cy="25.4" r="1.6" fill="#f6e8cf"/>'
+      : '<circle cx="23" cy="27" r="3.2" fill="#2d1200"/><circle cx="41" cy="27" r="3.2" fill="#2d1200"/>';
+    const mouth = [
+      '<path d="M22 44c3-2 6 1 10-1s7 0 10 1" fill="none" stroke="#2d1200" stroke-width="3" stroke-linecap="round"/>',
+      '<path d="M23 45c5-4 13-4 18 0" fill="none" stroke="#2d1200" stroke-width="3" stroke-linecap="round"/>',
+      '<path d="M23 42.5h18" stroke="#2d1200" stroke-width="3" stroke-linecap="round"/>',
+      '<path d="M22 39c5 6 15 6 20 0" fill="none" stroke="#2d1200" stroke-width="3" stroke-linecap="round"/>',
+      '<path d="M20 37h24c-1 9-6 13-12 13s-11-4-12-13z" fill="#2d1200"/><path d="M26 45c4 2 8 2 12 0" stroke="#f08a4b" stroke-width="3" stroke-linecap="round"/>',
+    ][n - 1];
+    const fill = ["#d9c7a8", "#ead6b4", "#f6e8cf", "#fbe3b0", "#ffd977"][n - 1];
+    return `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="${HEAD}" fill="${fill}" stroke="#2d1200" stroke-width="3"/><circle cx="16" cy="37" r="4.5" fill="#f08a4b" opacity=".45"/><circle cx="48" cy="37" r="4.5" fill="#f08a4b" opacity=".45"/>${eyes}${mouth}</svg>`;
+  }
+  window.P9_FACE = face;
+  const pick = { mood: 0, github: 0, vscode: 0, oop: 0 };
+  function radioGroup(el, render, key) {
+    el.innerHTML = "";
+    for (let i = 1; i <= 5; i++) {
+      const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "radio"); b.className = (key === "mood" ? "face-btn " : "") + "press";
+      b.innerHTML = render(i); b.setAttribute("aria-checked", String(pick[key] === i));
+      b.setAttribute("aria-label", key === "mood" ? MOODS[i - 1] : `${i} out of 5`);
+      b.onclick = () => {
+        pick[key] = i;
+        [...el.children].forEach((c, j) => c.setAttribute("aria-checked", String(j + 1 === i)));
+        if (key === "mood" && window.gsap && !calm) window.gsap.fromTo(b.querySelector("svg"), { rotate: -10 }, { rotate: 0, duration: .45, ease: "back.out(3)" });
+        syncCheckinBtn();
+      };
+      el.appendChild(b);
+    }
+  }
+  const drawPicks = () => {
+    radioGroup($("mood"), (i) => face(i) + `<span>${MOODS[i - 1]}</span>`, "mood");
+    radioGroup($("git"), (i) => String(i), "github");
+    radioGroup($("vsc"), (i) => String(i), "vscode");
+    radioGroup($("oop"), (i) => String(i), "oop");
+  };
+  drawPicks();
+
+  let checkins = [], cref = null;
+  const todayKey = iso(day0());
+  function syncCheckinBtn() {
+    const btn = $("checkin-go");
+    const mine = checkins.find((c) => c.name === me && c.date === todayKey);
+    const ready = me && pick.mood && pick.github && pick.vscode && pick.oop;
+    btn.disabled = !me || !cref || !ready;
+    btn.textContent = !me ? "Pick your name first" : !ready ? "Answer all four" : mine ? "Update my check-in" : "Check in";
+    $("checkin-state").textContent = !cref ? "Saving works on claude.ai." : mine ? "Checked in today." : "";
+  }
+  function loadMine() {
+    const mine = checkins.find((c) => c.name === me && c.date === todayKey);
+    if (mine) { pick.mood = mine.mood; pick.github = mine.github; pick.vscode = mine.vscode || 0; pick.oop = mine.oop; drawPicks(); }
+    syncCheckinBtn();
+  }
+  $("checkin").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    if (!me || !cref || !pick.mood) return;
+    cref.doc(`${todayKey}_${me}`).set({ name: me, date: todayKey, mood: pick.mood, github: pick.github, vscode: pick.vscode, oop: pick.oop })
+      .then(() => toast(`Thanks, ${me}! You're checked in.`)).catch(fail);
+  });
+
+  const SKILLS = [["GitHub", "github"], ["VS Code", "vscode"], ["OOP fundamentals", "oop"]];
+  const seen = new Set();
+  function renderHere() {
+    const f = $("here"); f.innerHTML = ""; const fresh = [];
+    PEOPLE.forEach((p) => {
+      const c = checkins.find((x) => x.name === p && x.date === todayKey);
+      const fig = document.createElement("figure");
+      fig.innerHTML = (c ? face(c.mood) : '<span class="away" aria-label="Not checked in"></span>') + "<figcaption></figcaption>";
+      fig.querySelector("figcaption").textContent = p;
+      f.appendChild(fig);
+      if (c && !seen.has(p)) { seen.add(p); fresh.push(fig.firstChild); }
+    });
+    anim(fresh, { scale: .8, opacity: 0, duration: .45, ease: "back.out(2)", stagger: .06, transformOrigin: "50% 50%" });
+    const g = $("growth"); g.innerHTML = "";
+    SKILLS.forEach(([label, field]) => g.appendChild(growthRow(label, field)));
+    const mg = $("my-growth"); mg.innerHTML = "";
+    SKILLS.forEach(([label, field]) => mg.appendChild(growthRow(label, field, me)));
+    renderPulse();
+  }
+  function growthRow(label, field, only) {
+    const by = {};
+    checkins.filter((c) => !only || c.name === only).sort((a, b) => a.date.localeCompare(b.date)).forEach((c) => { if (typeof c[field] === "number") (by[c.name] = by[c.name] || []).push(c[field]); });
+    const people = Object.values(by);
+    const el = document.createElement("div"); el.className = "g-row";
+    el.innerHTML = `<div class="lbl"><span></span><b></b></div>`;
+    el.querySelector("span").textContent = label;
+    if (!people.length) { const p = document.createElement("p"); p.className = "foot"; p.textContent = "No ratings yet"; el.appendChild(p); return el; }
+    const first = people.reduce((a, v) => a + v[0], 0) / people.length;
+    const now = people.reduce((a, v) => a + v[v.length - 1], 0) / people.length;
+    const pct = Math.round((now - first) / first * 100);
+    el.querySelector("b").textContent = (pct > 0 ? "+" : "") + pct + "%";
+    const x = (v) => ((v - 1) / 4 * 100).toFixed(2) + "%";
+    el.insertAdjacentHTML("beforeend", `<svg role="img" aria-label="${label}: from ${first.toFixed(1)} to ${now.toFixed(1)} out of 5">
+      <line x1="0" x2="100%" y1="12" y2="12" stroke="#3a2e24" stroke-width="2" stroke-linecap="round"/>
+      <line x1="${x(first)}" x2="${x(now)}" y1="12" y2="12" stroke="#ffc21a" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+      <circle cx="${x(first)}" cy="12" r="5.5" fill="#93816c" stroke="#1d1712" stroke-width="2"><title>First check-in: ${first.toFixed(1)}</title></circle>
+      <circle cx="${x(now)}" cy="12" r="7" fill="#ffc21a" stroke="#1d1712" stroke-width="2"><title>Latest: ${now.toFixed(1)}</title></circle>
+      <text x="0" y="33" font-size="12" fill="#93816c">first ${first.toFixed(1)}</text>
+      <text x="100%" y="33" font-size="12" fill="#c2b09a" text-anchor="end">now ${now.toFixed(1)}</text></svg>`);
+    return el;
+  }
+
+  // ---------- Meeting runner (matches MEETING-1.md) ----------
+  const BLOCKS = [
+    { title: "Check-in", who: "Everyone checks in on this screen", min: 5 },
+    { title: "Quest Council", who: "Six rounds, Katrina hosts", min: 12 },
+    { title: "Build sprint", who: "Two crews in breakout rooms", min: 18 },
+    { title: "Show and claim", who: "One task each, with a date", min: 5 },
+  ];
+  const saved = store.get("p9-durations-v2", null);
+  if (Array.isArray(saved) && saved.length === BLOCKS.length) saved.forEach((m, i) => { BLOCKS[i].min = m; });
+  let active = -1, endsAt = 0, startedAt = 0, tick = null, lastClock = "";
+  const at = (mins) => { const d = new Date(2026, 9, 24, 11, mins); return d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0"); };
+  const mmss = (ms) => { const s = Math.ceil(Math.abs(ms) / 1000); return (ms < 0 ? "+" : "") + Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+  const total = () => BLOCKS.reduce((a, b) => a + b.min, 0);
+  // Beanzo digits are proportional, so each character sits in a fixed slot to stop the clock jittering
+  function setClock(text, word) {
+    if (text === lastClock) return; lastClock = text;
+    const c = $("clock"); c.classList.toggle("word", !!word); c.innerHTML = "";
+    if (word) { const s = document.createElement("span"); s.textContent = text; c.appendChild(s); return; }
+    [...text].forEach((ch) => { const s = document.createElement("span"); s.textContent = ch; if (ch === ":") s.className = "c"; c.appendChild(s); });
+  }
+  function renderAgenda() {
+    const ol = $("agenda"); ol.innerHTML = ""; let m = 0;
+    BLOCKS.forEach((b, i) => {
+      const li = document.createElement("li");
+      li.className = "item" + (i === active ? " active" : i < active ? " past" : "");
+      li.innerHTML = `<span class="t">${at(m)}</span><span class="n"></span><span class="step"><button type="button" class="press" aria-label="One minute less">−</button><span>${b.min}m</span><button type="button" class="press" aria-label="One minute more">+</button></span>`;
+      const n = li.querySelector(".n"); n.textContent = b.title;
+      const s = document.createElement("small"); s.textContent = b.who; n.appendChild(s);
+      const [minus, plus] = li.querySelectorAll(".step button");
+      minus.onclick = () => adjust(i, -1); plus.onclick = () => adjust(i, 1);
+      ol.appendChild(li); m += b.min;
+    });
+    const end = document.createElement("li"); end.className = "item"; end.innerHTML = `<span class="t">${at(m)}</span><span class="n faint">End, on time</span><span></span>`; ol.appendChild(end);
+    const tr = $("track"); tr.innerHTML = "";
+    BLOCKS.forEach((b, i) => { const s = document.createElement("div"); s.className = "seg" + (i < active ? " done" : ""); s.style.flex = b.min; s.innerHTML = "<b></b>"; tr.appendChild(s); });
+    if (active < BLOCKS.length) { const blk = BLOCKS[Math.max(0, active)]; $("now-title").textContent = blk.title; $("now-who").textContent = blk.who; }
+    if (active < 0) $("block-of").textContent = `${BLOCKS.length} blocks · ${total()} min`;
+  }
+  function adjust(i, d) {
+    const n = Math.min(45, Math.max(1, BLOCKS[i].min + d)); if (n === BLOCKS[i].min) return;
+    BLOCKS[i].min = n; store.set("p9-durations-v2", BLOCKS.map((b) => b.min));
+    if (i === active) endsAt += d * 60000;
+    renderAgenda(); paint();
+  }
+  function goTo(i) {
+    active = i;
+    if (i >= BLOCKS.length) {
+      clearInterval(tick); tick = null;
+      $("live").classList.remove("on"); $("live-t").textContent = "Finished"; setClock("Done", true); $("clock").classList.remove("over");
+      $("now-title").textContent = "That's the meeting"; $("now-who").textContent = "Wednesday: post your check-in in Discord.";
+      $("next").disabled = true; $("next").classList.remove("solid"); $("start").hidden = false; $("start").textContent = "Start again"; $("block-of").textContent = "";
+      renderAgenda(); document.querySelectorAll(".seg").forEach((s) => s.classList.add("done")); toast("Meeting done. Go build!"); return;
+    }
+    endsAt = Date.now() + BLOCKS[i].min * 60000; startedAt = Date.now();
+    $("live").classList.add("on"); $("live-t").textContent = "Live"; $("block-of").textContent = `Block ${i + 1} of ${BLOCKS.length}`;
+    $("next").disabled = false; $("next").classList.add("solid"); $("start").hidden = true;
+    $("next").textContent = i === BLOCKS.length - 1 ? "End meeting" : "Next block";
+    renderAgenda(); paint(); if (!tick) tick = setInterval(paint, 250);
+    if (BLOCKS[i].title === "Quest Council") toast("Council time. Open the Council screen.");
+  }
+  function paint() {
+    if (active < 0) { setClock(BLOCKS[0].min + ":00"); return; }
+    if (active >= BLOCKS.length) return;
+    const left = endsAt - Date.now(); setClock(mmss(left)); $("clock").classList.toggle("over", left < 0);
+    const seg = $("track").children[active];
+    if (seg) seg.firstChild.style.transform = `scaleX(${Math.min(1, Math.max(0, 1 - left / (endsAt - startedAt))).toFixed(4)})`;
+  }
+  $("start").onclick = () => goTo(0);
+  $("next").onclick = () => goTo(active + 1);
+  $("reset").onclick = () => {
+    clearInterval(tick); tick = null; active = -1;
+    $("live").classList.remove("on"); $("live-t").textContent = "Not started";
+    $("start").hidden = false; $("start").textContent = "Start meeting"; $("next").disabled = true; $("next").classList.remove("solid"); $("next").textContent = "Next block";
+    $("clock").classList.remove("over"); renderAgenda(); paint();
+  };
+  renderAgenda(); paint();
+  const dateLine = new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+  $("today-sub").textContent = dateLine + (new Date().getDay() === 6 ? " · Meeting at 11:00. Check in first." : " · Next meeting Saturday at 11:00.");
+
+  // ---------- Game plan ----------
+  const STAGES = [
+    { name: "Choose your knight", text: "Pick a knight, a topic and a difficulty", oop: "Your knight is an object", ic: '<path d="M7 20l3-6M17 20l-3-6"/><circle cx="12" cy="8" r="4"/>' },
+    { name: "The dungeon", text: "Dropped in the dark. The warlock appears", oop: "The story begins", ic: '<path d="M5 21V10l7-6 7 6v11"/><path d="M10 21v-4a2 2 0 0 1 4 0v4"/>' },
+    { name: "The Maze", text: "Pick the right direction, 5 turns, multiple choice", oop: "Classes and objects", chamber: 1, ic: '<path d="M4 4h16v16H4zM4 9h9M11 14h9M8 9v6M16 4v5"/>' },
+    { name: "Alchemy Lab", text: "Guess what the code prints to build the spell, 4 words", oop: "Methods and return values", chamber: 1, ic: '<path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7.5 15h9"/>' },
+    { name: "Hall of Illusions", text: "Three look-alike code doors, only one is real", oop: "Inheritance, polymorphism", chamber: 1, ic: '<path d="M3 21V9a3 3 0 0 1 6 0v12M9 21V9a3 3 0 0 1 6 0v12M15 21V9a3 3 0 0 1 6 0v12"/>' },
+    { name: "The Final Door", text: "Answer the warlock to win 3 keys, open-ended", oop: "Explain it in your own words", chamber: 1, ic: '<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/>' },
+  ];
+  STAGES.forEach((s) => {
+    const li = document.createElement("li"); li.className = "stage" + (s.chamber ? " chamber" : "");
+    li.innerHTML = `<div class="node"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.ic}</svg></span></div><h3></h3><p></p><span class="oop"></span>`;
+    li.querySelector("h3").textContent = s.name; li.querySelector("p").textContent = s.text; li.querySelector(".oop").textContent = s.oop;
+    $("flow").appendChild(li);
+  });
+  const LEGS = [
+    { s: [2026, 9, 24], e: [2026, 9, 30], when: "Oct 24 – 30", title: "Maze playable", items: ["Starter runs on every laptop", "Maze questions written", "Knight select sketched"] },
+    { s: [2026, 9, 31], e: [2026, 10, 6], when: "Oct 31 – Nov 6", title: "All 4 chambers playable", items: ["Alchemy Lab, Hall, Final Door in", "Styled screens", "One playtest each"] },
+    { s: [2026, 10, 7], e: [2026, 10, 11], when: "Nov 7 – 11", title: "Polish and practice", items: ["Fix playtest problems", "Feature freeze Nov 9", "Backup video, run-through"] },
+    { s: [2026, 10, 12], e: [2026, 10, 12], when: "Thu Nov 12", title: "Demo day", items: ["Escape, live"] },
+  ];
+  const D = (a) => new Date(a[0], a[1], a[2]);
+  const len = (l) => (D(l.e) - D(l.s)) / 864e5 + 1;
+  const units = LEGS.map((l) => Math.max(3, len(l))), sum = units.reduce((a, b) => a + b, 0), now = new Date();
+  $("legs").style.gridTemplateColumns = units.map((u) => u + "fr").join(" ");
+  let pos = 0;
+  LEGS.forEach((l, i) => {
+    const s0 = D(l.s), cur = now >= s0 && now < new Date(D(l.e).getTime() + 864e5);
+    const seg = document.createElement("div"); seg.style.flex = units[i]; if (cur) seg.className = "cur"; $("tl-bar").appendChild(seg);
+    const el = document.createElement("div"); el.className = "leg" + (cur ? " cur" : "");
+    el.innerHTML = `<span class="when"></span><b></b><ul></ul>`;
+    el.querySelector(".when").textContent = l.when; el.querySelector("b").textContent = l.title;
+    l.items.forEach((t) => { const li = document.createElement("li"); li.textContent = t; el.querySelector("ul").appendChild(li); });
+    $("legs").appendChild(el);
+    if (now >= s0) pos = units.slice(0, i).reduce((a, b) => a + b, 0) + Math.min(1, (now - s0) / (len(l) * 864e5)) * units[i];
+  });
+  if (now > new Date(2026, 10, 13)) $("today").hidden = true; else $("today").style.left = (pos / sum * 100).toFixed(2) + "%";
+
+  const planTabs = [...$("plan-tabs").querySelectorAll("button")];
+  function placePill() {
+    const on = planTabs.find((b) => b.getAttribute("aria-selected") === "true"); if (!on || !on.offsetWidth) return;
+    $("plan-pill").style.width = on.offsetWidth + "px"; $("plan-pill").style.transform = `translateX(${on.offsetLeft}px)`;
+  }
+  function showPlan(p, animate) {
+    planTabs.forEach((x) => x.setAttribute("aria-selected", String(x.dataset.p === p)));
+    ["dungeon", "schedule", "charter"].forEach((k) => { $("p-" + k).hidden = k !== p; });
+    placePill(); store.set("p9-plan", p);
+    if (animate) anim($("p-" + p).children, { y: 8, opacity: 0, duration: .28, stagger: .04, ease: "power3.out", clearProps: "transform,opacity" });
+  }
+  planTabs.forEach((b) => b.addEventListener("click", () => showPlan(b.dataset.p, true)));
+  showPlan(["dungeon", "schedule", "charter"].includes(store.get("p9-plan", "dungeon")) ? store.get("p9-plan", "dungeon") : "dungeon", false);
+  addEventListener("resize", placePill); if (document.fonts) document.fonts.ready.then(placePill);
+
+  $("copy").onclick = () => {
+    const text = "Did: …\nNext: …\nStuck on: … (or \"nothing\")";
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents($("tpl").firstChild); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Selected. Press Ctrl+C."); };
+    try { navigator.clipboard.writeText(text).then(() => toast("Copied. Paste it in Discord."), fallback); } catch { fallback(); }
+  };
+
+  // ---------- Tasks ----------
+  const NEXT = { todo: "doing", doing: "done", done: "todo" }, SAY = { todo: "To do", doing: "Doing", done: "Done" };
+  const TICK = {
+    todo: '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+    doing: '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 5a5 5 0 0 1 0 10z" fill="currentColor"/></svg>',
+    done: '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor"/><path d="M6 10.3l2.6 2.6 5.4-5.6" fill="none" stroke="#1f2310" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+  const X = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  let tasks = [], ref = null, readOnly = false, filter = store.get("p9-filter", "all");
+  $("t-owner").innerHTML = PEOPLE.map((p) => `<option>${p}</option>`).join("");
+  const soon = day0(); soon.setDate(soon.getDate() + 3); $("t-due").value = iso(soon);
+  const short = (s) => { const d = new Date(s + "T00:00"); return isNaN(d) ? "" : d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); };
+  const isLate = (t) => t.status !== "done" && t.due && new Date(t.due + "T23:59:59") < new Date();
+  function renderTasks() {
+    const f = $("filters"); f.innerHTML = "";
+    [["all", "Everyone"], ...PEOPLE.map((p) => [p, p])].forEach(([k, label]) => {
+      const open = tasks.filter((t) => t.status !== "done" && (k === "all" || t.owner === k)).length;
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip press"; b.setAttribute("aria-pressed", String(filter === k));
+      b.textContent = `${label} · ${open}`; b.onclick = () => { filter = k; store.set("p9-filter", k); renderTasks(); }; f.appendChild(b);
+    });
+    const wrap = $("people"); wrap.innerHTML = "";
+    PEOPLE.filter((p) => filter === "all" || p === filter).forEach((p) => {
+      const mine = tasks.filter((t) => t.owner === p).sort((a, b) => (a.status === "done") - (b.status === "done") || String(a.due).localeCompare(String(b.due)));
+      const done = mine.filter((t) => t.status === "done").length;
+      const box = document.createElement("div"); box.className = "card person";
+      box.innerHTML = `<div class="person-h"><b></b><span>${mine.length ? done + " of " + mine.length + " done" : ""}</span></div><div class="bar-mini"><i style="transform:scaleX(${mine.length ? done / mine.length : 0})"></i></div><ul class="rows"></ul>`;
+      box.querySelector("b").textContent = p;
+      const ul = box.querySelector("ul");
+      if (!mine.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = "Nothing claimed yet."; ul.appendChild(e); }
+      mine.forEach((t) => ul.appendChild(row(t)));
+      wrap.appendChild(box);
+    });
+    const my = $("my-tasks"); my.innerHTML = "";
+    const mine = tasks.filter((t) => t.owner === me).sort((a, b) => (a.status === "done") - (b.status === "done") || String(a.due).localeCompare(String(b.due)));
+    if (!mine.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = "Nothing on your list yet. Claim one at the meeting."; my.appendChild(e); }
+    mine.forEach((t) => my.appendChild(row(t)));
+    renderPulse();
+  }
+  function row(t) {
+    const li = document.createElement("li"); const s = SAY[t.status] ? t.status : "todo"; const late = isLate(t);
+    li.className = "row" + (s === "done" ? " is-done" : "");
+    li.innerHTML = `<button type="button" class="tick press" data-s="${s}">${TICK[s]}</button><p></p><span class="meta"><span class="date${late ? " late" : ""}">${late ? "Late · " : ""}${short(t.due)}</span></span>`;
+    li.querySelector("p").textContent = t.title;
+    const tk = li.querySelector(".tick"); tk.setAttribute("aria-label", `${SAY[s]}. Mark as ${SAY[NEXT[s]].toLowerCase()}`);
+    if (readOnly) { tk.disabled = true; return li; }
+    tk.onclick = () => {
+      const n = NEXT[s]; tk.classList.add("swap");
+      setTimeout(() => { tk.dataset.s = n; tk.innerHTML = TICK[n]; tk.classList.remove("swap"); }, 120);
+      ref.doc(t.id).update({ status: n }).then(() => { if (n === "done") toast("Nice. Marked done."); }).catch(fail);
+    };
+    const del = document.createElement("button"); del.type = "button"; del.className = "del press"; del.setAttribute("aria-label", "Remove task"); del.innerHTML = X;
+    let armed;
+    del.onclick = () => {
+      if (!del.classList.contains("armed")) { del.classList.add("armed"); del.textContent = "Remove?"; armed = setTimeout(() => { del.classList.remove("armed"); del.innerHTML = X; }, 2600); return; }
+      clearTimeout(armed); ref.doc(t.id).delete().then(() => toast("Task removed")).catch(fail);
+    };
+    li.querySelector(".meta").appendChild(del);
+    return li;
+  }
+  function note(msg, err) { const n = $("note"); n.textContent = msg; n.classList.toggle("err", !!err); n.hidden = !msg; }
+  function fail(e) {
+    if (e && e.code === "invalid_argument") { readOnly = true; $("composer").hidden = true; renderTasks(); note("You can view the board but not change it. Ask Katrina for Contributor access.", true); }
+    else toast("That didn't save. Check your connection and try again.");
+  }
+  $("composer").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const title = $("t-title").value.trim(); if (!title || !ref) return;
+    const owner = $("t-owner").value;
+    ref.add({ title, owner, due: $("t-due").value, status: "todo" }).then(() => { $("t-title").value = ""; toast(`Added to ${owner}'s list`); }).catch(fail);
+  });
+
+  // ---------- Live (owner only) ----------
+  const ROUND_LABELS = ["Remember it", "Your own path", "Our helping hand", "The Maze", "Our warlock", "Our creative twist", "Proof it teaches", "My next small win"];
+  const ROUND_IDS = ["recall", "personal", "hint", "maze", "warlock", "twist", "proof", "commitment"];
+  const PHASE = { ready: "Waiting to start", running: "Answering now", paused: "Paused", revealed: "Answers revealed", catchup: "Catch-up open" };
+  let session = null, answers = [];
+  function renderPulse() {
+    if (typeof renderNotes === "function") renderNotes();
+    const box = $("pulse"); if (!box) return; box.innerHTML = "";
+    PEOPLE.filter((p) => p !== "Katrina").forEach((p) => {
+      const c = checkins.find((x) => x.name === p && x.date === todayKey);
+      const mine = tasks.filter((t) => t.owner === p);
+      const late = mine.filter(isLate).length;
+      const next = mine.filter((t) => t.status !== "done").sort((a, b) => String(a.due).localeCompare(String(b.due)))[0];
+      const card = document.createElement("div"); card.className = "card kid";
+      card.innerHTML = `<div class="kid-top">${c ? face(c.mood) : '<span class="away"></span>'}<div><b></b><small></small></div></div>
+        <dl><dt>GitHub · VS Code · OOP</dt><dd>${c ? [c.github, c.vscode || "–", c.oop].join(" · ") : "–"}</dd>
+        <dt>Tasks done</dt><dd>${mine.filter((t) => t.status === "done").length} of ${mine.length}</dd>
+        <dt>Late</dt><dd class="${late ? "warn" : ""}">${late}</dd></dl><p class="next"></p>`;
+      card.querySelector("b").textContent = p;
+      card.querySelector("small").textContent = c ? `Checked in · ${MOODS[c.mood - 1]}` : "Not checked in today";
+      card.querySelector(".next").textContent = next ? `Next: ${next.title} (${short(next.due)})` : "No open tasks";
+      box.appendChild(card);
+    });
+    const cl = $("council-live"); if (!cl) return;
+    const idx = session && typeof session.round === "number" ? session.round : 0;
+    const sent = answers.filter((a) => a.round === ROUND_IDS[idx]).map((a) => a.name);
+    cl.innerHTML = `<p class="cl-round"></p><p class="cl-phase"></p><div class="cl-seats"></div>`;
+    cl.querySelector(".cl-round").textContent = `Round ${idx + 1}: ${ROUND_LABELS[idx] || ""}`;
+    cl.querySelector(".cl-phase").textContent = session ? PHASE[session.phase] || "Waiting to start" : "Not started yet";
+    PEOPLE.filter((p) => p !== "Katrina").forEach((p) => {
+      const el = document.createElement("span"); el.className = sent.includes(p) ? "in" : "";
+      el.textContent = p + (sent.includes(p) ? " · sent" : ""); cl.querySelector(".cl-seats").appendChild(el);
+    });
+  }
+  // ---------- Council notes (Markdown) ----------
+  let decisions = [];
+  const STUDENT_LIST = PEOPLE.filter((p) => p !== "Katrina");
+  function notesMarkdown() {
+    const rounds = (window.P9_ROUNDS || []).filter((r) => !r.optional);
+    const L = [];
+    const here = STUDENT_LIST.filter((p) => checkins.some((c) => c.name === p && c.date === todayKey));
+    const answered = rounds.filter((r) => answers.some((a) => a.round === r.id));
+    L.push(`# 🏰 Council notes · ${new Date().toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`, "");
+    const tops = [];
+    rounds.forEach((r) => {
+      const list = answers.filter((a) => a.round === r.id && STUDENT_LIST.includes(a.name));
+      if (!list.length || r.free) return;
+      const opts = r.options.map(([id, label]) => [label, list.filter((a) => a.pick === id).length]).sort((a, b) => b[1] - a[1]);
+      if (opts[0][1]) tops.push(`**${r.label}** → ${opts[0][0]}`);
+    });
+    L.push(`> **TL;DR:** ${here.length} of ${STUDENT_LIST.length} here · ${answered.length} of ${rounds.length} rounds answered.` + (tops.length ? ` Top picks: ${tops.join(" · ")}.` : ""), "");
+    const dec = rounds.map((r) => [r, decisions.find((d) => d.round === r.id)]).filter(([, d]) => d && d.text);
+    L.push("## ✅ What we decided", "");
+    if (dec.length) dec.forEach(([r, d]) => L.push(`- **${r.label}:** ${d.text}`));
+    else L.push("- Nothing saved yet. Type a working decision after each reveal on the Council screen.");
+    L.push("", "## 🗳️ Round by round", "");
+    rounds.forEach((r, i) => {
+      const list = answers.filter((a) => a.round === r.id && STUDENT_LIST.includes(a.name));
+      L.push(`### ${i + 1}. ${r.label}`, `*${r.question}*`, "");
+      if (!list.length) { L.push("- Not answered yet", ""); return; }
+      if (!r.free) {
+        const rows = [...r.options.map(([id, label]) => [id, label]), ["own", "Another idea"]]
+          .map(([id, label]) => [label, list.filter((a) => a.pick === id).map((a) => a.name)])
+          .filter(([, who]) => who.length).sort((a, b) => b[1].length - a[1].length);
+        rows.forEach(([label, who], j) => L.push(`- ${j === 0 ? "🥇 " : ""}**${label}** · ${who.length} (${who.join(", ")})`));
+      }
+      const ideas = list.filter((a) => a.idea);
+      if (ideas.length) { L.push("- 💡 Ideas:"); ideas.forEach((a) => L.push(`  - ${a.name}: "${a.idea.replace(/\s+/g, " ").trim()}"`)); }
+      const missing = STUDENT_LIST.filter((p) => !list.some((a) => a.name === p));
+      if (missing.length) L.push(`- ⏳ Missing: ${missing.join(", ")}`);
+      L.push("");
+    });
+    L.push("## 🙋 Who checked in", "");
+    STUDENT_LIST.forEach((p) => {
+      const c = checkins.find((x) => x.name === p && x.date === todayKey);
+      L.push(c ? `- **${p}** · ${MOODS[c.mood - 1]} · GitHub ${c.github}/5 · VS Code ${c.vscode || "–"}/5 · OOP ${c.oop}/5` : `- **${p}** · not checked in`);
+    });
+    const absent = STUDENT_LIST.filter((p) => !answers.some((a) => a.name === p));
+    L.push("", "## 🎯 Next steps", "", "- [ ] Turn each top pick into one task on the board (with an owner and a date)");
+    if (absent.length) L.push(`- [ ] Catch up with ${absent.join(", ")} (DM from the Discord kit)`);
+    L.push("- [ ] Post the recap in #meeting-notes", "");
+    return L.join("\n");
+  }
+  // Tiny Markdown renderer for the preview: headings, quotes, bullets, task boxes, bold, italics
+  function mdToHtml(md) {
+    const esc = (t) => t.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    const inline = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>");
+    const out = []; let list = 0;
+    const close = (to) => { while (list > to) { out.push("</ul>"); list--; } };
+    md.split("\n").forEach((line) => {
+      const m = line.match(/^(\s*)- (\[ \] )?(.*)$/);
+      if (m) {
+        const depth = m[1].length >= 2 ? 2 : 1;
+        while (list < depth) { out.push("<ul>"); list++; }
+        close(depth);
+        out.push(`<li>${m[2] ? "☐ " : ""}${inline(m[3])}</li>`); return;
+      }
+      close(0);
+      if (line.startsWith("### ")) out.push(`<h3>${inline(line.slice(4))}</h3>`);
+      else if (line.startsWith("## ")) out.push(`<h2>${inline(line.slice(3))}</h2>`);
+      else if (line.startsWith("# ")) out.push(`<h1>${inline(line.slice(2))}</h1>`);
+      else if (line.startsWith("> ")) out.push(`<blockquote>${inline(line.slice(2))}</blockquote>`);
+      else if (line.trim()) out.push(`<p>${inline(line)}</p>`);
+    });
+    close(0);
+    return out.join("");
+  }
+  let notesT;
+  function renderNotes() {
+    clearTimeout(notesT);
+    notesT = setTimeout(() => { const v = $("notes-view"); if (v) v.innerHTML = mdToHtml(notesMarkdown()); }, 150);
+  }
+  $("notes-copy").onclick = () => {
+    const text = notesMarkdown();
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents($("notes-view")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast("Selected. Press Ctrl+C."); };
+    try { navigator.clipboard.writeText(text).then(() => toast("Copied the notes as Markdown"), fallback); } catch { fallback(); }
+  };
+  $("notes-save").onclick = () => {
+    window.p9SaveText(`council-notes-${todayKey}.md`, notesMarkdown()).then((ok) => toast(ok ? "Saved council notes" : "Couldn't save. Use Copy instead."));
+  };
+
+  PEOPLE.filter((p) => p !== "Katrina").forEach((p) => {
+    const li = document.createElement("li"); const link = `${BOARD}#${p.toLowerCase()}`;
+    li.innerHTML = `<b></b><code></code><button class="btn press" type="button">Copy link</button>`;
+    li.querySelector("b").textContent = p; li.querySelector("code").textContent = link;
+    li.querySelector("button").onclick = () => {
+      const fallback = () => { const r = document.createRange(); r.selectNodeContents(li.querySelector("code")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast("Selected. Press Ctrl+C."); };
+      try { navigator.clipboard.writeText(link).then(() => toast(`Copied ${p}'s link`), fallback); } catch { fallback(); }
+    };
+    $("links").appendChild(li);
+  });
+
+  renderMe(); renderHere(); renderTasks();
+  go(startScreen, false);
+  if (window.claude && window.claude.use) {
+    // Unknown viewer (no user capability, signed out, a test mock) always means "not the owner".
+    Promise.resolve().then(() => window.claude.use("user")).then(async (u) => {
+      try { owner = !!(u && typeof u.isOwner === "function" && await u.isOwner()); } catch { owner = false; }
+      showOwnerNav();
+      if (owner && startScreen === "mentor") { screen = ""; go("mentor", false); }
+    }).catch(() => {});
+  }
+  if (window.claude && window.claude.use) {
+    window.claude.use("db").then((db) => {
+      if (!db) { note("Sign in to claude.ai to see the team's tasks."); syncCheckinBtn(); return; }
+      db.doc("workshop_sessions/meeting-1").onSnapshot((d) => { session = d.exists ? d.data() : null; renderPulse(); }, () => {});
+      db.collection("workshop_answers").onSnapshot((snap) => { answers = snap.docs.map((d) => d.data()).filter((a) => a.session === "meeting-1"); renderPulse(); }, () => {});
+      db.collection("workshop_decisions").onSnapshot((snap) => { decisions = snap.docs.map((d) => d.data()).filter((d) => d.session === "meeting-1"); renderPulse(); }, () => {});
+      cref = db.collection("checkins");
+      cref.onSnapshot((snap) => { checkins = snap.docs.map((d) => d.data()); renderHere(); loadMine(); }, () => {});
+      ref = db.collection("tasks");
+      $("composer").hidden = false;
+      let first = true;
+      ref.onSnapshot((snap) => {
+        tasks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        note(tasks.length ? "" : "No tasks yet. Add the first one above.");
+        renderTasks();
+        if (first && tasks.length && screen === "tasks") anim($("people").children, { y: 10, opacity: 0, duration: .3, stagger: .05, ease: "power3.out", clearProps: "transform,opacity" });
+        first = false;
+      }, () => note("The board stopped syncing. Reload the page.", true));
+      syncCheckinBtn();
+    });
+  } else { note("Open this page on claude.ai to see the team's tasks."); syncCheckinBtn(); }
+})();
+</script>
+<script>
+/*@COUNCIL_JS@*/
+</script>
+<script>
+/*@PARTY_JS@*/
+</script>

@@ -1,0 +1,52 @@
+<section class="council" id="council" aria-labelledby="council-title">
+      <header class="council-hero">
+        <img class="council-backdrop" src="@ART:round-table@" alt="King Arthur's knights seated around the Round Table as the Holy Grail appears">
+        <div><span class="tag torch">The quest council · Meeting 1</span><h2 id="council-title">Four minds.<br>One adventure.</h2><p>Pick a direction. Reveal your ideas.<br>Leave your fingerprints on the game.</p><a class="btn solid press" href="#council-play">Enter the council &darr;</a></div>
+        <span class="council-art-credit">The Round Table, Lancelot manuscript (BnF MS fr. 120), c. 1400. Public domain</span>
+      </header>
+      <div class="council-ribbon"><span><b>01</b> Think for yourself</span><span><b>02</b> Reveal together</span><span><b>03</b> Make something real</span></div>
+      <div class="council-entry" id="council-play">
+        <div><h3>Take your seat</h3><p class="sub">On separate devices: open the same published Claude artifact and choose your own name. Katrina runs the rounds.</p></div>
+        <div class="council-seats" id="council-seats" role="group" aria-label="Council participant"></div>
+        <p class="foot">Names coordinate the activity; they are not secure sign-in. Responses are named and visible after reveal. Use one host device.</p>
+        <p class="council-connection" id="council-connection" role="status">Connecting the council…</p>
+        <button class="btn press" type="button" id="council-rehearse" hidden>Try a local rehearsal</button>
+      </div>
+      <div class="council-layout">
+        <aside class="council-sidebar">
+          <p class="label">The 12-minute creative sprint</p><ol id="council-rounds" class="council-rounds"></ol>
+          <details><summary>Optional · if time allows</summary><ol id="council-bonus" class="council-rounds"></ol></details>
+          <div class="council-coach"><span class="tag moss">Mentor cue</span><p id="council-coach"></p><p class="foot">Six core rounds = 8 minutes answering + 4 minutes discussing. Stop at 12; protect the build time.</p></div>
+        </aside>
+        <div class="council-main">
+          <article class="council-question" aria-labelledby="council-question">
+            <div class="council-question-top"><span class="tag ember" id="council-category"></span><div class="council-countdown"><output id="council-clock" aria-label="Round time remaining">1:00</output><span id="council-phase">Waiting for host</span></div></div>
+            <p class="label" id="council-number"></p><h3 id="council-question"></h3><p class="sub" id="council-prompt"></p>
+            <div class="council-impact"><b>This shapes:</b> <span id="council-impact"></span></div>
+            <form id="council-answer">
+              <fieldset id="council-options"><legend class="council-sr">Choose a direction</legend><div class="council-options" id="council-choices"></div></fieldset>
+              <label class="council-label" for="council-idea" id="council-idea-label">Your creative spin or reason (optional)</label>
+              <textarea id="council-idea" rows="2" maxlength="280" placeholder="Make it yours in a sentence…"></textarea>
+              <div id="council-due-wrap" hidden><label class="council-label" for="council-due">Date you can show it</label><input type="date" id="council-due"></div>
+              <div class="council-submit"><button class="btn solid press" type="submit" id="council-submit" disabled>Pick your name first</button><span id="council-answer-status" role="status"></span></div>
+            </form>
+            <div class="council-arrivals" id="council-arrivals" aria-live="polite"></div>
+            <div class="council-host" id="council-host" hidden>
+              <span class="label">Katrina's controls · coordinate one host</span>
+              <div class="controls"><button class="btn solid press" type="button" id="council-start">Start round</button><button class="btn press" type="button" id="council-pause">Pause</button><button class="btn press" type="button" id="council-extend">+30 seconds</button><button class="btn press" type="button" id="council-reveal">Reveal answers</button><button class="btn press" type="button" id="council-next">Next round &rarr;</button><button class="btn press" type="button" id="council-catchup">Open catch-up</button></div>
+              <p class="foot">Time up keeps drafts intact. Reveal when ready, or add time. Reopening a round preserves answers. Missing students can contribute during catch-up.</p>
+            </div>
+          </article>
+          <section class="council-results" id="council-results" aria-labelledby="council-results-title" hidden>
+            <div class="head"><h3 id="council-results-title">The party has spoken…</h3><span class="tag torch" id="council-result-count"></span></div>
+            <p id="council-result-note" class="sub"></p><div id="council-result-rows"></div>
+            <form id="council-decision" hidden><label class="council-label" for="council-agreement">After discussion, what will we try? (editable; no automatic winner)</label><textarea id="council-agreement" maxlength="400" rows="2" placeholder="Our working decision, or: unresolved until…"></textarea><button class="btn solid press" type="submit">Save working decision</button><p class="foot">A working decision is provisional. Check with missing teammates before treating it as agreed.</p></form>
+          </section>
+        </div>
+      </div>
+      <section class="council-brief" aria-labelledby="council-brief-title">
+        <div class="head"><div><h3 id="council-brief-title">Our adventure, taking shape.</h3></div><button class="btn press" type="button" id="council-export">Download our brief</button></div>
+        <p class="sub">Votes suggest directions. Working decisions record the discussion. Ideas stay visible; nobody's task is assigned automatically.</p><div id="council-brief" class="council-brief-grid"></div>
+        <div class="council-handoff"><b>Now build for 18 minutes.</b><p>Build crew: make one puzzle work. Design crew: sketch that same room using the team's choices. Then each person claims one small task with a date in Tasks.</p><button class="btn solid press" type="button" data-go="tasks">Take our ideas into tasks &rarr;</button></div>
+      </section>
+    </section>

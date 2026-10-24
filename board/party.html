@@ -1,0 +1,100 @@
+<div class="party" id="party" hidden>
+  <!-- HOST: the screen Katrina streams -->
+  <section class="p-host" id="p-host" hidden>
+    <header class="p-top">
+      <span class="p-brand">Knight's Escape <i>Council</i></span>
+      <span class="p-round" id="h-round"></span>
+      <div class="p-top-r">
+        <span class="p-code-mini">Room <b id="h-code-mini"></b></span>
+        <button class="p-icon" type="button" id="h-full" aria-label="Full screen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      </div>
+    </header>
+
+    <!-- lobby / between rounds -->
+    <div class="p-stage" id="h-lobby">
+      <div class="p-join">
+        <p class="p-ribbon">Join on your phone</p>
+        <ol class="p-steps">
+          <li>Open your board link</li>
+          <li>Tap <b>Play</b></li>
+          <li>Enter the room code</li>
+        </ol>
+        <div class="p-code" id="h-code" aria-label="Room code"></div>
+      </div>
+      <div class="p-lobby-r">
+        <h1 class="p-big" id="h-lobby-title">The Council is gathering</h1>
+        <p class="p-sub" id="h-lobby-sub"></p>
+        <div class="p-crowd" id="h-crowd"></div>
+      </div>
+    </div>
+
+    <!-- question -->
+    <div class="p-stage p-q" id="h-question" hidden>
+      <div class="p-q-head">
+        <span class="p-cat" id="h-cat"></span>
+        <h1 class="p-big" id="h-q"></h1>
+        <p class="p-sub" id="h-prompt"></p>
+      </div>
+      <div class="p-opts" id="h-opts"></div>
+      <div class="p-q-foot">
+        <div class="p-answered" id="h-answered"></div>
+        <div class="p-timer" id="h-timer"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="t-bg"/><circle cx="60" cy="60" r="52" class="t-fg" id="h-ring"/></svg><b id="h-secs"></b></div>
+      </div>
+    </div>
+
+    <!-- reveal -->
+    <div class="p-stage p-rev" id="h-reveal" hidden>
+      <div class="p-q-head">
+        <span class="p-cat">The Council has spoken</span>
+        <h1 class="p-big p-mid" id="h-rq"></h1>
+      </div>
+      <div class="p-bars" id="h-bars"></div>
+      <div class="p-ideas" id="h-ideas"></div>
+    </div>
+
+    <!-- finished -->
+    <div class="p-stage p-end" id="h-end" hidden>
+      <h1 class="p-big">That's the Council!</h1>
+      <p class="p-sub">Your answers are saved on the board. Now: build for 18 minutes.</p>
+    </div>
+
+    <footer class="p-controls" id="h-controls">
+      <button class="p-btn" type="button" id="h-back">Back</button>
+      <button class="p-btn" type="button" id="h-plus">+30 sec</button>
+      <button class="p-btn p-go" type="button" id="h-main">Start round</button>
+      <span class="p-keys">Space: next step</span>
+    </footer>
+  </section>
+
+  <!-- PLAYER: phones -->
+  <section class="p-play" id="p-play" hidden>
+    <form class="p-joinform" id="j-form" autocomplete="off">
+      <span class="p-brand">Knight's Escape <i>Council</i></span>
+      <label class="p-lbl" for="j-code">Room code</label>
+      <input class="p-in" id="j-code" maxlength="4" placeholder="Enter 4-letter code" autocapitalize="characters" spellcheck="false">
+      <label class="p-lbl" for="j-name">Name</label>
+      <input class="p-in" id="j-name" maxlength="12" placeholder="Enter your name" spellcheck="false">
+      <button class="p-btn p-go p-wide" type="submit" id="j-go">Play</button>
+      <p class="p-err" id="j-err" role="alert"></p>
+    </form>
+
+    <div class="p-phone" id="j-phone" hidden>
+      <header class="p-me"><span class="p-av" id="j-av"></span><b id="j-name-t"></b><span class="p-code-mini" id="j-code-t"></span></header>
+      <div class="p-wait" id="j-wait">
+        <p class="p-big p-mid" id="j-wait-t">You're in!</p>
+        <p class="p-sub" id="j-wait-s">Look at the big screen.</p>
+      </div>
+      <form class="p-answer" id="j-answer" hidden>
+        <p class="p-cat" id="j-cat"></p>
+        <h2 class="p-qs" id="j-q"></h2>
+        <div class="p-picks" id="j-picks" role="radiogroup"></div>
+        <label class="p-lbl" for="j-idea" id="j-idea-l">Add your own spin (optional)</label>
+        <textarea class="p-in p-ta" id="j-idea" maxlength="280" placeholder="Make it yours in a sentence…"></textarea>
+        <input class="p-in" id="j-due" type="date" hidden aria-label="When can you show it?">
+        <button class="p-btn p-go p-wide" type="submit" id="j-send">Send</button>
+        <p class="p-err" id="j-msg" role="status"></p>
+        <p class="p-time" id="j-time"></p>
+      </form>
+    </div>
+  </section>
+</div>
