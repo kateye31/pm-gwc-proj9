@@ -197,6 +197,27 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .row-ask { justify-self: start; margin-left: -4px; }
 .row.is-done .row-where, .row.is-done .row-done, .row.is-done .row-ask { display: none; }
 
+/* Progressive disclosure on Team tasks: details per row, "Show all" per person, folded add form */
+.row-toggle { justify-self: start; display: inline-flex; align-items: center; gap: 4px; margin: -2px 0 0 -6px; padding: 4px 6px; border: 0; border-radius: 6px; background: none; color: var(--parch-3); font-size: 13.5px; }
+@media (hover: hover) and (pointer: fine) { .row-toggle:hover, .person-more:hover { color: var(--parch); } }
+.chev { transition: transform 180ms var(--ease-out); }
+[aria-expanded="true"] > .chev, .adder[open] > summary .chev { transform: rotate(180deg); }
+.row-more { display: grid; gap: 4px; padding-top: 2px; }
+.row-more:not([hidden]) { animation: reveal 200ms var(--ease-out); }
+@keyframes reveal { from { opacity: 0; transform: translateY(-3px); } }
+.person-more { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: 4px; padding: 12px 0 8px; border: 0; border-top: 1px solid var(--line); background: none; color: var(--parch-2); font-size: 14.5px; text-align: left; }
+.person-more span { flex: 1; }
+.adder { display: grid; gap: var(--s2); justify-items: start; width: 100%; }
+.adder:has(> #composer[hidden]) { display: none; }
+.adder > summary { list-style: none; }
+.adder > summary::-webkit-details-marker { display: none; }
+.adder > summary .when-open, .adder[open] > summary .when-closed { display: none; }
+.adder[open] > summary .when-open { display: inline; }
+.adder[open] > summary svg { transform: rotate(45deg); }
+.adder > summary svg { transition: transform 180ms var(--ease-out); }
+.adder > .composer { width: 100%; animation: reveal 200ms var(--ease-out); }
+@media (prefers-reduced-motion: reduce) { .row-more:not([hidden]), .adder > .composer { animation: none; } .chev, .adder > summary svg { transition: none; } }
+
 /* Ask for help */
 .helper { display: grid; gap: var(--s2); }
 .helper .chips .chip { height: 36px; font-size: 14.5px; }
@@ -600,6 +621,8 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
         <h1>Tasks</h1>
         <p>Tap the circle to move a task along: to do, doing, done.</p>
       </div>
+      <details class="adder" id="adder">
+      <summary class="btn press"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2.5v9M2.5 7h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="when-closed">Add a task</span><span class="when-open">Close</span></summary>
       <form class="card composer" id="composer" hidden>
         <input id="t-title" class="grow" required maxlength="140" placeholder="Add a task, like: write 2 hints for the Maze" aria-label="Task">
         <select id="t-owner" aria-label="Owner"></select>
@@ -608,6 +631,7 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
         <input id="t-done" class="done" maxlength="160" placeholder="Done when, like: the Maze has 5 turns" aria-label="Done when (optional)">
         <button class="btn solid press" type="submit">Add</button>
       </form>
+      </details>
       <div class="chips" id="filters" role="group" aria-label="Show tasks for"></div>
       <div class="people" id="people"></div>
       <p class="note" id="note">Loading the team's tasks…</p>
@@ -1255,32 +1279,57 @@ window.P9_STARTER = /*@STARTER@*/{};
       const b = document.createElement("button"); b.type = "button"; b.className = "chip press"; b.setAttribute("aria-pressed", String(filter === k));
       b.textContent = `${label} · ${open}`; b.onclick = () => { filter = k; store.set("p9-filter", k); renderTasks(); }; f.appendChild(b);
     });
-    const wrap = $("people"); wrap.innerHTML = "";
+    // Everyone view: each person shows their next 2 open tasks; "Show all" reveals the rest (done ones too).
+    // Filtering to one person shows everything.
+    const wrap = $("people"), focusP = wrap.contains(document.activeElement) && document.activeElement.dataset.p; wrap.innerHTML = "";
     PEOPLE.filter((p) => filter === "all" || p === filter).forEach((p) => {
       const mine = tasks.filter((t) => t.owner === p).sort((a, b) => (a.status === "done") - (b.status === "done") || String(a.due).localeCompare(String(b.due)));
-      const done = mine.filter((t) => t.status === "done").length;
+      const done = mine.filter((t) => t.status === "done").length, open = mine.length - done;
+      const all = filter !== "all" || showAll.has(p);
+      const shown = all ? mine : mine.filter((t) => t.status !== "done").slice(0, 2);
       const box = document.createElement("div"); box.className = "card person";
       box.innerHTML = `<div class="person-h"><b></b><span>${mine.length ? done + " of " + mine.length + " done" : ""}</span></div><div class="bar-mini"><i style="transform:scaleX(${mine.length ? done / mine.length : 0})"></i></div><ul class="rows"></ul>`;
       box.querySelector("b").textContent = p;
       const ul = box.querySelector("ul");
-      if (!mine.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = "Nothing claimed yet."; ul.appendChild(e); }
-      mine.forEach((t) => ul.appendChild(row(t)));
+      if (!mine.length || !shown.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = mine.length ? "All done. Nice work." : "Nothing claimed yet."; ul.appendChild(e); }
+      shown.forEach((t) => ul.appendChild(row(t)));
+      if (filter === "all" && (shown.length < mine.length || showAll.has(p))) {
+        const more = document.createElement("button"); more.type = "button"; more.className = "person-more press"; more.dataset.p = p;
+        more.setAttribute("aria-expanded", String(showAll.has(p)));
+        more.innerHTML = `<span></span>${CHEV}`;
+        more.querySelector("span").textContent = showAll.has(p) ? "Show less" : `Show all ${mine.length} tasks` + (open > 2 ? ` · ${open - 2} more to do` : "") + (done ? ` · ${done} done` : "");
+        more.onclick = () => { showAll.has(p) ? showAll.delete(p) : showAll.add(p); renderTasks(); };
+        box.appendChild(more);
+      }
       wrap.appendChild(box);
     });
+    if (focusP) { const b = wrap.querySelector(`.person-more[data-p="${focusP}"]`); if (b) b.focus(); }
     const my = $("my-tasks"); my.innerHTML = "";
     const mine = tasks.filter((t) => t.owner === me).sort((a, b) => (a.status === "done") - (b.status === "done") || String(a.due).localeCompare(String(b.due)));
     if (!mine.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = "Nothing on your list yet. Claim one at the meeting."; my.appendChild(e); }
-    mine.forEach((t) => my.appendChild(row(t, !PREVIEW)));
+    mine.forEach((t) => my.appendChild(row(t, { ask: !PREVIEW, open: true })));
     renderPulse();
   }
   // "game.js · line 147 · escapeScreen()" so nobody has to guess where a task lives
   const whereText = (t) => [t.file, t.line ? "line " + t.line : "", t.fn].filter(Boolean).join(" · ");
-  function row(t, ask) {
+  const showAll = new Set(), openRows = new Set();
+  const CHEV = '<svg class="chev" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 5.5L7 9l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  // opts.open: details always visible (your own list on My quest). Otherwise a "Details" toggle opens them.
+  function row(t, opts = {}) {
+    const ask = opts.ask;
     const li = document.createElement("li"); const s = SAY[t.status] ? t.status : "todo"; const late = isLate(t);
     li.className = "row" + (s === "done" ? " is-done" : "");
     li.innerHTML = `<button type="button" class="tick press" data-s="${s}">${TICK[s]}</button><div class="row-body"><p></p></div><span class="meta"><span class="date${late ? " late" : ""}">${late ? "Late · " : ""}${short(t.due)}</span></span>`;
     li.querySelector("p").textContent = t.title;
-    const body = li.querySelector(".row-body");
+    let body = li.querySelector(".row-body");
+    if (!opts.open && (t.file || t.done) && s !== "done") {
+      const tg = document.createElement("button"), more = document.createElement("div"), id = "more-" + t.id;
+      tg.type = "button"; tg.className = "row-toggle"; tg.setAttribute("aria-controls", id); tg.innerHTML = `<span>Details</span>${CHEV}`;
+      more.className = "row-more"; more.id = id;
+      const sync = () => { const o = openRows.has(t.id); tg.setAttribute("aria-expanded", String(o)); more.hidden = !o; };
+      tg.onclick = () => { openRows.has(t.id) ? openRows.delete(t.id) : openRows.add(t.id); sync(); };
+      body.append(tg, more); sync(); body = more;
+    }
     if (t.file) {
       // One chip per part so "line 80" never splits across lines
       const w = document.createElement("span"); w.className = "row-where"; w.textContent = "Where";
@@ -1323,6 +1372,8 @@ window.P9_STARTER = /*@STARTER@*/{};
     if ($("t-done").value.trim()) task.done = $("t-done").value.trim();
     ref.add(task).then(() => { ["t-title", "t-where", "t-done"].forEach((id) => { $(id).value = ""; }); toast(`Added to ${who}'s list`); }).catch(fail);
   });
+
+  $("adder").addEventListener("toggle", () => { if ($("adder").open) $("t-title").focus(); });
 
   // ---------- Ask for help ----------
   // Every question goes out with our project's context: the starter files (with line numbers) and her open tasks.
