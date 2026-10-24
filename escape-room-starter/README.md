@@ -33,6 +33,28 @@ Difficulty sets the hints per chamber: Squire 3, Knight 2, Champion 1.
 
 Search for `TODO` to find open work. Every chamber has 1 or 2 examples to copy.
 
+## Where the OOP topics come from
+
+Sanjana's research mapped each concept to a part of the dungeon. The TODOs in `rooms.js` include her ideas:
+
+| Concept | Her idea | Where it goes |
+| --- | --- | --- |
+| Classes and objects | A `Knight` class is the blueprint; each knight is an object | The Maze |
+| Constructors and methods | Pick the right constructor arguments or method call | The Maze, Alchemy Lab |
+| Encapsulation | Private fields protected by public methods | Alchemy Lab |
+| Inheritance | `Wizard` and `Knight` share properties from a `Character` parent | Hall of Illusions |
+| Polymorphism | Different objects answer the same method call: the final boss puzzle | Hall of Illusions, Final Door |
+
+## Question of the week
+
+Each week, every person asks **one student outside the team** one question (5 minutes, tops) and posts the answer in Discord.
+
+| Week | Ask | Why |
+| --- | --- | --- |
+| Oct 24 – 30 | "When you study OOP, what's hardest to remember?" | Shapes the hints |
+| Oct 31 – Nov 6 | "Play the Maze for 5 minutes. Where did you get stuck?" | First playtest |
+| Nov 7 – 11 | "After playing: explain class vs. object in your own words." | Proves it teaches |
+
 ---
 
 # Contributing

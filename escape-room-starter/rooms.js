@@ -1,6 +1,8 @@
 // ALL GAME CONTENT LIVES HERE. Edit this file to change the story and puzzles.
 // Based on Shirley's Group 9 design roadmap: a warlock traps you in his dungeon,
 // and you escape through 4 chambers. Search for TODO to find open work.
+// OOP topics follow Sanjana's research (classes & objects, constructors & methods,
+// encapsulation, inheritance, polymorphism as the final boss).
 
 // ---------- Start screen ----------
 const KNIGHTS = [
@@ -49,7 +51,10 @@ const MAZE = {
       hint: "Count how many times you see the word new.",
       explain: "Each new creates one object, so there are 2.",
     },
-    // TODO (Sanjana): write turns 3, 4 and 5
+    // TODO (Sanjana): write turns 3, 4 and 5. Ideas from your research:
+    //   - Constructors: "Which line creates a Knight named Ava?"  new Knight("Ava") vs Knight("Ava") vs new Knight
+    //   - Methods: which method call makes the knight attack?  k.attack() vs attack(k) vs Knight.attack
+    //   - Fields: after k.level = 3, what is k.level?
   ],
 };
 
@@ -72,7 +77,9 @@ const LAB = {
       answer: 1,
       hint: "toUpperCase() returns a new String in capital letters.",
     },
-    // TODO (Leslie/Sanjana): 2 more steps, so the spell has 4 words
+    // TODO (Leslie/Sanjana): 2 more steps, so the spell has 4 words. Ideas from Sanjana's research:
+    //   - Encapsulation: a private field read through a public getter, e.g. getSecret() returns "DOOR"
+    //   - Constructor arguments: new Potion("RISE").word() prints what?
   ],
 };
 
@@ -105,7 +112,8 @@ const HALL = {
       hint: "Java runs the method of the real object, not the variable's type.",
       explain: "c is declared as Character but holds a Wizard, so Wizard's speak() runs. That's polymorphism.",
     },
-    // TODO (team): one more round
+    // TODO (team): one more round. Sanjana's research saves polymorphism for the boss:
+    //   three doors call the same method on different objects; which one prints the right line?
   ],
 };
 
