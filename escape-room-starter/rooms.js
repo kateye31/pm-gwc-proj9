@@ -62,7 +62,7 @@ const MAZE = {
 // 4 steps. Guess what each snippet prints; the printed words join into the spell.
 const LAB = {
   title: "The Alchemy Lab",
-  concept: "Methods and return values",
+  concept: "Methods and encapsulation",
   story: "Bubbling potions line the shelves. Each one whispers a word when you read its code.",
   steps: [
     {
@@ -87,7 +87,7 @@ const LAB = {
 // 3 doors per round. They look alike, but only one has correct code.
 const HALL = {
   title: "The Hall of Illusions",
-  concept: "Inheritance and polymorphism",
+  concept: "Inheritance (plus a first look at polymorphism)",
   story: "Three doors shimmer before you. Two are illusions. Only one is real.",
   rounds: [
     {
@@ -121,7 +121,7 @@ const HALL = {
 // Answer the warlock in your own words. Each answer earns a key (3 keys open the door).
 const FINAL = {
   title: "The Final Door",
-  concept: "Explain it in your own words",
+  concept: "Polymorphism, the final boss: explain it in your own words",
   story: "A giant door with three keyholes. The warlock appears: 'Answer me, and the keys are yours.'",
   questions: [
     {

@@ -15,9 +15,9 @@ Open `index.html` in your browser. No installs.
 | Start | Choose your knight and difficulty | Your knight is an object | `KNIGHTS`, `DIFFICULTIES` |
 | Intro | The warlock traps you | | `WARLOCK` |
 | 1. The Maze | 5 turns, pick the right direction (multiple choice) | Classes and objects | `MAZE` |
-| 2. The Alchemy Lab | Guess what the code prints; the words build a spell | Methods and return values | `LAB` |
-| 3. Hall of Illusions | 3 look-alike code doors, only one is real | Inheritance, polymorphism | `HALL` |
-| 4. The Final Door | Answer the warlock in your own words, earn 3 keys | Explain it | `FINAL` |
+| 2. The Alchemy Lab | Guess what the code prints; the words build a spell | Methods and encapsulation | `LAB` |
+| 3. Hall of Illusions | 3 look-alike code doors, only one is real | Inheritance | `HALL` |
+| 4. The Final Door | Answer the warlock in your own words, earn 3 keys | Polymorphism, the final boss | `FINAL` |
 | Escape | You win, play again | | |
 
 Difficulty sets the hints per chamber: Squire 3, Knight 2, Champion 1.
@@ -35,7 +35,8 @@ Search for `TODO` to find open work. Every chamber has 1 or 2 examples to copy.
 
 ## Where the OOP topics come from
 
-Sanjana's research mapped each concept to a part of the dungeon. The TODOs in `rooms.js` include her ideas:
+Sanjana's research mapped each concept to a part of the dungeon. The TODOs in `rooms.js` include her ideas.
+Learn more: [Programiz Java](https://www.programiz.com/java-programming/class-objects) · [Codecademy Learn Java](https://www.codecademy.com/learn/learn-java) · [dev.java](https://dev.java/learn/classes-objects/)
 
 | Concept | Her idea | Where it goes |
 | --- | --- | --- |
@@ -43,7 +44,7 @@ Sanjana's research mapped each concept to a part of the dungeon. The TODOs in `r
 | Constructors and methods | Pick the right constructor arguments or method call | The Maze, Alchemy Lab |
 | Encapsulation | Private fields protected by public methods | Alchemy Lab |
 | Inheritance | `Wizard` and `Knight` share properties from a `Character` parent | Hall of Illusions |
-| Polymorphism | Different objects answer the same method call: the final boss puzzle | Hall of Illusions, Final Door |
+| Polymorphism | Different objects answer the same method call: the final boss puzzle | Final Door (first look in the Hall) |
 
 ## Question of the week
 
