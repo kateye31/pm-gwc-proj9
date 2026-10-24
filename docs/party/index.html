@@ -658,6 +658,9 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
 @media (max-width: 600px) { .council-hero { padding: 24px; min-height: 360px; background-position: 60% center; } .council-hero::before { content: ''; position: absolute; inset: 0; background: color-mix(in srgb, var(--night) 30%, transparent); } .council-hero > div { position: relative; } .council-ribbon { padding: 14px 20px; font-size: 14px; } .council-entry, .council-main, .council-brief { padding: 20px; } .council-rounds { grid-template-columns: repeat(2, 1fr); } .council-options, .council-brief-grid { grid-template-columns: 1fr; } .council-choice:not(.own) { flex-direction: row; min-height: 110px; } .council-choice img { width: 95px; height: auto; min-height: 110px; object-fit: cover; } .council-choice .choice-body { flex: 1; } .council-art-credit { font-size: 9px; max-width: 90%; } .council-results { padding: 16px; } .council-brief .head .btn { white-space: normal; height: auto; padding-block: 10px; } }
 @media (max-width: 600px) { .council-hero::before { background: color-mix(in srgb, var(--night) 75%, transparent); } }
 
+/* Credits for the option-card paintings */
+.council-art-note { margin: 10px 0 0; font-size: 12.5px; color: var(--parch-3); }
+
 /* Council inside the new shell */
 .council { border-color: var(--line); border-radius: 20px; }
 .council-hero { min-height: 190px; padding: 0; }
@@ -790,6 +793,9 @@ body.party-mode { overflow-x: hidden; }
   .p-bar { grid-template-columns: 1fr 50px; } .p-track { grid-column: 1 / -1; grid-row: 2; }
 }
 @media (prefers-reduced-motion: reduce) { .p-btn, .p-pick, .t-fg { transition-duration: 0ms; } }
+
+/* Credits for the option-card paintings */
+.p-credit { margin: 10px 0 0; font-size: 13px; color: var(--parch-3); text-align: right; }
 
 
 /* Phone */
@@ -989,7 +995,7 @@ body.party-mode { overflow-x: hidden; }
             <p class="label" id="council-number"></p><h3 id="council-question"></h3><p class="sub" id="council-prompt"></p>
             <div class="council-impact"><b>This shapes:</b> <span id="council-impact"></span></div>
             <form id="council-answer">
-              <fieldset id="council-options"><legend class="council-sr">Choose a direction</legend><div class="council-options" id="council-choices"></div></fieldset>
+              <fieldset id="council-options"><legend class="council-sr">Choose a direction</legend><div class="council-options" id="council-choices"></div><p class="council-art-note">Art: Gawain, Cotton Nero A.x manuscript, c. 1400 (British Library) · J. M. W. Turner, Ulysses Deriding Polyphemus, 1829 · J. R. Skelton, Beowulf and the Dragon, 1908. All public domain.</p></fieldset>
               <label class="council-label" for="council-idea" id="council-idea-label">Your creative spin or reason (optional)</label>
               <textarea id="council-idea" rows="2" maxlength="280" placeholder="Make it yours in a sentence…"></textarea>
               <div id="council-due-wrap" hidden><label class="council-label" for="council-due">Date you can show it</label><input type="date" id="council-due"></div>
@@ -1258,6 +1264,7 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
         <p class="p-sub" id="h-prompt"></p>
       </div>
       <div class="p-opts" id="h-opts"></div>
+      <p class="p-credit">Art: Gawain manuscript, c. 1400 · Turner, Ulysses Deriding Polyphemus, 1829 · Skelton, Beowulf and the Dragon, 1908 · public domain</p>
       <div class="p-q-foot">
         <div class="p-answered" id="h-answered"></div>
         <div class="p-timer" id="h-timer"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="t-bg"/><circle cx="60" cy="60" r="52" class="t-fg" id="h-ring"/></svg><b id="h-secs"></b></div>

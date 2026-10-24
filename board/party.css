@@ -122,3 +122,6 @@ body.party-mode { overflow-x: hidden; }
   .p-bar { grid-template-columns: 1fr 50px; } .p-track { grid-column: 1 / -1; grid-row: 2; }
 }
 @media (prefers-reduced-motion: reduce) { .p-btn, .p-pick, .t-fg { transition-duration: 0ms; } }
+
+/* Credits for the option-card paintings */
+.p-credit { margin: 10px 0 0; font-size: 13px; color: var(--parch-3); text-align: right; }
