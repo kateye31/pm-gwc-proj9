@@ -1285,7 +1285,9 @@ window.P9_STARTER = /*@STARTER@*/{};
     PEOPLE.filter((p) => filter === "all" || p === filter).forEach((p) => {
       const mine = tasks.filter((t) => t.owner === p).sort((a, b) => (a.status === "done") - (b.status === "done") || String(a.due).localeCompare(String(b.due)));
       const done = mine.filter((t) => t.status === "done").length, open = mine.length - done;
-      const all = filter !== "all" || showAll.has(p);
+      // Open by default: your own card, or every card for a guest who isn't signed in. Clicking flips the default.
+      const expanded = (!me || p === me) !== showAll.has(p);
+      const all = filter !== "all" || expanded;
       const shown = all ? mine : mine.filter((t) => t.status !== "done").slice(0, 2);
       const box = document.createElement("div"); box.className = "card person";
       box.innerHTML = `<div class="person-h"><b></b><span>${mine.length ? done + " of " + mine.length + " done" : ""}</span></div><div class="bar-mini"><i style="transform:scaleX(${mine.length ? done / mine.length : 0})"></i></div><ul class="rows"></ul>`;
@@ -1293,11 +1295,12 @@ window.P9_STARTER = /*@STARTER@*/{};
       const ul = box.querySelector("ul");
       if (!mine.length || !shown.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = mine.length ? "All done. Nice work." : "Nothing claimed yet."; ul.appendChild(e); }
       shown.forEach((t) => ul.appendChild(row(t)));
-      if (filter === "all" && (shown.length < mine.length || showAll.has(p))) {
+      const hidable = mine.filter((t) => t.status !== "done").slice(0, 2).length < mine.length;
+      if (filter === "all" && hidable) {
         const more = document.createElement("button"); more.type = "button"; more.className = "person-more press"; more.dataset.p = p;
-        more.setAttribute("aria-expanded", String(showAll.has(p)));
+        more.setAttribute("aria-expanded", String(expanded));
         more.innerHTML = `<span></span>${CHEV}`;
-        more.querySelector("span").textContent = showAll.has(p) ? "Show less" : `Show all ${mine.length} tasks` + (open > 2 ? ` · ${open - 2} more to do` : "") + (done ? ` · ${done} done` : "");
+        more.querySelector("span").textContent = expanded ? "Show less" : `Show all ${mine.length} tasks` + (open > 2 ? ` · ${open - 2} more to do` : "") + (done ? ` · ${done} done` : "");
         more.onclick = () => { showAll.has(p) ? showAll.delete(p) : showAll.add(p); renderTasks(); };
         box.appendChild(more);
       }
