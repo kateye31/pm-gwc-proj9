@@ -389,6 +389,24 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .key.ghost small { letter-spacing: .02em; font-size: 13px; color: var(--parch-2); }
 .pin-back { border: 0; background: none; color: var(--parch-3); text-decoration: underline; text-underline-offset: 3px; font-size: 14px; padding: 6px; }
 
+/* Council results on Live */
+.results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-top: 14px; }
+.rres { background: var(--night); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.rres-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.rres-h b { font-size: 15.5px; }
+.rres-h span { font-size: 12.5px; color: var(--parch-3); white-space: nowrap; }
+.rres .q { font-size: 13.5px; color: var(--parch-2); }
+.rbar { display: grid; gap: 3px; }
+.rbar-l { display: flex; justify-content: space-between; gap: 8px; font-size: 13.5px; }
+.rbar-l em { font-style: normal; color: var(--parch-3); font-size: 12.5px; }
+.rbar-t { height: 8px; border-radius: 4px; background: var(--plank); overflow: hidden; }
+.rbar-t i { display: block; height: 100%; border-radius: 4px; transform-origin: left; transition: transform 500ms var(--ease-out); }
+.rbar.win .rbar-l span { color: var(--torch); font-weight: 700; }
+.rideas { margin: 2px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13px; color: var(--parch-2); }
+.rideas b { color: var(--parch); font-weight: 700; }
+.rdec { font-size: 13px; color: var(--moss); border-top: 1px solid var(--line); padding-top: 6px; }
+.rnone { font-size: 13px; color: var(--parch-3); }
+
 /* Council notes */
 .md { margin-top: 16px; max-height: 560px; overflow: auto; padding: 18px 20px; border-radius: 14px; background: var(--night); border: 1px solid var(--line); font-size: 15px; line-height: 1.6; }
 .md h1 { font-family: var(--display); font-weight: 400; font-size: 24px; margin: 0 0 10px; }
@@ -1008,6 +1026,10 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
           </div>
         </div>
         <ol class="agenda" id="agenda"></ol>
+      </div>
+      <div class="card">
+        <div class="head"><div><h2>Council results</h2><p class="foot" style="margin-top:4px">From the party game. Updates live as answers come in.</p></div></div>
+        <div class="results-grid" id="results-grid"></div>
       </div>
       <div class="card notes">
         <div class="head">
@@ -1632,8 +1654,43 @@ window.p9SaveText = async (filename, text) => {
   const ROUND_IDS = ["recall", "personal", "hint", "maze", "warlock", "twist", "proof", "commitment"];
   const PHASE = { ready: "Waiting to start", running: "Answering now", paused: "Paused", revealed: "Answers revealed", catchup: "Catch-up open" };
   let session = null, answers = [];
+  function renderResults() {
+    const grid = $("results-grid"); if (!grid) return; grid.innerHTML = "";
+    const STUDENT_LIST = PEOPLE.filter((p) => p !== "Katrina");
+    const COLORS = ["var(--moss)", "var(--torch)", "var(--ember)", "var(--parch-3)"];
+    (window.P9_ROUNDS || []).filter((r) => !r.optional).forEach((r, i) => {
+      const list = answers.filter((a) => a.round === r.id && STUDENT_LIST.includes(a.name));
+      const card = document.createElement("div"); card.className = "rres";
+      card.innerHTML = `<div class="rres-h"><b></b><span>${list.length} of ${STUDENT_LIST.length} answered</span></div><p class="q"></p>`;
+      card.querySelector("b").textContent = `${i + 1}. ${r.label}`; card.querySelector(".q").textContent = r.question;
+      if (!list.length) { const n = document.createElement("p"); n.className = "rnone"; n.textContent = "Not played yet"; card.appendChild(n); }
+      else if (!r.free) {
+        const opts = [...r.options.map(([id, label]) => [id, label]), ["own", "Another idea"]];
+        const counts = opts.map(([id]) => list.filter((a) => a.pick === id).length);
+        const top = Math.max(...counts);
+        opts.forEach(([id, label], j) => {
+          if (id === "own" && !counts[j]) return;
+          const who = list.filter((a) => a.pick === id).map((a) => a.name).join(", ");
+          const row = document.createElement("div"); row.className = "rbar" + (counts[j] === top && top ? " win" : "");
+          row.innerHTML = `<div class="rbar-l"><span></span><em></em></div><div class="rbar-t"><i style="background:${COLORS[j]};transform:scaleX(${counts[j] / list.length})"></i></div>`;
+          row.querySelector("span").textContent = `${label} · ${counts[j]}`; row.querySelector("em").textContent = who;
+          card.appendChild(row);
+        });
+      }
+      const ideas = list.filter((a) => a.idea);
+      if (ideas.length) {
+        const ul = document.createElement("ul"); ul.className = "rideas";
+        ideas.forEach((a) => { const li = document.createElement("li"); li.innerHTML = "<b></b> "; li.querySelector("b").textContent = a.name + ":"; li.append(a.idea); ul.appendChild(li); });
+        card.appendChild(ul);
+      }
+      const d = decisions.find((x) => x.round === r.id);
+      if (d && d.text) { const p = document.createElement("p"); p.className = "rdec"; p.textContent = "Decided: " + d.text; card.appendChild(p); }
+      grid.appendChild(card);
+    });
+  }
   function renderPulse() {
     if (typeof renderNotes === "function") renderNotes();
+    renderResults();
     const box = $("pulse"); if (!box) return; box.innerHTML = "";
     PEOPLE.filter((p) => p !== "Katrina").forEach((p) => {
       const c = checkins.find((x) => x.name === p && x.date === todayKey);
