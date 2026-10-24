@@ -1592,6 +1592,8 @@ window.p9SaveText = async (filename, text) => {
     const list = owner ? PEOPLE : me ? [me] : [];
     $("t-owner").innerHTML = list.map((p) => `<option>${p}</option>`).join("");
     $("t-owner").disabled = !owner;
+    // Visitors (not signed in, not the mentor) can look but not add
+    if (ref) $("composer").hidden = PREVIEW || (!owner && !me);
   }
   syncOwnerPicker();
   const soon = day0(); soon.setDate(soon.getDate() + 3); $("t-due").value = iso(soon);
@@ -1653,7 +1655,7 @@ window.p9SaveText = async (filename, text) => {
     ev.preventDefault();
     const title = $("t-title").value.trim(); if (!title || !ref) return;
     const who = $("t-owner").value;
-    if (!owner && who !== me) { toast("You can only add tasks to your own list."); return; }
+    if (!owner && (!me || who !== me)) { toast(me ? "You can only add tasks to your own list." : "Sign in with your name and PIN to add tasks."); return; }
     ref.add({ title, owner: who, due: $("t-due").value, status: "todo" }).then(() => { $("t-title").value = ""; toast(`Added to ${who}'s list`); }).catch(fail);
   });
 
@@ -1877,7 +1879,7 @@ window.p9SaveText = async (filename, text) => {
       cref = db.collection("checkins");
       cref.onSnapshot((snap) => { checkins = snap.docs.map((d) => d.data()); renderHere(); loadMine(); }, () => {});
       ref = db.collection("tasks");
-      $("composer").hidden = PREVIEW;
+      $("composer").hidden = PREVIEW || (!owner && !me);
       if (PREVIEW) readOnly = true;
       let first = true;
       ref.onSnapshot((snap) => {
