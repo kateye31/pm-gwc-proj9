@@ -2,7 +2,7 @@
 
 A Java OOP escape room for college students. A warlock traps you in his dungeon;
 you escape through 4 chambers by reading and reasoning about code.
-Design: Shirley's Group 9 design roadmap. Demo: Thursday, Nov 12.
+Design: Tvishaa's Group 9 design roadmap. Demo: Thursday, Nov 12.
 
 ## Run it
 

@@ -1,5 +1,5 @@
 // ALL GAME CONTENT LIVES HERE. Edit this file to change the story and puzzles.
-// Based on Shirley's Group 9 design roadmap: a warlock traps you in his dungeon,
+// Based on Tvishaa's Group 9 design roadmap: a warlock traps you in his dungeon,
 // and you escape through 4 chambers. Search for TODO to find open work.
 // OOP topics follow Sanjana's research (classes & objects, constructors & methods,
 // encapsulation, inheritance, polymorphism as the final boss).
