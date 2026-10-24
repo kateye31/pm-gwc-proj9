@@ -206,8 +206,11 @@
   function playControls() {
     const saved = store.get("p9-party", null);
     $("j-name").value = (saved && saved.name) || store.get("p9-me", "") || "";
-    if (saved && saved.date === today && saved.code === CODE && STUDENTS.includes(saved.name)) { me = saved.name; join(false); }
-    $("j-form").addEventListener("submit", (e) => {
+    const verified = store.get("p9-verified", "");
+    if (STUDENTS.includes(verified)) { $("j-name").value = verified; $("j-pin-row").hidden = true; }
+    if (saved && saved.date === today && saved.code === CODE && STUDENTS.includes(saved.name) && saved.name === verified) { me = saved.name; join(false); }
+    $("j-name").addEventListener("input", () => { $("j-pin-row").hidden = $("j-name").value.trim().toLowerCase() === verified.toLowerCase() && !!verified; });
+    $("j-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const code = $("j-code").value.trim().toUpperCase();
       const typed = $("j-name").value.trim().toLowerCase();
@@ -215,6 +218,12 @@
       if (code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
       if (typed === "katrina") { $("j-err").textContent = "Katrina, you're the host. Open the host screen instead."; return; }
       if (!name) { $("j-err").textContent = "Type your first name as it is on the team list."; return; }
+      if (store.get("p9-verified", "") !== name) {
+        const pin = $("j-pin").value.trim();
+        const ok = window.P9_PINS && window.P9_PIN_HASH && /^\d{4}$/.test(pin) && await window.P9_PIN_HASH(name, pin) === window.P9_PINS[name];
+        if (!ok) { $("j-err").textContent = "That PIN doesn't match. Ask Katrina if you forgot it."; $("j-pin").value = ""; return; }
+        store.set("p9-verified", name);
+      }
       me = name; store.set("p9-party", { code, name, date: today }); store.set("p9-me", name); store.set("p9-council-person", name);
       join(true);
     });

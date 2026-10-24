@@ -279,6 +279,23 @@ a { color: var(--parch); text-underline-offset: 3px; }
 @media (max-width: 1000px) { .pulse { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .pulse { grid-template-columns: 1fr; } .links li { grid-template-columns: 1fr auto; } .links code { grid-column: 1 / -1; grid-row: 2; } }
 
+/* PIN keypad */
+.pin { display: grid; justify-items: center; gap: 14px; padding: 6px 0 4px; }
+.pin h2 { font-family: var(--display); font-weight: 400; font-size: 26px; text-align: center; }
+.pin-dots { display: flex; gap: 14px; height: 18px; }
+.pin-dots i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--parch-2); transition: background-color 120ms ease, transform 160ms var(--ease-out); }
+.pin-dots i.on { background: var(--torch); border-color: var(--torch); transform: scale(1.1); }
+.pin-msg { min-height: 20px; font-size: 14px; color: var(--ember); text-align: center; }
+.keypad { display: grid; grid-template-columns: repeat(3, 76px); gap: 12px 18px; }
+.key { width: 76px; height: 76px; border-radius: 50%; border: 1px solid var(--plank); background: var(--wood-2); color: var(--parch); display: grid; place-content: center; justify-items: center; gap: 0; line-height: 1; transition: transform 120ms var(--ease-out), background-color 160ms ease; }
+.key b { font-size: 30px; font-weight: 400; font-family: var(--body); }
+.key small { font-size: 10px; letter-spacing: .22em; color: var(--parch-3); margin-top: 3px; min-height: 10px; }
+.key:active { transform: scale(0.94); background: var(--plank); }
+@media (hover: hover) and (pointer: fine) { .key:hover { border-color: var(--parch-3); } }
+.key.ghost { border-color: transparent; background: transparent; }
+.key.ghost small { letter-spacing: .02em; font-size: 13px; color: var(--parch-2); }
+.pin-back { border: 0; background: none; color: var(--parch-3); text-decoration: underline; text-underline-offset: 3px; font-size: 14px; padding: 6px; }
+
 /* Council notes */
 .md { margin-top: 16px; max-height: 560px; overflow: auto; padding: 18px 20px; border-radius: 14px; background: var(--night); border: 1px solid var(--line); font-size: 15px; line-height: 1.6; }
 .md h1 { font-family: var(--display); font-weight: 400; font-size: 24px; margin: 0 0 10px; }
@@ -700,9 +717,26 @@ window.p9SaveText = async (filename, text) => {
 
   // ---------- Who am I ----------
   // A personal link (#leslie, #sanjana, #shirley, #tvishaa, #katrina) signs that person in on this device.
+  // Each person confirms their name once per device with a 4-digit PIN Katrina gives them.
+  // Only SHA-256 hashes live in the page. It's a light check for a team of five, not real security.
+  const PINS = window.P9_PINS || {
+    Leslie: "3e37e34816d7e848de31dc4573e135e913898ffeaa572d11dbe0a59c8ee3ce21",
+    Sanjana: "37ba7dba927b62bf2d71469592eb4d3a1b40940efe45d4bab10df0f2fe1ae3bb",
+    Shirley: "3a2134fb3cad2d8f3f44e1408656f3562ffdc5ebc6e715c5c23d77d970e50bc5",
+    Tvishaa: "439c1da9aa2d0e18e62562a24b93523fe3be51bb99ae9aabb60a5460efea2d1d",
+    Katrina: "5f9b844685892b40f15fed7ad0344e30371558921a83bb123adb584fb8324100",
+  };
+  window.P9_PINS = PINS;
+  const pinHash = async (name, pin) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(name.toLowerCase() + ":" + pin)))].map((b) => b.toString(16).padStart(2, "0")).join("");
+  window.P9_PIN_HASH = pinHash;
   let me = store.get("p9-me", "");
+  if (store.get("p9-verified", "") !== me) me = "";
   const linked = PEOPLE.find((p) => p.toLowerCase() === (location.hash || "").slice(1).toLowerCase());
-  if (linked) { me = linked; store.set("p9-me", me); store.set("p9-council-person", me); }
+  let pending = "", pinEntry = "";
+  if (linked) {
+    if (store.get("p9-verified", "") === linked) { me = linked; store.set("p9-me", me); store.set("p9-council-person", me); }
+    else { me = ""; pending = linked; }
+  }
   if (!PEOPLE.includes(me)) me = "";
   const startScreen = linked ? (linked === "Katrina" ? "mentor" : "today") : (location.hash || "").slice(1);
   function renderMe() {
@@ -712,18 +746,60 @@ window.p9SaveText = async (filename, text) => {
     $("whoami-t").innerHTML = me ? `You're <b></b>` : "Not picked yet";
     if (me) $("whoami-t").querySelector("b").textContent = me;
     const c = $("hello-chips"); c.innerHTML = "";
-    PEOPLE.forEach((p) => {
-      const b = document.createElement("button"); b.type = "button"; b.className = "name-btn press"; b.textContent = p;
-      b.onclick = () => {
-        me = p; store.set("p9-me", p); store.set("p9-council-person", p);
-        renderMe(); loadMine(); renderTasks(); renderHere(); toast(`Hi ${p}!`);
-        anim($("today-body").children, { y: 10, opacity: 0, duration: .32, stagger: .05, ease: "power3.out", clearProps: "transform,opacity" });
-      };
-      c.appendChild(b);
-    });
+    const head = $("hello").querySelector("h2"), sub = $("hello").querySelector(".sub");
+    if (pending) {
+      head.hidden = true; sub.hidden = true; c.className = "";
+      renderKeypad(c);
+    } else {
+      head.hidden = false; sub.hidden = false; c.className = "names";
+      PEOPLE.forEach((p) => {
+        const b = document.createElement("button"); b.type = "button"; b.className = "name-btn press"; b.textContent = p;
+        b.onclick = () => { pending = p; pinEntry = ""; renderMe(); };
+        c.appendChild(b);
+      });
+    }
     syncCheckinBtn();
   }
-  $("whoami-change").onclick = () => { me = ""; store.set("p9-me", ""); renderMe(); go("today", true); };
+  $("whoami-change").onclick = () => { me = ""; pending = ""; store.set("p9-me", ""); store.set("p9-verified", ""); renderMe(); go("today", true); };
+
+  // Phone-style keypad: digits with their letters, like a real phone
+  const KEYS = [["1", ""], ["2", "ABC"], ["3", "DEF"], ["4", "GHI"], ["5", "JKL"], ["6", "MNO"], ["7", "PQRS"], ["8", "TUV"], ["9", "WXYZ"], ["", ""], ["0", "+"], ["del", ""]];
+  function renderKeypad(box) {
+    box.innerHTML = `<div class="pin"><h2></h2><p class="sub">Enter your 4-digit PIN</p><div class="pin-dots">${"<i></i>".repeat(4)}</div><p class="pin-msg" id="pin-msg"></p><div class="keypad"></div><button type="button" class="pin-back">Not you? Pick another name</button></div>`;
+    box.querySelector("h2").textContent = `Hi, ${pending}!`;
+    const pad = box.querySelector(".keypad");
+    KEYS.forEach(([d, letters]) => {
+      const k = document.createElement("button"); k.type = "button";
+      if (!d) { k.className = "key ghost"; k.disabled = true; k.setAttribute("aria-hidden", "true"); }
+      else if (d === "del") { k.className = "key ghost"; k.innerHTML = "<b>⌫</b><small>Delete</small>"; k.setAttribute("aria-label", "Delete"); k.onclick = () => pressKey("del"); }
+      else { k.className = "key"; k.innerHTML = `<b>${d}</b><small>${letters}</small>`; k.setAttribute("aria-label", d); k.onclick = () => pressKey(d); }
+      pad.appendChild(k);
+    });
+    box.querySelector(".pin-back").onclick = () => { pending = ""; pinEntry = ""; renderMe(); };
+    paintDots();
+  }
+  function paintDots() { document.querySelectorAll(".pin-dots i").forEach((dot, i) => dot.classList.toggle("on", i < pinEntry.length)); }
+  async function pressKey(d) {
+    if (!pending) return;
+    if (d === "del") { pinEntry = pinEntry.slice(0, -1); paintDots(); return; }
+    if (pinEntry.length >= 4) return;
+    pinEntry += d; paintDots();
+    if (pinEntry.length < 4) return;
+    const ok = PINS[pending] && await pinHash(pending, pinEntry) === PINS[pending];
+    if (!ok) {
+      $("pin-msg").textContent = "That PIN doesn't match. Ask Katrina if you forgot it.";
+      if (window.gsap && !calm) window.gsap.fromTo(".pin-dots", { x: -10 }, { x: 0, duration: .45, ease: "elastic.out(1, 0.3)" });
+      pinEntry = ""; setTimeout(paintDots, 250); return;
+    }
+    me = pending; pending = ""; pinEntry = "";
+    store.set("p9-me", me); store.set("p9-verified", me); store.set("p9-council-person", me);
+    renderMe(); loadMine(); renderTasks(); renderHere(); toast(`Hi ${me}!`);
+    anim($("today-body").children, { y: 10, opacity: 0, duration: .32, stagger: .05, ease: "power3.out", clearProps: "transform,opacity" });
+  }
+  document.addEventListener("keydown", (e) => {
+    if (!pending || e.target.closest("input,textarea")) return;
+    if (/^[0-9]$/.test(e.key)) pressKey(e.key); else if (e.key === "Backspace") pressKey("del");
+  });
 
   // ---------- Check-in ----------
   const MOODS = ["Wiped out", "Meh", "Okay", "Good", "Fired up"];

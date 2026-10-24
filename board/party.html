@@ -74,6 +74,10 @@
       <input class="p-in" id="j-code" maxlength="4" placeholder="Enter 4-letter code" autocapitalize="characters" spellcheck="false">
       <label class="p-lbl" for="j-name">Name</label>
       <input class="p-in" id="j-name" maxlength="12" placeholder="Enter your name" spellcheck="false">
+      <div id="j-pin-row" style="display:grid;gap:10px">
+        <label class="p-lbl" for="j-pin">PIN</label>
+        <input class="p-in" id="j-pin" maxlength="4" inputmode="numeric" autocomplete="off" placeholder="4 digits from Katrina" style="letter-spacing:.4em">
+      </div>
       <button class="p-btn p-go p-wide" type="submit" id="j-go">Play</button>
       <p class="p-err" id="j-err" role="alert"></p>
     </form>
