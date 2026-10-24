@@ -2416,13 +2416,17 @@ window.p9SaveText = async (filename, text) => {
 
   // ---------- Player ----------
   let draft = { round: "", pick: "", idea: "", due: "" };
+  // After the live Council ends, a player who missed rounds answers them on her own, no host or timer.
+  const missing = () => ALL.filter((r) => !r.optional && !answers.some((a) => a.round === r.id && a.name === me));
+  const catchUp = () => finished() && missing().length > 0;
+  const playRound = () => catchUp() ? missing()[0] : round();
   function renderPlay() {
     if (!me) return;
     $("j-form").hidden = true; $("j-phone").hidden = false;
     $("j-av").outerHTML = `<span class="p-av" id="j-av" style="background:${COLOR[me]}">${face(4)}</span>`;
     $("j-name-t").textContent = me; $("j-code-t").innerHTML = `Room <b>${CODE}</b>`;
-    const r = round();
-    const answering = !finished() && (state.phase === "running" || state.phase === "catchup");
+    const r = playRound();
+    const answering = catchUp() || (!finished() && (state.phase === "running" || state.phase === "catchup"));
     $("j-wait").hidden = answering; $("j-answer").hidden = !answering;
     if (!answering) {
       const t = finished() ? ["That's a wrap!", "Thanks for shaping the game. Time to build."]
@@ -2457,6 +2461,7 @@ window.p9SaveText = async (filename, text) => {
   function syncPicks() { [...$("j-picks").children].forEach((b) => b.setAttribute("aria-checked", String(b.dataset.id === draft.pick))); }
   function paintPlayTimer() {
     if (mode !== "play" || $("j-answer").hidden) return;
+    if (catchUp()) { const left = missing().length; $("j-time").textContent = `Catch-up · ${left} question${left === 1 ? "" : "s"} left · no timer`; $("j-send").disabled = !ansRef; return; }
     const s = secsLeft(), closed = state.phase === "running" && s <= 0;
     $("j-time").textContent = state.phase === "catchup" ? "Catch-up: no timer" : closed ? "Time's up" : `${mmss(s)} left`;
     $("j-send").disabled = closed || !ansRef;
@@ -2489,7 +2494,7 @@ window.p9SaveText = async (filename, text) => {
     $("j-due").addEventListener("input", () => { draft.due = $("j-due").value; });
     $("j-answer").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const r = round();
+      const r = playRound();
       if (!r.free && !draft.pick) { $("j-msg").textContent = "Pick one first, or choose \"I have another idea.\""; return; }
       if ((r.free || draft.pick === "own") && !draft.idea.trim()) { $("j-msg").textContent = "Write your idea before sending."; return; }
       if (r.due && !draft.due) { $("j-msg").textContent = "Choose a date you can show it."; return; }
