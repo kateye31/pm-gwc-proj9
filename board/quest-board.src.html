@@ -1487,9 +1487,11 @@ window.P9_STARTER = /*@STARTER@*/{};
   $("adder").addEventListener("toggle", () => { if ($("adder").open) $("t-title").focus(); });
 
   // ---------- Your unfinished tasks: nav badge + one reminder per visit ----------
-  const myOpen = () => tasks.filter((t) => t.owner === me && t.status !== "done").sort((a, b) => String(a.due || "9").localeCompare(String(b.due || "9")));
+  // The board's owner is Katrina even before she picks her name
+  const whoAmI = () => me || (owner && !PREVIEW ? "Katrina" : "");
+  const myOpen = () => tasks.filter((t) => t.owner === whoAmI() && t.status !== "done").sort((a, b) => String(a.due || "9").localeCompare(String(b.due || "9")));
   function renderBadges() {
-    const n = me && !PREVIEW ? myOpen().length : 0;
+    const n = whoAmI() && !PREVIEW ? myOpen().length : 0;
     document.querySelectorAll('[data-go="tasks"] .badge').forEach((el) => { el.hidden = !n; el.textContent = n > 9 ? "9+" : String(n); });
     document.querySelectorAll('.nav [data-go="tasks"], .tabbar [data-go="tasks"]').forEach((el) => { if (n) el.setAttribute("aria-label", `Team tasks, ${n} to do`); else el.removeAttribute("aria-label"); });
   }
@@ -1503,7 +1505,7 @@ window.P9_STARTER = /*@STARTER@*/{};
     return days === 0 ? "due today" : days === 1 ? "due tomorrow" : `due ${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`;
   };
   function maybeNudge() {
-    if (nudged || !me || PREVIEW || ORGANIZER || document.body.classList.contains("party-mode")) return;
+    if (nudged || !whoAmI() || PREVIEW || ORGANIZER || document.body.classList.contains("party-mode")) return;
     const st = store.get(REMIND, {}) || {};
     if (st.off || (st.snooze && st.snooze > todayKey)) return;
     const open = myOpen(); if (!open.length) return;
@@ -1524,7 +1526,7 @@ window.P9_STARTER = /*@STARTER@*/{};
   $("nudge-view").onclick = () => {
     closeNudge();
     go("tasks", true);
-    const card = [...document.querySelectorAll("#people .person")].find((c) => c.querySelector(".person-h b").textContent === me);
+    const card = [...document.querySelectorAll("#people .person")].find((c) => c.querySelector(".person-h b").textContent === whoAmI());
     if (card) card.scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" });
   };
   $("nudge-later").onclick = () => { const t = day0(); t.setDate(t.getDate() + 1); closeNudge({ snooze: iso(t) }); toast("Okay, I'll remind you tomorrow."); };
