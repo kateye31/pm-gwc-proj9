@@ -126,7 +126,18 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .here { display: flex; flex-wrap: wrap; gap: var(--s2) var(--s1); }
 .here figure { margin: 0; display: grid; justify-items: center; gap: 4px; width: 60px; }
 .here svg { width: 48px; height: 48px; }
-.here .away { width: 48px; height: 48px; border-radius: 50%; border: 1.5px dashed var(--plank); }
+.here .initial { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--wood-2); border: 1px solid var(--plank); font-weight: 700; font-size: 18px; color: var(--parch); }
+.here-empty { font-size: 14.5px; color: var(--parch-3); }
+.here-past { list-style: none; margin: var(--s2) 0 0; padding: 0; display: grid; }
+.here-past li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px var(--s2); padding: 10px 0; border-top: 1px solid var(--line); font-size: 14.5px; }
+.here-past b { font-weight: 700; }
+.here-past span { color: var(--parch-2); }
+/* Live: attendance per meeting */
+.meet-admin { display: grid; margin-top: var(--s2); }
+.meet-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s1) var(--s2); padding: 12px 0; border-top: 1px solid var(--line); }
+.meet-row > b { font-size: 15px; }
+.meet-row > b small { font-weight: 400; color: var(--parch-3); margin-left: 6px; }
+.meet-row .chip { height: 34px; font-size: 14px; }
 .here figcaption { font-size: 13px; color: var(--parch-2); }
 .growth { display: grid; gap: 16px; }
 .g-row { display: grid; gap: 2px; }
@@ -573,8 +584,10 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
               <ul class="rows" id="my-tasks" style="margin-top:10px"></ul>
             </div>
             <div class="card">
-              <h2>Who's here</h2>
-              <div class="here" id="here" style="margin-top:14px"></div>
+              <h2 id="here-h">Who came</h2>
+              <p class="foot" id="here-sub" style="margin-top:4px"></p>
+              <div class="here" id="here" style="margin-top:var(--s2)"></div>
+              <ul class="here-past" id="here-past" aria-label="Earlier meetings"></ul>
             </div>
             <div class="card">
               <h2>Your growth</h2>
@@ -782,6 +795,11 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
         <p>Only you see this page. It updates on its own as the team checks in, ticks tasks and answers the Council.</p>
       </div>
       <div class="pulse" id="pulse"></div>
+      <div class="card">
+        <div class="head"><h2>Meetings</h2><button class="btn press" type="button" id="meet-new">Start today's meeting</button></div>
+        <p class="foot" style="margin-top:4px">Tap a name to mark who came. Anyone who checks in on a meeting day is added on their own.</p>
+        <div class="meet-admin" id="meet-admin"></div>
+      </div>
       <div class="grid-2">
         <div class="card">
           <div class="head"><h2>Council right now</h2><button class="btn solid press" type="button" onclick="window.P9_PARTY && window.P9_PARTY('host')">Open host screen</button></div>
@@ -1101,21 +1119,74 @@ window.P9_STARTER = /*@STARTER@*/{};
     ev.preventDefault();
     if (!me || !cref || !pick.mood) return;
     cref.doc(`${todayKey}_${me}`).set({ name: me, date: todayKey, mood: pick.mood, github: pick.github, vscode: pick.vscode, oop: pick.oop })
-      .then(() => toast(`Thanks, ${me}! You're checked in.`)).catch(fail);
+      .then(() => { markHere(me); toast(`Thanks, ${me}! You're checked in.`); }).catch(fail);
   });
 
   const SKILLS = [["GitHub", "github"], ["VS Code", "vscode"], ["OOP fundamentals", "oop"]];
   const seen = new Set();
+  // ---------- Meetings: who came ----------
+  // Attendance lives in workshop_sessions as attend-<n> docs: { kind: "attendance", n, date, attended: [names] }
+  let meetings = [], sref = null;
+  const KIDS = PEOPLE.filter((p) => p !== "Katrina");
+  const meetDay = (d) => { const x = new Date(d + "T00:00"); return isNaN(x) ? "" : x.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }); };
+  const meetName = (m) => `Meeting ${m.n}` + (m.date ? " · " + meetDay(m.date) : "");
+  // Live (owner only): tap names to fix attendance, start a new meeting for today
+  function renderMeetAdmin() {
+    const box = $("meet-admin"); if (!box) return; box.innerHTML = "";
+    const latest = meetings[0];
+    $("meet-new").disabled = !sref || (latest && latest.date === todayKey);
+    $("meet-new").textContent = latest && latest.date === todayKey ? `Meeting ${latest.n} is today` : `Start meeting ${latest ? latest.n + 1 : 1} today`;
+    if (!meetings.length) { const e = document.createElement("p"); e.className = "foot"; e.textContent = "No meetings yet."; box.appendChild(e); return; }
+    meetings.forEach((m) => {
+      const r = document.createElement("div"); r.className = "meet-row";
+      r.innerHTML = `<b></b><div class="chips" role="group"></div>`;
+      r.querySelector("b").innerHTML = `Meeting ${m.n}<small></small>`; r.querySelector("small").textContent = m.date ? meetDay(m.date) : "no date";
+      r.querySelector(".chips").setAttribute("aria-label", `Who came to meeting ${m.n}`);
+      KIDS.forEach((p) => {
+        const on = (m.attended || []).includes(p);
+        const c = document.createElement("button"); c.type = "button"; c.className = "chip press"; c.textContent = p; c.setAttribute("aria-pressed", String(on));
+        c.onclick = () => { const next = on ? m.attended.filter((x) => x !== p) : [...(m.attended || []), p]; sref.doc(m.id).update({ attended: next }).catch(fail); };
+        r.querySelector(".chips").appendChild(c);
+      });
+      box.appendChild(r);
+    });
+  }
+  $("meet-new").onclick = () => {
+    if (!sref) return;
+    const n = meetings.length ? meetings[0].n + 1 : 1;
+    const here = KIDS.filter((p) => checkins.some((c) => c.name === p && c.date === todayKey));
+    sref.doc("attend-" + n).set({ kind: "attendance", n, date: todayKey, attended: here }).then(() => toast(`Meeting ${n} started`)).catch(fail);
+  };
+  // Checking in on a meeting day counts as coming
+  function markHere(name) {
+    const m = meetings[0];
+    if (!sref || !m || m.date !== todayKey || !KIDS.includes(name) || (m.attended || []).includes(name)) return;
+    sref.doc(m.id).update({ attended: [...(m.attended || []), name] }).catch(() => {});
+  }
   function renderHere() {
     const f = $("here"); f.innerHTML = ""; const fresh = [];
-    PEOPLE.forEach((p) => {
-      const c = checkins.find((x) => x.name === p && x.date === todayKey);
+    const latest = meetings[0];
+    $("here-h").textContent = latest && latest.date === todayKey ? "Who's here" : "Who came";
+    $("here-sub").textContent = latest ? meetName(latest) : "Shows who came once the first meeting starts.";
+    // Only the people who came. Nobody gets an empty "missing" circle.
+    const came = latest ? KIDS.filter((p) => (latest.attended || []).includes(p)) : [];
+    came.forEach((p) => {
+      const c = latest.date && checkins.find((x) => x.name === p && x.date === latest.date);
       const fig = document.createElement("figure");
-      fig.innerHTML = (c ? face(c.mood) : '<span class="away" aria-label="Not checked in"></span>') + "<figcaption></figcaption>";
+      fig.innerHTML = (c ? face(c.mood) : `<span class="initial" aria-hidden="true">${p[0]}</span>`) + "<figcaption></figcaption>";
       fig.querySelector("figcaption").textContent = p;
       f.appendChild(fig);
-      if (c && !seen.has(p)) { seen.add(p); fresh.push(fig.firstChild); }
+      if (!seen.has(p)) { seen.add(p); fresh.push(fig.firstChild); }
     });
+    if (latest && !came.length) { const e = document.createElement("p"); e.className = "here-empty"; e.textContent = "No one yet. Check in to show up here."; f.appendChild(e); }
+    const past = $("here-past"); past.innerHTML = "";
+    meetings.slice(1).forEach((m) => {
+      const li = document.createElement("li"); li.innerHTML = "<b></b><span></span>";
+      li.querySelector("b").textContent = meetName(m);
+      li.querySelector("span").textContent = KIDS.filter((p) => (m.attended || []).includes(p)).join(", ") || "No one marked";
+      past.appendChild(li);
+    });
+    renderMeetAdmin();
     anim(fresh, { scale: .8, opacity: 0, duration: .45, ease: "back.out(2)", stagger: .06, transformOrigin: "50% 50%" });
     const g = $("growth"); g.innerHTML = "";
     SKILLS.forEach(([label, field]) => g.appendChild(growthRow(label, field)));
@@ -1773,6 +1844,8 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
       db.doc("workshop_sessions/meeting-1").onSnapshot((d) => { session = d.exists ? d.data() : null; renderPulse(); }, () => {});
       db.collection("workshop_answers").onSnapshot((snap) => { answers = snap.docs.map((d) => d.data()).filter((a) => a.session === "meeting-1"); renderPulse(); }, () => {});
       db.collection("workshop_decisions").onSnapshot((snap) => { decisions = snap.docs.map((d) => d.data()).filter((d) => d.session === "meeting-1"); renderPulse(); }, () => {});
+      sref = db.collection("workshop_sessions");
+      sref.onSnapshot((snap) => { meetings = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((m) => m.kind === "attendance" && typeof m.n === "number").sort((a, b) => b.n - a.n); renderHere(); }, () => {});
       cref = db.collection("checkins");
       cref.onSnapshot((snap) => { checkins = snap.docs.map((d) => d.data()); renderHere(); loadMine(); }, () => {});
       ref = db.collection("tasks");
