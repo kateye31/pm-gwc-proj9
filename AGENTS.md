@@ -12,6 +12,7 @@ Team: Leslie, Sanjana (build), Shirley, Tvishaa (design). Mentor: Katrina.
   - Edit `quest-board.src.html`, then run `python board/build.py` (it inlines `fonts/` into `quest-board.html`). Never hand-edit `quest-board.html`.
   - It is a page fragment: no `<html>/<head>/<body>` tags (the host adds them). Keep `<title>` and `<style>` at the top.
   - Single dark theme ("lantern-lit dungeon"). Colors only via the `:root` tokens.
+  - Public-site font: Beanzo is personal-use only, so `build_site.py` swaps in an open (OFL) Google Font for `--display` on GitHub Pages (now Archivo Black). Change it there, not in the board source. Font comparison: `board/fonts/specimen.jpg`.
   - Fonts: Beanzo (the team's font) for screen titles and big numbers only. All readable text (body, labels, buttons, small text) is Atkinson Hyperlegible (Google Fonts), fallback Times New Roman. Never Newstan/Road Hunter for small text: they're display fonts and unreadable small. No Inter/Geist.
   - Layout: app shell with screens My quest (`today`), Council, Team tasks, Game plan, plus Live (`mentor`), shown only when `user.isOwner()` is true. Personal links `#leslie`, `#sanjana`, `#shirley`, `#tvishaa`, `#katrina` pick the person and their Council seat. Don't add tabs; put new things inside an existing screen.
   - QA: `node board/checks/browser-qa.cjs` (needs Chrome). `council-tests.cjs` is a module the runner calls; running it alone tests nothing.
