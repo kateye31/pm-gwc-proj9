@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" type="image/png" href="icon-board.png"><link rel="apple-touch-icon" href="icon-board.png"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap"><style>:root{--display:"Archivo Black","Atkinson Hyperlegible",sans-serif !important}</style><script src="config.js"></script><script>// Runs the board outside claude.ai. The board talks to `window.claude.use(name)`;
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" type="image/png" href="icon-board.png"><link rel="apple-touch-icon" href="icon-board.png"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jacquard+24&display=swap"><style>:root{--display:"Jacquard 24","Atkinson Hyperlegible",serif !important}</style><script src="config.js"></script><script>// Runs the board outside claude.ai. The board talks to `window.claude.use(name)`;
 // this file answers those calls with Firebase (shared, no sign-in) or a demo store (one computer).
 (() => {
   const firebaseConfig = window.P9_FIREBASE;
@@ -111,6 +111,11 @@
   --on-torch: #2a1300;
   --ember: #f08a4b;
   --moss: #c2ba52;
+  --stone: #211b17;
+  --stone-hi: rgba(246, 232, 207, .12);
+  --stone-low: rgba(5, 3, 2, .32);
+  --rune: rgba(255, 194, 26, .16);
+  --mortar-line: rgba(246, 232, 207, .025);
   /* Depth: several soft, offset shadows tinted with the wood (never pure black), plus a lit top edge */
   --shadow: inset 0 1px 0 rgba(255,230,190,.05), 0 1px 2px rgba(10,6,3,.45), 0 6px 12px -4px rgba(10,6,3,.4), 0 20px 36px -18px rgba(10,6,3,.75);
   --shadow-lift: inset 0 1px 0 rgba(255,255,255,.28), 0 1px 2px rgba(10,6,3,.4), 0 6px 14px -6px rgba(240,160,14,.45);
@@ -551,6 +556,118 @@ body.p9-readonly .council-entry, body.p9-readonly #council-submit, body.p9-reado
 .decided-list b { font-size: 13px; font-weight: 400; color: var(--parch-3); }
 .decided-list span { font-size: 16px; font-weight: 700; color: var(--parch); }
 .decided-list small { font-size: 13px; color: var(--moss); }
+
+/* Lantern-lit dungeon identity: worn stone, carved frames, and warm metal fittings. */
+body {
+  background-color: var(--night);
+  background-image:
+    linear-gradient(var(--mortar-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mortar-line) 1px, transparent 1px),
+    radial-gradient(circle at 72% 8%, var(--rune), transparent 30%);
+  background-size: 64px 32px, 64px 32px, auto;
+  background-position: 0 0, 32px 16px, 0 0;
+}
+.side {
+  border-right-color: var(--plank);
+  background-color: var(--wood);
+  background-image:
+    linear-gradient(90deg, transparent, var(--stone-low)),
+    repeating-linear-gradient(0deg, transparent 0 31px, var(--mortar-line) 31px 32px);
+  box-shadow: inset -1px 0 var(--stone-low), inset -4px 0 12px var(--stone-low);
+}
+.brand b,
+.screen-head h1,
+.days b,
+.clock,
+.hello h2,
+.pin h2,
+.md h1 {
+  letter-spacing: .025em;
+}
+.screen-head h1 {
+  font-size: clamp(40px, 5vw, 58px);
+  line-height: .9;
+}
+.card > h2,
+.card > .head > h2,
+.meet-strip h2,
+.person-h b,
+.kid-top b,
+.stage h3,
+.leg b,
+.council-entry h3,
+.council-question > h3 {
+  line-height: 1.15;
+  letter-spacing: .035em;
+}
+.card > h2, .card > .head > h2, .meet-strip h2 { font-size: 23px; }
+.days b { font-size: 38px; line-height: .82; }
+.clock { line-height: .78; }
+.card,
+.hello,
+.council {
+  border-color: var(--plank);
+  border-radius: 8px 16px 8px 16px;
+  background-color: var(--wood);
+  background-image:
+    linear-gradient(135deg, var(--stone-hi), transparent 18px),
+    var(--lantern),
+    repeating-linear-gradient(0deg, transparent 0 39px, var(--mortar-line) 39px 40px);
+  box-shadow:
+    inset 0 0 0 1px var(--stone-low),
+    inset 0 1px var(--stone-hi),
+    0 12px 30px -22px var(--night);
+}
+.card::selection, .hello::selection { background: var(--torch); color: var(--on-torch); }
+.nav button,
+.btn,
+.chip,
+.name-btn,
+.composer input,
+.composer select,
+.helper textarea {
+  border-radius: 4px 9px 4px 9px;
+}
+.nav button[aria-current="page"] {
+  border: 1px solid var(--plank);
+  background-image: linear-gradient(90deg, var(--rune), transparent 72%);
+  box-shadow: inset 0 1px var(--stone-hi), inset 0 -1px var(--stone-low);
+}
+.btn {
+  border-color: var(--plank);
+  background-color: var(--stone);
+  background-image: linear-gradient(180deg, var(--stone-hi), transparent 45%);
+  box-shadow: inset 0 1px var(--stone-hi), inset 0 -2px var(--stone-low);
+}
+.btn.solid,
+.rc.A,
+.nudge-ic {
+  background-image: linear-gradient(180deg, var(--parch), var(--torch) 35%, var(--torch-2));
+  border-color: var(--torch-2);
+  box-shadow: inset 0 1px var(--parch), inset 0 -2px var(--stone-low), 0 0 18px var(--rune);
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover:not(:disabled) { border-color: var(--parch-3); background-color: var(--wood-2); }
+  .btn.solid:hover:not(:disabled) { background-image: linear-gradient(180deg, var(--parch), var(--torch)); border-color: var(--parch-2); }
+}
+.face-btn,
+.scale,
+.helper-a,
+.rres,
+.md,
+.scroll-note {
+  border-radius: 5px 11px 5px 11px;
+}
+.tag,
+.lvl,
+.row-where code,
+.helper-a code { border-radius: 3px; }
+.nudge {
+  border-color: var(--plank);
+  border-radius: 7px 16px 7px 16px;
+  background-color: var(--wood-2);
+  background-image: linear-gradient(135deg, var(--stone-hi), transparent 20px), var(--lantern);
+}
 
 /* Inlined by build.py. All interface colors use the board's theme tokens. */
 .council { border: 1px solid var(--plank); border-radius: 24px; overflow: hidden; background: var(--night); }

@@ -29,8 +29,8 @@ def page(config_src, extra="", icon="icon-board.png", title="Knight's Escape"):
         "body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>"
         # Open-licensed fonts for the public site (Beanzo is personal-use only)
         '<link rel="preconnect" href="https://fonts.googleapis.com">'
-        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap">'
-        '<style>:root{--display:"Archivo Black","Atkinson Hyperlegible",sans-serif !important}</style>'
+        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jacquard+24&display=swap">'
+        '<style>:root{--display:"Jacquard 24","Atkinson Hyperlegible",serif !important}</style>'
         f'<script src="{config_src}"></script>{extra}<script>{shim}</script>'
         f"</head><body>{bundle}</body></html>"
     )
