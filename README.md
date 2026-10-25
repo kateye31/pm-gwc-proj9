@@ -28,11 +28,11 @@ Demo day is **Thursday, November 12, 2026**. The game design is Tvishaa's (the G
 
 ## What it does
 
-The board has four screens, plus one only the mentor sees. Each person opens a personal link (`#leslie`, `#sanjana`…), signs in once with a 4-digit PIN on a phone-style keypad, and stays signed in on that device.
+The board has four screens, plus one only the mentor sees. Each person opens a personal link (`#leslie`, `#sanjana`…), signs in once with a 4-digit PIN on a phone-style keypad (or pastes it), and stays signed in on that device.
 
 - **My quest.** A 20-second check-in (mood plus GitHub, VS Code and OOP comfort from 1 to 5) that charts each person's growth over the weeks. Her own tasks, each with **where to start** (`rooms.js, line 80 · LAB.steps`) and **what done looks like**. Who came to the latest meeting, and a short history of earlier ones.
-- **Stuck? Ask for help.** Questions go out with the project already explained: the starter's real code with line numbers and her open tasks. So "which line do I work on?" gets a real answer. The AI is told to give hints first and not write the task for her. On claude.ai it answers on the page; on the public site it opens ChatGPT or Claude with the question filled in.
-- **Team tasks.** Everyone's tasks, calm by default: the next 2 per person, with **Show all** and **Details** one tap away. Your own card opens on its own. A badge on the nav counts your unfinished tasks.
+- **Stuck? Ask for help**, a floating button on every screen. Questions go out with the project already explained: the starter's real code with line numbers and her open tasks. So "which line do I work on?" gets a real answer. The AI is told to give hints first and not write the task for her. On claude.ai it answers on the page; on the public site it opens ChatGPT or Claude with the question filled in, and **Ask in VS Code** copies a version for the AI chat inside VS Code, which can read the repo.
+- **Team tasks.** Everyone's tasks, calm by default: the next 2 per person, with **Show all** and **Details** one tap away. Your own card comes first, open, with a **You** tag. A badge on the nav counts your unfinished tasks, and a reminder shows once per visit.
 - **Council.** A party game for team decisions, inspired by Jackbox: the mentor streams the big screen, everyone answers on their phone, and the answers are revealed together. Missed the meeting? **Catch-up mode** walks you through the rounds you missed, with no timer and no screenshare.
 - **Game plan.** The dungeon map (four chambers and what each teaches), the schedule to demo day, and a charter with a **who-does-what (RACI) matrix** and a risk register.
 - **Live** (mentor only). A card per student, attendance per meeting, the Council in real time, results and notes that write themselves as Markdown, a meeting timer, and "see the site as…" previews.
@@ -100,14 +100,14 @@ The team is four students, so the board stores as little as possible.
 - **First names only.** No emails, accounts or real passwords. PINs are stored as SHA-256 hashes, never as the PIN.
 - **A PIN is a light gate, not real security.** It stops classmates from checking in as each other. The real protection is the Firestore rules: only the board's own collections, at most 12 fields per record, and everything expires on Dec 31, 2026.
 - **The mentor view** unlocks with a key whose hash is in [`config.js`](docs/config.js); the key itself is never in the repo.
-- **Art is human-made.** Public-domain paintings and manuscripts (Wikimedia Commons), credited on the page where they appear: the Round Table (Lancelot manuscript, BnF MS fr. 120, c. 1400), Gawain (Cotton Nero A.x, c. 1400), J. M. W. Turner's *Ulysses Deriding Polyphemus* (1829) and J. R. Skelton's *Beowulf and the Dragon* (1908). No AI-generated images.
+- **Art is human-made.** Public-domain paintings and manuscripts (Wikimedia Commons), credited on the page where they appear: the Round Table (Lancelot manuscript, BnF MS fr. 120, c. 1400), Gawain (Cotton Nero A.x, c. 1400), J. M. W. Turner's *Ulysses Deriding Polyphemus* (1829) and J. R. Skelton's *Beowulf and the Dragon* (1908). The RACI card uses one licensed illustration, *Image by vectorjuice on Freepik*, credited under it. No AI-generated images.
 - **These screenshots use sample check-ins.** Tasks, meetings and Council answers are the team's; moods and skill ratings are made up, so nobody's real ratings are in a public README.
 
 ## Design
 
-- **One dark theme**, "lantern-lit dungeon": warm near-black wood, parchment text, torch gold only for what is live or primary. Every color is a `:root` token.
-- **Readable first.** Body text is [Atkinson Hyperlegible](https://www.brailleinstitute.org/freefont/), designed for low-vision readers. The team's display font is used for titles and big numbers only.
-- **An 8px spacing scale**, layered soft shadows tinted with the wood color (never pure black), and a grayscale check: every screen keeps its hierarchy with the color removed.
+- **One dark theme**, "lantern-lit dungeon": warm near-black wood with a faint stone-block texture, carved card corners, thin gothic arches on screen titles, and torch gold only for what is live or primary. Buttons are matte, with no shine or glow. Every color is a `:root` token.
+- **Readable first.** Body text is [Atkinson Hyperlegible](https://www.brailleinstitute.org/freefont/), designed for low-vision readers. Titles use a castle face: the team's font on claude.ai, and [Grenze Gotisch](https://fonts.google.com/specimen/Grenze+Gotisch) (open license) on the public site, chosen after comparing 8 fonts on the real headings. Buttons, letters, room codes and numbers always use bold Atkinson, because blackletter is hard to read small.
+- **Checked, not eyeballed.** A Playwright audit runs every screen at laptop and phone width and flags any title-font text under 18px and any text under 4.5:1 contrast. An 8px spacing scale, soft shadows tinted with the wood color (never pure black), and a grayscale check keep the hierarchy clear.
 - **Motion that stays out of the way.** Transform and opacity only, under 300 ms, ease-out, and turned off for anyone who prefers reduced motion.
 
 ## Run it yourself

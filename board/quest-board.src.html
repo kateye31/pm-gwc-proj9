@@ -363,10 +363,27 @@ body.party-mode .help-fab, body.party-mode .help-panel { display: none; }
   .raci-row > .rc-cell::after { content: attr(data-who); font-size: 12.5px; color: var(--parch-3); }
   .raci-row > .me { background: none; } .raci-row > .me::after { color: var(--torch); font-weight: 700; }
 }
-.lvl { display: inline-block; font-size: 13px; font-weight: 700; padding: 0 8px; border-radius: 5px; white-space: nowrap; }
-.lvl.hi { background: var(--ember); color: var(--mortar); }
-.lvl.md { background: var(--torch); color: var(--on-torch); }
-.lvl.lo { background: var(--moss); color: #1f2310; }
+/* Risk register: the same row-and-chip language as the RACI above it */
+.risk-register { display: grid; }
+.risk-row { display: grid; grid-template-columns: minmax(220px, 1.7fr) minmax(72px, .55fr) minmax(72px, .55fr) minmax(84px, .7fr); align-items: stretch; border-top: 1px solid var(--line); }
+.risk-row.risk-head { border-top: 0; }
+.risk-row > * { display: grid; place-items: center; padding: 12px 4px; min-width: 0; }
+.risk-row > .risk-work { place-items: center start; padding-left: 0; }
+.risk-work b { font-weight: 700; font-size: 15.5px; }
+.risk-work small { display: block; color: var(--parch-3); font-size: 13.5px; line-height: 1.4; }
+.risk-head small { color: var(--parch-3); font-size: 13px; }
+.risk-owner { font-size: 15px; }
+.risk-chip { min-width: 52px; height: 32px; padding: 0 10px; border-radius: 9px; display: inline-grid; place-items: center; font-size: 13.5px; font-weight: 700; line-height: 1; white-space: nowrap; }
+.risk-chip.high { background: var(--ember); color: var(--mortar); }
+.risk-chip.med { border: 1.5px solid var(--torch); color: var(--torch); }
+.risk-chip.low { border: 1px dashed var(--plank); color: var(--parch-3); font-weight: 400; }
+@media (max-width: 640px) {
+  .risk-head { display: none; }
+  .risk-row { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: var(--s2) 0 var(--s1); }
+  .risk-row > .risk-work { grid-column: 1 / -1; padding: 0 0 var(--s1); }
+  .risk-row > .risk-level, .risk-row > .risk-owner { gap: 4px; padding: 4px 0; }
+  .risk-row > .risk-level::after, .risk-row > .risk-owner::after { content: attr(data-label); font-size: 12.5px; color: var(--parch-3); }
+}
 .ap { color: var(--moss); } .col { color: var(--ember); }
 .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 32px; }
 .two h3 { font-size: 15px; color: var(--torch); margin: 10px 0 6px; }
@@ -948,16 +965,14 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
         <div class="card">
           <h2>Risk register</h2>
           <p class="foot" style="margin:4px 0 12px">Reviewed at every meeting.</p>
-          <div class="tbl-wrap"><table class="tbl">
-            <thead><tr><th>Risk</th><th>Likely</th><th>Impact</th><th>Plan</th><th>Owner</th></tr></thead>
-            <tbody>
-              <tr><td>Low attendance</td><td><span class="lvl hi">High</span></td><td><span class="lvl hi">High</span></td><td class="sub">Tasks live on the board; Wednesday check-in; DM absent people</td><td>Katrina</td></tr>
-              <tr><td>Scope creep</td><td><span class="lvl hi">High</span></td><td><span class="lvl md">Med</span></td><td class="sub">New ideas go on a later list; feature freeze Nov 9</td><td>Katrina</td></tr>
-              <tr><td>Starter won't run</td><td><span class="lvl md">Med</span></td><td><span class="lvl md">Med</span></td><td class="sub">Pair with whoever has it running</td><td>Leslie</td></tr>
-              <tr><td>Puzzles too hard</td><td><span class="lvl md">Med</span></td><td><span class="lvl hi">High</span></td><td class="sub">Week-2 playtests; two hints per puzzle</td><td>Sanjana</td></tr>
-              <tr><td>Demo breaks</td><td><span class="lvl lo">Low</span></td><td><span class="lvl hi">High</span></td><td class="sub">Backup video recorded by Nov 11</td><td>Katrina</td></tr>
-            </tbody>
-          </table></div>
+          <div class="risk-register" role="table" aria-label="Risk register">
+            <div class="risk-row risk-head" role="row"><span class="risk-work" role="columnheader"><small>Risk and plan</small></span><span role="columnheader"><small>Likely</small></span><span role="columnheader"><small>Impact</small></span><span role="columnheader"><small>Owner</small></span></div>
+            <div class="risk-row" role="row"><span class="risk-work" role="rowheader"><span><b>Low attendance</b><small>Tasks live on the board; Wednesday check-in; DM absent people</small></span></span><span class="risk-level" role="cell" data-label="Likely"><span class="risk-chip high">High</span></span><span class="risk-level" role="cell" data-label="Impact"><span class="risk-chip high">High</span></span><span class="risk-owner" role="cell" data-label="Owner">Katrina</span></div>
+            <div class="risk-row" role="row"><span class="risk-work" role="rowheader"><span><b>Scope creep</b><small>New ideas go on a later list; feature freeze Nov 9</small></span></span><span class="risk-level" role="cell" data-label="Likely"><span class="risk-chip high">High</span></span><span class="risk-level" role="cell" data-label="Impact"><span class="risk-chip med">Med</span></span><span class="risk-owner" role="cell" data-label="Owner">Katrina</span></div>
+            <div class="risk-row" role="row"><span class="risk-work" role="rowheader"><span><b>Starter won't run</b><small>Pair with whoever has it running</small></span></span><span class="risk-level" role="cell" data-label="Likely"><span class="risk-chip med">Med</span></span><span class="risk-level" role="cell" data-label="Impact"><span class="risk-chip med">Med</span></span><span class="risk-owner" role="cell" data-label="Owner">Leslie</span></div>
+            <div class="risk-row" role="row"><span class="risk-work" role="rowheader"><span><b>Puzzles too hard</b><small>Week-2 playtests; two hints per puzzle</small></span></span><span class="risk-level" role="cell" data-label="Likely"><span class="risk-chip med">Med</span></span><span class="risk-level" role="cell" data-label="Impact"><span class="risk-chip high">High</span></span><span class="risk-owner" role="cell" data-label="Owner">Sanjana</span></div>
+            <div class="risk-row" role="row"><span class="risk-work" role="rowheader"><span><b>Demo breaks</b><small>Backup video recorded by Nov 11</small></span></span><span class="risk-level" role="cell" data-label="Likely"><span class="risk-chip low">Low</span></span><span class="risk-level" role="cell" data-label="Impact"><span class="risk-chip high">High</span></span><span class="risk-owner" role="cell" data-label="Owner">Katrina</span></div>
+          </div>
         </div>
         <div class="card">
           <h2>What each chamber teaches</h2>
