@@ -199,6 +199,8 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .people { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--s3); }
 .person { padding: var(--s3) var(--s3) var(--s1); }
 .person-h { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 8px; }
+.person.is-me { border-color: rgba(255, 194, 26, .5); box-shadow: inset 0 0 0 1px rgba(255, 194, 26, .18), var(--shadow); }
+.you-tag { margin: 0 auto 0 10px; align-self: center; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--torch); color: var(--torch); font: 700 12.5px/1.5 var(--body); font-style: normal; }
 .person-h b { font-family: var(--display); font-weight: 400; font-size: 20px; letter-spacing: .01em; }
 .person-h span { font-size: 13px; color: var(--parch-3); }
 .bar-mini { height: 3px; border-radius: 2px; background: var(--plank); overflow: hidden; margin-bottom: 4px; }
@@ -324,6 +326,12 @@ body.party-mode .help-fab, body.party-mode .help-panel { display: none; }
 .tbl th { text-align: left; font-weight: 400; color: var(--parch-3); font-size: 13px; padding: 0 12px 10px 0; }
 .tbl td { padding: 11px 12px 11px 0; border-top: 1px solid var(--line); vertical-align: top; }
 /* Who does what (RACI): a chip per cell, weighted A > R > C > I so it reads even in grayscale */
+.raci-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 380px); gap: var(--s3); align-items: center; }
+/* The illustration has a white background, so it sits on a parchment panel instead of glaring against the dark card */
+.raci-art { margin: var(--s2) 0 0; }
+.raci-art img { display: block; width: 100%; height: auto; border-radius: 12px; background: var(--parch); border: 1px solid var(--plank); filter: brightness(.94); }
+.raci-art figcaption { margin-top: 6px; font-size: 12.5px; color: var(--parch-3); text-align: right; }
+@media (max-width: 760px) { .raci-intro { grid-template-columns: 1fr; } .raci-art { max-width: 420px; } }
 .raci-key { list-style: none; margin: var(--s2) 0 var(--s3); padding: 0; display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); }
 .raci-key li { display: flex; align-items: center; gap: var(--s1); font-size: 14.5px; color: var(--parch-2); }
 .raci-key .rc { width: 30px; height: 28px; font-size: 13.5px; border-radius: 8px; }
@@ -920,13 +928,21 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
         </div>
         <div class="card">
           <h2>Who does what</h2>
-          <p class="sub" style="margin-top:var(--s1)">One owner per row. If it needs to change, change it together at a meeting.</p>
-          <ul class="raci-key" aria-label="What the letters mean">
-            <li><span class="rc R" aria-hidden="true">R</span>Does the work</li>
-            <li><span class="rc A" aria-hidden="true">A</span>Owns it and says it's done</li>
-            <li><span class="rc C" aria-hidden="true">C</span>Gives input</li>
-            <li><span class="rc I" aria-hidden="true">I</span>Kept in the loop</li>
-          </ul>
+          <div class="raci-intro">
+            <div>
+              <p class="sub" style="margin-top:var(--s1)">One owner per row. If it needs to change, change it together at a meeting.</p>
+              <ul class="raci-key" aria-label="What the letters mean">
+                <li><span class="rc R" aria-hidden="true">R</span>Does the work</li>
+                <li><span class="rc A" aria-hidden="true">A</span>Owns it and says it's done</li>
+                <li><span class="rc C" aria-hidden="true">C</span>Gives input</li>
+                <li><span class="rc I" aria-hidden="true">I</span>Kept in the loop</li>
+              </ul>
+            </div>
+            <figure class="raci-art">
+              <img src="@ART:raci-illustration@" width="1280" height="853" alt="Illustration of a team placing R, A, C and I cards on a big task chart">
+              <figcaption>Image by vectorjuice on Freepik</figcaption>
+            </figure>
+          </div>
           <div class="raci" id="raci" role="table" aria-label="Who does what"></div>
         </div>
         <div class="card">
@@ -1587,15 +1603,17 @@ window.P9_STARTER = /*@STARTER@*/{};
     // Everyone view: each person shows their next 2 open tasks; "Show all" reveals the rest (done ones too).
     // Filtering to one person shows everything.
     const wrap = $("people"), focusP = wrap.contains(document.activeElement) && document.activeElement.dataset.p; wrap.innerHTML = "";
-    PEOPLE.filter((p) => filter === "all" || p === filter).forEach((p) => {
+    // Your own card comes first and stands out
+    const meNow = whoAmI();
+    [...PEOPLE].sort((a, b) => (b === meNow) - (a === meNow)).filter((p) => filter === "all" || p === filter).forEach((p) => {
       const mine = tasks.filter((t) => t.owner === p).sort((a, b) => (a.status === "done") - (b.status === "done") || String(a.due).localeCompare(String(b.due)));
       const done = mine.filter((t) => t.status === "done").length, open = mine.length - done;
       // Open by default: your own card, or every card for a guest who isn't signed in. Clicking flips the default.
       const expanded = (!me || p === me) !== showAll.has(p);
       const all = filter !== "all" || expanded;
       const shown = all ? mine : mine.filter((t) => t.status !== "done").slice(0, 2);
-      const box = document.createElement("div"); box.className = "card person";
-      box.innerHTML = `<div class="person-h"><b></b><span>${mine.length ? done + " of " + mine.length + " done" : ""}</span></div><div class="bar-mini"><i style="transform:scaleX(${mine.length ? done / mine.length : 0})"></i></div><ul class="rows"></ul>`;
+      const box = document.createElement("div"); box.className = "card person" + (p === meNow ? " is-me" : "");
+      box.innerHTML = `<div class="person-h"><b></b>${p === meNow ? '<i class="you-tag">You</i>' : ""}<span>${mine.length ? done + " of " + mine.length + " done" : ""}</span></div><div class="bar-mini"><i style="transform:scaleX(${mine.length ? done / mine.length : 0})"></i></div><ul class="rows"></ul>`;
       box.querySelector("b").textContent = p;
       const ul = box.querySelector("ul");
       if (!mine.length || !shown.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = mine.length ? "All done. Nice work." : "Nothing claimed yet."; ul.appendChild(e); }
