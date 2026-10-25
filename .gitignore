@@ -14,3 +14,6 @@ board/MENTOR-PLAN.md
 board/quest-board.html
 board/discord-kit.src.html
 board/art/quest-council.png
+
+# Lock files some tools drop here while running
+state/
