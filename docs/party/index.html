@@ -2399,7 +2399,9 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   function renderCatchup() {
     const box = $("catchup"); if (!box) return;
     const core = (window.P9_ROUNDS || []).filter((r) => !r.optional);
-    const over = session && typeof session.round === "number" && session.round >= core.length;
+    // The host's round pointer can move backward (Back, to review a round), so it's not a safe
+    // "is the Council over" check. Go by which rounds have actually been revealed instead.
+    const over = session && core.length > 0 && core.every((r) => (session.revealed || []).includes(r.id));
     const left = me && me !== "Katrina" && !PREVIEW ? core.filter((r) => !answers.some((a) => a.round === r.id && a.name === me)) : [];
     box.hidden = !over || !left.length;
     $("catchup-sub").textContent = `You have ${left.length} question${left.length === 1 ? "" : "s"} from the last meeting. No timer and no big screen, about 5 minutes. Your answers join the team's.`;
@@ -3020,7 +3022,12 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   let state = { round: 0, phase: "ready", deadline: 0, remaining: 60, revealed: [] };
   let answers = [], players = [], me = "", tick = null;
   const round = () => ALL[state.round] || ALL[0];
+  // The host's current position can move backward (Back, to review a round), so it's not a safe
+  // "is the Council over" check. Use which rounds have actually been revealed instead: that list
+  // only grows, so it stays true once the Council is done no matter where the host's screen sits.
+  const CORE_IDS = ALL.filter((r) => !r.optional).map((r) => r.id);
   const finished = () => state.round >= CORE;
+  const councilOver = () => CORE_IDS.length > 0 && CORE_IDS.every((id) => (state.revealed || []).includes(id));
   const secsLeft = () => state.phase === "running" ? Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000)) : (state.remaining || round().seconds);
   const mmss = (s) => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
   const roundAnswers = () => answers.filter((a) => a.round === round().id && STUDENTS.includes(a.name));
@@ -3151,7 +3158,7 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   let draft = { round: "", pick: "", idea: "", due: "" };
   // After the live Council ends, a player who missed rounds answers them on her own, no host or timer.
   const missing = () => ALL.filter((r) => !r.optional && !answers.some((a) => a.round === r.id && a.name === me));
-  const catchUp = () => finished() && missing().length > 0;
+  const catchUp = () => councilOver() && missing().length > 0;
   const playRound = () => catchUp() ? missing()[0] : round();
   function renderPlay() {
     if (!me) { syncJoin(); return; }
@@ -3159,10 +3166,10 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     $("j-av").outerHTML = `<span class="p-av" id="j-av" style="background:${COLOR[me]}">${face(4)}</span>`;
     $("j-name-t").textContent = me; $("j-code-t").innerHTML = `Room <b>${CODE}</b>`;
     const r = playRound();
-    const answering = catchUp() || (!finished() && (state.phase === "running" || state.phase === "catchup"));
+    const answering = catchUp() || (!councilOver() && (state.phase === "running" || state.phase === "catchup"));
     $("j-wait").hidden = answering; $("j-answer").hidden = !answering;
     if (!answering) {
-      const t = finished() ? ["That's a wrap!", "Thanks for shaping the game. Time to build."]
+      const t = councilOver() ? ["That's a wrap!", "Thanks for shaping the game. Time to build."]
         : state.phase === "revealed" ? ["Look up!", "The answers are on the big screen."]
         : state.phase === "paused" ? ["Paused", "Hang tight. The host paused the round."]
         : state.round === 0 && !answers.length ? ["You're in!", "Look at the big screen. The host will start soon."]
@@ -3193,7 +3200,7 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   }
   // The room code only matters during a live meeting. Afterwards anyone can sign in and catch up on her own.
   function syncJoin() {
-    const live = !finished();
+    const live = !councilOver();
     $("j-code-row").hidden = !live; $("j-note").hidden = live;
     $("j-go").textContent = live ? "Play" : "Catch up";
   }
@@ -3218,7 +3225,7 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
       const code = $("j-code").value.trim().toUpperCase();
       const typed = $("j-name").value.trim().toLowerCase();
       const name = STUDENTS.find((n) => n.toLowerCase() === typed);
-      if (!finished() && code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
+      if (!councilOver() && code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
       if (typed === "katrina") { $("j-err").textContent = "Katrina, you're the host. Open the host screen instead."; return; }
       if (!name) { $("j-err").textContent = "Type your first name as it is on the team list."; return; }
       if (store.get("p9-verified", "") !== name) {

@@ -1920,7 +1920,9 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   function renderCatchup() {
     const box = $("catchup"); if (!box) return;
     const core = (window.P9_ROUNDS || []).filter((r) => !r.optional);
-    const over = session && typeof session.round === "number" && session.round >= core.length;
+    // The host's round pointer can move backward (Back, to review a round), so it's not a safe
+    // "is the Council over" check. Go by which rounds have actually been revealed instead.
+    const over = session && core.length > 0 && core.every((r) => (session.revealed || []).includes(r.id));
     const left = me && me !== "Katrina" && !PREVIEW ? core.filter((r) => !answers.some((a) => a.round === r.id && a.name === me)) : [];
     box.hidden = !over || !left.length;
     $("catchup-sub").textContent = `You have ${left.length} question${left.length === 1 ? "" : "s"} from the last meeting. No timer and no big screen, about 5 minutes. Your answers join the team's.`;
