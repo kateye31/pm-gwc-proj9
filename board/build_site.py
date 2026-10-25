@@ -29,9 +29,9 @@ def page(config_src, extra="", icon="icon-board.png", title="Knight's Escape"):
         "body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>"
         # Open-licensed fonts for the public site (Beanzo is personal-use only)
         '<link rel="preconnect" href="https://fonts.googleapis.com">'
-        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jacquard+24&display=swap">'
-        # Jacquard 24 is for titles only: its digits and small sizes are hard to read, so labels and numbers use bold Atkinson
-        '<style>:root{--display:"Jacquard 24","Atkinson Hyperlegible",serif !important;'
+        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@400;600&display=swap">'
+        # Grenze Gotisch is for titles only: blackletter digits and small sizes are hard to read, so labels and numbers use bold Atkinson
+        '<style>:root{--display:"Grenze Gotisch","Atkinson Hyperlegible",serif !important;'
         '--label:"Atkinson Hyperlegible",sans-serif !important;--label-weight:700 !important;'
         '--num:"Atkinson Hyperlegible",sans-serif !important;--num-weight:700 !important}</style>'
         f'<script src="{config_src}"></script>{extra}<script>{shim}</script>'

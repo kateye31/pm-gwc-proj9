@@ -240,6 +240,7 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .helper { display: grid; gap: var(--s2); }
 /* Floating: a button bottom-right on every screen opens the helper as a panel above it */
 .helper-top { display: flex; align-items: start; justify-content: space-between; gap: var(--s2); }
+.helper-top h2 { font-family: var(--display); font-weight: 400; font-size: 23px; line-height: 1.15; letter-spacing: .035em; }
 .help-x { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--plank); border-radius: 10px; background: var(--wood-2); color: var(--parch-2); }
 .help-fab { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 44; display: inline-flex; align-items: center; gap: 8px; height: 52px; padding: 0 20px 0 16px; border-radius: 999px; border: 1px solid var(--torch-2); background: linear-gradient(180deg, #ffcd45, var(--torch)); color: var(--on-torch); font-weight: 700; font-size: 15.5px; box-shadow: var(--shadow-lift), 0 12px 28px -10px rgba(10,6,3,.7); }
 .help-fab[aria-expanded="true"] { opacity: 0; pointer-events: none; transform: scale(.96); }
@@ -1211,7 +1212,7 @@ window.P9_STARTER = /*@STARTER@*/{};
     for (const d of digits) await pressKey(d);
   }
   document.addEventListener("paste", (e) => {
-    if (!pending || e.target.closest("input,textarea")) return;
+    if (!pending || (e.target.closest && e.target.closest("input,textarea"))) return;
     e.preventDefault(); typePin(e.clipboardData && e.clipboardData.getData("text"));
   });
 

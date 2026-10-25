@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" type="image/png" href="icon-board.png"><link rel="apple-touch-icon" href="icon-board.png"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jacquard+24&display=swap"><style>:root{--display:"Jacquard 24","Atkinson Hyperlegible",serif !important;--label:"Atkinson Hyperlegible",sans-serif !important;--label-weight:700 !important;--num:"Atkinson Hyperlegible",sans-serif !important;--num-weight:700 !important}</style><script src="config.js"></script><script>// Runs the board outside claude.ai. The board talks to `window.claude.use(name)`;
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" type="image/png" href="icon-board.png"><link rel="apple-touch-icon" href="icon-board.png"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@400;600&display=swap"><style>:root{--display:"Grenze Gotisch","Atkinson Hyperlegible",serif !important;--label:"Atkinson Hyperlegible",sans-serif !important;--label-weight:700 !important;--num:"Atkinson Hyperlegible",sans-serif !important;--num-weight:700 !important}</style><script src="config.js"></script><script>// Runs the board outside claude.ai. The board talks to `window.claude.use(name)`;
 // this file answers those calls with Firebase (shared, no sign-in) or a demo store (one computer).
 (() => {
   const firebaseConfig = window.P9_FIREBASE;
@@ -325,6 +325,7 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .helper { display: grid; gap: var(--s2); }
 /* Floating: a button bottom-right on every screen opens the helper as a panel above it */
 .helper-top { display: flex; align-items: start; justify-content: space-between; gap: var(--s2); }
+.helper-top h2 { font-family: var(--display); font-weight: 400; font-size: 23px; line-height: 1.15; letter-spacing: .035em; }
 .help-x { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--plank); border-radius: 10px; background: var(--wood-2); color: var(--parch-2); }
 .help-fab { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 44; display: inline-flex; align-items: center; gap: 8px; height: 52px; padding: 0 20px 0 16px; border-radius: 999px; border: 1px solid var(--torch-2); background: linear-gradient(180deg, #ffcd45, var(--torch)); color: var(--on-torch); font-weight: 700; font-size: 15.5px; box-shadow: var(--shadow-lift), 0 12px 28px -10px rgba(10,6,3,.7); }
 .help-fab[aria-expanded="true"] { opacity: 0; pointer-events: none; transform: scale(.96); }
@@ -1690,7 +1691,7 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
     for (const d of digits) await pressKey(d);
   }
   document.addEventListener("paste", (e) => {
-    if (!pending || e.target.closest("input,textarea")) return;
+    if (!pending || (e.target.closest && e.target.closest("input,textarea"))) return;
     e.preventDefault(); typePin(e.clipboardData && e.clipboardData.getData("text"));
   });
 
