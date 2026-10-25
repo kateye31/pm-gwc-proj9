@@ -167,6 +167,11 @@ Then start your next task with a **new** branch (Step 2).
 
 AI (ChatGPT, Claude, Copilot) is great for **learning**, but **you** should write your part. On demo day you'll explain what you built!
 
+### The easy way: the board's helper
+Tap **Ask for help** (bottom right on every screen), or **Ask about this task** under any of your tasks. It already knows our code and your task, so you only type your question. Then pick:
+- **Ask in ChatGPT** or **Ask in Claude:** opens the chat with your question filled in.
+- **Ask in VS Code:** copies your question for the AI chat inside VS Code, which can read our files. In VS Code press **Ctrl+Alt+I** to open the chat and paste (Ctrl+V).
+
 ### Ask with this shape
 > **I'm working on:** [file + chamber, e.g. "rooms.js, the Maze"]
 > **I'm trying to:** [your goal]

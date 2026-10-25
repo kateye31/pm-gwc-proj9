@@ -30,7 +30,10 @@ def page(config_src, extra="", icon="icon-board.png", title="Knight's Escape"):
         # Open-licensed fonts for the public site (Beanzo is personal-use only)
         '<link rel="preconnect" href="https://fonts.googleapis.com">'
         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jacquard+24&display=swap">'
-        '<style>:root{--display:"Jacquard 24","Atkinson Hyperlegible",serif !important}</style>'
+        # Jacquard 24 is for titles only: its digits and small sizes are hard to read, so labels and numbers use bold Atkinson
+        '<style>:root{--display:"Jacquard 24","Atkinson Hyperlegible",serif !important;'
+        '--label:"Atkinson Hyperlegible",sans-serif !important;--label-weight:700 !important;'
+        '--num:"Atkinson Hyperlegible",sans-serif !important;--num-weight:700 !important}</style>'
         f'<script src="{config_src}"></script>{extra}<script>{shim}</script>'
         f"</head><body>{bundle}</body></html>"
     )

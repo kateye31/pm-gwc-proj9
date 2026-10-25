@@ -39,6 +39,8 @@
   --s1: 8px; --s2: 16px; --s3: 24px; --s4: 32px;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --display: "Beanzo", "Atkinson Hyperlegible", "Arial Narrow", sans-serif;
+  /* Font roles: titles, small chunky labels, numbers. The public site maps labels and numbers to bold Atkinson. */
+  --label: var(--display); --label-weight: 400; --num: var(--display); --num-weight: 400;
   --body: "Atkinson Hyperlegible", "Times New Roman", Times, serif;
   --hand: "Atkinson Hyperlegible", "Times New Roman", serif;
   color-scheme: dark;
@@ -63,7 +65,7 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .side { position: sticky; top: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; gap: 28px; padding: 26px 18px 20px; border-right: 1px solid var(--line); background: var(--wood); }
 .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
 .brand b { display: block; font-family: var(--display); font-weight: 400; font-size: 21px; line-height: 1; letter-spacing: .01em; }
-.brand small { display: block; font-size: 13px; color: var(--parch-3); margin-top: 3px; }
+.brand small { display: block; white-space: nowrap; font-size: 13px; color: var(--parch-3); margin-top: 3px; }
 .nav { display: grid; gap: 2px; }
 .nav button { display: flex; align-items: center; gap: 12px; width: 100%; height: 42px; padding: 0 12px; border: 0; border-radius: 10px; background: none; color: var(--parch-2); font-size: 15.5px; text-align: left; }
 @media (hover: hover) and (pointer: fine) { .nav button:hover { background: var(--wood-2); color: var(--parch); } }
@@ -72,7 +74,7 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .nav svg { flex: none; }
 .side-foot { margin-top: auto; display: grid; gap: 14px; padding: 0 8px; }
 .days { display: flex; align-items: baseline; gap: 8px; }
-.days b { font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1; color: var(--torch); }
+.days b { font-family: var(--num); font-weight: var(--num-weight); font-size: 34px; line-height: 1; color: var(--torch); }
 .days span { font-size: 13px; color: var(--parch-2); line-height: 1.25; }
 .whoami { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 14px; color: var(--parch-2); }
 .whoami button { border: 0; background: none; color: var(--parch-3); text-decoration: underline; text-underline-offset: 3px; font-size: 13px; padding: 4px; }
@@ -159,7 +161,7 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--plank); }
 .live.on { color: var(--torch); }
 .live.on i { background: var(--torch); box-shadow: 0 0 0 4px color-mix(in srgb, var(--torch) 25%, transparent); }
-.clock { font-family: var(--display); font-size: clamp(72px, 9vw, 108px); line-height: .85; color: var(--torch); display: flex; }
+.clock { font-family: var(--num); font-weight: var(--num-weight); font-size: clamp(72px, 9vw, 108px); line-height: .85; color: var(--torch); display: flex; }
 .clock span { display: inline-block; width: .6em; text-align: center; }
 .clock span.c { width: .3em; }
 .clock.over { color: var(--ember); }
@@ -236,6 +238,24 @@ a { color: var(--parch); text-underline-offset: 3px; }
 
 /* Ask for help */
 .helper { display: grid; gap: var(--s2); }
+/* Floating: a button bottom-right on every screen opens the helper as a panel above it */
+.helper-top { display: flex; align-items: start; justify-content: space-between; gap: var(--s2); }
+.help-x { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--plank); border-radius: 10px; background: var(--wood-2); color: var(--parch-2); }
+.help-fab { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 44; display: inline-flex; align-items: center; gap: 8px; height: 52px; padding: 0 20px 0 16px; border-radius: 999px; border: 1px solid var(--torch-2); background: linear-gradient(180deg, #ffcd45, var(--torch)); color: var(--on-torch); font-weight: 700; font-size: 15.5px; box-shadow: var(--shadow-lift), 0 12px 28px -10px rgba(10,6,3,.7); }
+.help-fab[aria-expanded="true"] { opacity: 0; pointer-events: none; transform: scale(.96); }
+.help-panel { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 46; width: min(460px, calc(100vw - 24px)); max-height: calc(100dvh - 40px); overflow: auto; overscroll-behavior: contain; border-radius: 20px;
+  box-shadow: inset 0 1px 0 rgba(255,230,190,.06), 0 2px 4px rgba(10,6,3,.35), 0 16px 32px -10px rgba(10,6,3,.6), 0 40px 80px -30px rgba(10,6,3,.85);
+  transition: transform 240ms var(--ease-out), opacity 240ms var(--ease-out); transform-origin: bottom right; }
+.help-panel.out { opacity: 0; transform: translateY(12px) scale(.98); transition-duration: 160ms; }
+.help-panel > .helper { margin: 0; box-shadow: none; }
+.help-panel .chips .chip { height: 34px; font-size: 14px; padding: 0 12px; }
+.help-panel .helper-go .btn { flex: 1 1 auto; }
+body.party-mode .help-fab, body.party-mode .help-panel { display: none; }
+@media (max-width: 860px) {
+  .help-fab { right: 12px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); height: 48px; padding: 0 16px 0 14px; }
+  .help-panel { right: 12px; bottom: calc(72px + env(safe-area-inset-bottom, 0px)); max-height: calc(100dvh - 140px); }
+}
+@media (prefers-reduced-motion: reduce) { .help-panel, .help-panel.out { transform: none; transition: opacity 160ms ease; } }
 .helper .chips .chip { height: 36px; font-size: 14.5px; }
 .helper-l { font-size: 15px; font-weight: 700; margin-bottom: -6px; }
 .helper textarea { width: 100%; font: inherit; font-size: 15.5px; line-height: 1.5; color: var(--parch); background: var(--night); border: 1px solid var(--plank); border-radius: 12px; padding: 12px 14px; resize: vertical; transition: border-color 160ms ease; }
@@ -377,7 +397,7 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .hello { display: grid; gap: 8px; padding: 28px; }
 .hello h2 { font-family: var(--display); font-weight: 400; font-size: 28px; }
 .names { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 10px; }
-.name-btn { height: 72px; border-radius: 14px; border: 1px solid var(--plank); background: var(--night); font-family: var(--display); font-size: 22px; letter-spacing: .01em; color: var(--parch); }
+.name-btn { height: 72px; border-radius: 14px; border: 1px solid var(--plank); background: var(--night); font-family: var(--label); font-weight: var(--label-weight); font-size: 22px; letter-spacing: .01em; color: var(--parch); }
 @media (hover: hover) and (pointer: fine) { .name-btn:hover { border-color: var(--torch); background: var(--wood); } }
 .link-btn { border: 0; background: none; color: var(--parch-2); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 4px; }
 .meet-strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2) var(--s3); }
@@ -716,6 +736,7 @@ body {
         <form class="card helper" id="helper" autocomplete="off">
           <div class="helper-top">
             <div><h2>Stuck? Ask for help</h2><p class="sub">It knows our game's code and your tasks. It explains and gives hints first, so you still write your part.</p></div>
+            <button type="button" class="help-x press" id="help-x" aria-label="Close help"><svg width="16" height="16" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
           </div>
           <div class="chips" id="help-starters" role="group" aria-label="Question starters"></div>
           <label class="helper-l" for="help-q">Your question</label>
@@ -727,6 +748,7 @@ body {
             <button class="btn solid press" type="submit" id="help-ask" hidden>Ask</button>
             <button class="btn solid press" type="button" id="help-gpt">Ask in ChatGPT</button>
             <button class="btn press" type="button" id="help-claude">Ask in Claude</button>
+            <button class="btn press" type="button" id="help-vscode">Ask in VS Code</button>
             <button class="btn press" type="button" id="help-copy">Copy question</button>
           </div>
           <div class="helper-a" id="help-a" hidden aria-live="polite"></div>
@@ -975,6 +997,9 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
 <!--@PARTY_HTML@-->
 
 <div class="toast hide" id="toast" role="status" aria-live="polite"></div>
+<!-- Ask for help floats bottom-right on every screen; the form inside is #helper (moved here by the script) -->
+<div class="help-panel out" id="help-panel" role="dialog" aria-label="Ask for help" hidden></div>
+<button class="help-fab press" type="button" id="help-fab" aria-controls="help-panel" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M9.5 9.2a2.5 2.5 0 1 1 3.3 2.4c-.5.2-.8.6-.8 1.1"/><path d="M12 14.6h.01"/></svg><span>Ask for help</span></button>
 <div class="nudge out" id="nudge" role="dialog" aria-labelledby="nudge-t" aria-describedby="nudge-s" hidden>
   <div class="nudge-top">
     <span class="nudge-ic" id="nudge-ic"></span>
@@ -1139,7 +1164,7 @@ window.P9_STARTER = /*@STARTER@*/{};
   // Phone-style keypad: digits with their letters, like a real phone
   const KEYS = [["1", ""], ["2", "ABC"], ["3", "DEF"], ["4", "GHI"], ["5", "JKL"], ["6", "MNO"], ["7", "PQRS"], ["8", "TUV"], ["9", "WXYZ"], ["", ""], ["0", "+"], ["del", ""]];
   function renderKeypad(box) {
-    box.innerHTML = `<div class="pin"><h2></h2><p class="sub">Enter your 4-digit PIN</p><div class="pin-dots">${"<i></i>".repeat(4)}</div><p class="pin-msg" id="pin-msg"></p><div class="keypad"></div><button type="button" class="pin-back">Not you? Pick another name</button></div>`;
+    box.innerHTML = `<div class="pin"><h2></h2><p class="sub">Enter your 4-digit PIN</p><div class="pin-dots">${"<i></i>".repeat(4)}</div><p class="pin-msg" id="pin-msg"></p><div class="keypad"></div><button type="button" class="pin-back pin-paste">Paste PIN</button><button type="button" class="pin-back">Not you? Pick another name</button></div>`;
     box.querySelector("h2").textContent = `Hi, ${pending}!`;
     const pad = box.querySelector(".keypad");
     KEYS.forEach(([d, letters]) => {
@@ -1149,7 +1174,11 @@ window.P9_STARTER = /*@STARTER@*/{};
       else { k.className = "key"; k.innerHTML = `<b>${d}</b><small>${letters}</small>`; k.setAttribute("aria-label", d); k.onclick = () => pressKey(d); }
       pad.appendChild(k);
     });
-    box.querySelector(".pin-back").onclick = () => { pending = ""; pinEntry = ""; renderMe(); };
+    box.querySelector(".pin-back:not(.pin-paste)").onclick = () => { pending = ""; pinEntry = ""; renderMe(); };
+    box.querySelector(".pin-paste").onclick = async () => {
+      try { typePin(await navigator.clipboard.readText()); }
+      catch { $("pin-msg").textContent = "Couldn't read the clipboard. Press Ctrl+V, or tap the numbers."; }
+    };
     paintDots();
   }
   function paintDots() { document.querySelectorAll(".pin-dots i").forEach((dot, i) => dot.classList.toggle("on", i < pinEntry.length)); }
@@ -1173,6 +1202,17 @@ window.P9_STARTER = /*@STARTER@*/{};
   document.addEventListener("keydown", (e) => {
     if (!pending || e.target.closest("input,textarea")) return;
     if (/^[0-9]$/.test(e.key)) pressKey(e.key); else if (e.key === "Backspace") pressKey("del");
+  });
+  // Pasting a PIN (Ctrl+V, or copied from Katrina's DM) types its 4 digits
+  async function typePin(text) {
+    const digits = String(text || "").replace(/\D/g, "").slice(0, 4);
+    if (digits.length !== 4) { $("pin-msg").textContent = "That doesn't look like a 4-digit PIN."; return; }
+    pinEntry = ""; paintDots();
+    for (const d of digits) await pressKey(d);
+  }
+  document.addEventListener("paste", (e) => {
+    if (!pending || e.target.closest("input,textarea")) return;
+    e.preventDefault(); typePin(e.clipboardData && e.clipboardData.getData("text"));
   });
 
   // ---------- Check-in ----------
@@ -1518,7 +1558,7 @@ window.P9_STARTER = /*@STARTER@*/{};
       box.querySelector("b").textContent = p;
       const ul = box.querySelector("ul");
       if (!mine.length || !shown.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = mine.length ? "All done. Nice work." : "Nothing claimed yet."; ul.appendChild(e); }
-      shown.forEach((t) => ul.appendChild(row(t)));
+      shown.forEach((t) => ul.appendChild(row(t, { ask: !PREVIEW && t.owner === whoAmI() })));
       const hidable = mine.filter((t) => t.status !== "done").slice(0, 2).length < mine.length;
       if (filter === "all" && hidable) {
         const more = document.createElement("button"); more.type = "button"; more.className = "person-more press"; more.dataset.p = p;
@@ -1702,9 +1742,35 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   function askAbout(t) {
     helpTask = t;
     $("help-q").value = `Help me with my task "${t.title}". What does it mean, which line do I start on, and what's my first step?`;
-    $("helper").scrollIntoView({ behavior: calm ? "auto" : "smooth", block: "start" });
+    openHelp();
+  }
+  // The helper lives in a floating panel so it's one tap away on every screen
+  $("help-panel").appendChild($("helper"));
+  let helpT = 0;
+  function openHelp() {
+    const p = $("help-panel"); clearTimeout(helpT);
+    p.hidden = false; $("help-fab").setAttribute("aria-expanded", "true");
+    requestAnimationFrame(() => requestAnimationFrame(() => p.classList.remove("out")));
     $("help-q").focus({ preventScroll: true });
   }
+  function closeHelp() {
+    const p = $("help-panel"); if (p.hidden) return;
+    p.classList.add("out"); $("help-fab").setAttribute("aria-expanded", "false");
+    helpT = setTimeout(() => { p.hidden = true; }, 170); $("help-fab").focus({ preventScroll: true });
+  }
+  $("help-fab").onclick = openHelp;
+  $("help-x").onclick = closeHelp;
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("help-panel").hidden) closeHelp(); });
+  // VS Code's AI chat (Copilot or Claude) can already read the repo, so this question points at files instead of pasting them
+  function vscodePrompt() {
+    const open = helpTask ? [helpTask] : tasks.filter((t) => t.owner === whoAmI() && t.status !== "done");
+    const L = [`I'm ${me || "on the team"} on our Girls Who Code team. We're building "Knight's Escape", a Java OOP escape room in plain HTML/CSS/JS: rooms.js holds the puzzles as data, game.js runs the screens, style.css is the look. Read TEAM-GUIDE.md and README.md in this repo first.`, ""];
+    if (open.length) { L.push(helpTask ? "I'm working on this task:" : "My open tasks:"); open.forEach((t) => L.push(`- "${t.title}"` + (t.file ? ` (look at ${t.file}${t.line ? " around line " + t.line : ""}${t.fn ? ", " + t.fn : ""})` : "") + (t.done ? `. Done when: ${t.done}` : ""))); L.push(""); }
+    const pasted = $("help-code").value.trim(); if (pasted) L.push("What I pasted:", pasted, "");
+    L.push(`My question: ${$("help-q").value.trim()}`, "", "I'm a beginner. Point me to the exact file and line, give hints and explain first, show at most a few lines, and don't edit files or write my whole task for me.");
+    return L.join("\n");
+  }
+  $("help-vscode").onclick = () => { if (helpReady()) copyText(vscodePrompt(), "Copied. In VS Code, open the AI chat (Ctrl+Alt+I) and paste."); };
   HELP_STARTERS.forEach(([label, text]) => {
     const b = document.createElement("button"); b.type = "button"; b.className = "chip press"; b.textContent = label;
     b.onclick = () => { helpTask = null; $("help-q").value = text; if (/pasted/.test(text)) $("helper").querySelector("details").open = true; $("help-q").focus(); };
