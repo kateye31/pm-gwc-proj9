@@ -24,6 +24,16 @@ Team: Leslie, Sanjana (build), Shirley, Tvishaa (design). Mentor: Katrina.
   - Motion: transform/opacity only, ease `--ease-out`, under 300ms, respect `prefers-reduced-motion`.
   - Editing this file does not update the live page; Claude republishes it.
 
+## Writing student tasks (Katrina's)
+The girls are brand new to GitHub, VS Code and OOP. Every task must be doable without coming back to ask.
+- Title names the concept plainly. "Done when" is one short sentence: what you see when it works.
+- `steps`: a numbered list, one action each, ~9 max. Step 1 plays the game to that spot. The last steps save, refresh (F5), play to check, then commit and push (Team Guide, Part 3).
+- Say where with search text, not line numbers: "In VS Code, open rooms.js, Ctrl+F: const WARLOCK".
+- Define each code word the first time it appears, and say why (which concept; link the Charter table).
+- Hints, not answers. Never paste the finished code.
+- Check the search text exists on the student's branch in github.com/kateye31/group9 (the source of truth), and don't rely on notes from unmerged PRs.
+- Write tasks to both the Claude artifact DB and Firebase.
+
 ## Board design rules (Katrina's)
 - Art must be real, human-made work: public-domain paintings/manuscripts (Wikimedia Commons) or the students' own drawings. No AI-generated images. Credit every image on the page.
 - No small uppercase "eyebrow" labels above headings. No colored left-border rails thicker than 1px.

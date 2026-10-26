@@ -46,14 +46,26 @@ A **Java OOP escape room** for college students. A warlock traps you in his dung
 1. **VS Code** (where you edit code): code.visualstudio.com → Download → install.
 2. **Git** (saves and shares your work): git-scm.com → Download → install with the default options.
    *Easier option:* **GitHub Desktop** (desktop.github.com) does the same thing with buttons instead of typing.
+3. **Extensions** (free add-ons for VS Code). When you open our folder, VS Code pops up **"install recommended extensions?"** Click **Install**. You get:
+
+   | Extension | What it does for you |
+   | --- | --- |
+   | **Live Preview** | Right-click `index.html` → **Show Preview** to play the game inside VS Code. It refreshes every time you save. |
+   | **GitHub Copilot Chat** | The AI chat in VS Code (free plan, see Part 6) |
+   | **Error Lens** | Shows mistakes in red right on the line, so you don't have to hunt for them |
+   | **Code Spell Checker** | Underlines typos, like in spell words or the warlock's lines |
+   | **GitHub Pull Requests** | Open and check pull requests without leaving VS Code |
+
+   Missed the pop-up? Click the Extensions icon on the left (four squares), search each name, click **Install**.
 
 ### Step 3 · Get the code on your computer ("clone")
 1. Open the team repo on GitHub, click the green **Code** button, and copy the link.
 2. In VS Code: **View → Command Palette** → type **Git: Clone** → paste the link → choose a folder.
 3. Click **Open** when VS Code asks.
 
-### Step 4 · Play the game
+### Step 4 · Play the game (do this a lot!)
 Find **`index.html`** in the folder and double-click it. It opens in your browser. No installs needed.
+Play it **all the way through** at least once: pick a knight, the Maze, the Lab, the Hall, the Final Door, escape. Get one answer wrong on purpose and click **Hint** so you see those too. You can't fix what you haven't seen.
 
 ### Step 5 · Sign in to the team board
 1. Open **your own link** from Katrina's DM (it ends in your name, like `#shirley`).
@@ -64,12 +76,12 @@ Find **`index.html`** in the folder and double-click it. It opens in your browse
 
 ## Part 3 · How to make a change (every task)
 
-**Never push straight to `main`.** You work on your own branch, then Katrina checks it and merges it.
+**Never push straight to `1.0`** (our main branch). You work on your own branch, then Katrina checks it and merges it.
 
 ### Step 1 · Get the newest code
 ```bash
-git checkout main
-git pull origin main
+git checkout 1.0
+git pull origin 1.0
 ```
 
 ### Step 2 · Make your own branch
@@ -80,7 +92,8 @@ git checkout -b shirley/maze-colors
 
 ### Step 3 · Edit and test
 - Make your change in VS Code and **save** (Ctrl+S).
-- Refresh `index.html` in your browser and **play to your part** to check it works.
+- Refresh `index.html` in your browser (**F5**), or use **Live Preview**, and **play to your part** to check it works.
+- **Test after every small change**, not just at the end. If something breaks, you'll know it was the last thing you did.
 
 ### Step 4 · Save your work ("commit")
 ```bash
@@ -99,8 +112,8 @@ On GitHub, click **Compare & pull request**, then **Create pull request**. Katri
 
 ### Step 7 · After it's merged
 ```bash
-git checkout main
-git pull origin main
+git checkout 1.0
+git pull origin 1.0
 ```
 Then start your next task with a **new** branch (Step 2).
 
@@ -159,7 +172,7 @@ Then start your next task with a **new** branch (Step 2).
 | Oct 31 – Nov 6 | "Play the Maze for 5 minutes. Where did you get stuck?" |
 | Nov 7 – 11 | "After playing: explain class vs. object in your own words." |
 
-**Missed a meeting?** No screenshare needed. Open the team board with your link and tap **Answer now** on the "Catch up on the Council" card. It works on a laptop or a phone, walks you through the questions you missed, and has no timer. (The party link works too: after the meeting it skips the room code.)
+**Missed a meeting?** Open the party link on your phone. It walks you through the questions you missed (catch-up mode), with no timer.
 
 ---
 
@@ -167,10 +180,15 @@ Then start your next task with a **new** branch (Step 2).
 
 AI (ChatGPT, Claude, Copilot) is great for **learning**, but **you** should write your part. On demo day you'll explain what you built!
 
+### New to AI chat? Start here (1 minute)
+- ▶️ **Watch:** [Get started with Copilot Free in VS Code](https://www.youtube.com/watch?v=X_Aet9ndh_Y) (63 seconds, from the official VS Code channel). Want more? [Getting started with GitHub Copilot](https://www.youtube.com/watch?v=n0NlxUyA7FI) (11 minutes, from GitHub).
+- **Turn it on:** in VS Code, hover the **Copilot icon** in the bottom bar → **Use AI Features** → sign in with GitHub. No Copilot plan yet? You're put on **Copilot Free** automatically. (The videos are from late 2024, so the buttons may look a little different.)
+- **Open the chat:** press **Ctrl+Alt+I** and type your question. Copilot can see our files, so you can say "look at rooms.js".
+
 ### The easy way: the board's helper
-Tap **Ask for help** (bottom right on every screen), or **Ask about this task** under any of your tasks. It already knows our code and your task, so you only type your question. Then pick:
+On the team board, tap **Ask for help** (bottom right on every screen), or **Ask about this task** under any of your tasks. It already knows our code and your task, so you only type your question. Then pick:
 - **Ask in ChatGPT** or **Ask in Claude:** opens the chat with your question filled in.
-- **Ask in VS Code:** copies your question for the AI chat inside VS Code, which can read our files. In VS Code press **Ctrl+Alt+I** to open the chat and paste (Ctrl+V).
+- **Ask in VS Code:** copies your question for Copilot. In VS Code press **Ctrl+Alt+I** and paste (**Ctrl+V**).
 
 ### Ask with this shape
 > **I'm working on:** [file + chamber, e.g. "rooms.js, the Maze"]
@@ -218,7 +236,45 @@ explain simply, give hints before full answers, and don't write my whole task fo
 
 ---
 
-## Part 8 · Road to demo day
+## Part 8 · Free tools and resources
+
+### Free AI, and who can get it
+Check your age and school before signing up for anything.
+
+| Tool | Free for | How |
+| --- | --- | --- |
+| **GitHub Copilot Free** | Anyone with a GitHub account | Built into VS Code (see Part 6). **Start here.** |
+| **GitHub Copilot for students** | Students 13+ who can prove they're enrolled (high school counts) | Apply for the [GitHub Student Developer Pack](https://education.github.com/pack). Sign-ups may be paused, so check the page. |
+| **Gemini** | Free plan for everyone with a Google account | [gemini.google.com](https://gemini.google.com). A free year of Google AI Pro is for **college students 18+** in the US only. |
+| **ChatGPT / Codex** | Free plan | [chatgpt.com](https://chatgpt.com). Extra Codex credits are for **US and Canada university students** only. |
+| **Claude** | Free plan, **18+ only** | [claude.ai](https://claude.ai) |
+
+### Test your Java
+Our puzzles are Java, but the game itself is JavaScript, so the game can't run Java. Before you add a puzzle, check that it really prints what you think:
+- [Programiz online Java compiler](https://www.programiz.com/java-programming/online-compiler/): paste the snippet, press **Run**, compare the output to your answer.
+- [Java Tutor](https://pythontutor.com/java.html): steps through Java **one line at a time** and shows every variable. Great for tracing.
+
+### Learn web stuff
+- [MDN: Learn web development](https://developer.mozilla.org/en-US/docs/Learn_web_development): the most trusted guide for HTML, CSS and JavaScript
+- [W3Schools JavaScript](https://www.w3schools.com/js/): short examples you can try in the browser
+- [Google Fonts](https://fonts.google.com/): free fonts (see Shirley's style task for how to add one)
+
+### Cool JavaScript libraries (optional, only after your part works)
+A library is someone else's code you can use with one line. **Ask Katrina before adding one.**
+
+| Library | What it adds | Good spot in our game |
+| --- | --- | --- |
+| [canvas-confetti](https://www.kirilv.com/canvas-confetti/) | Confetti in 1 line of code | The escape screen 🎉 |
+| [Animate.css](https://animate.style/) | Animations by just adding a class name, no JavaScript | A door shaking on a wrong answer |
+| [GSAP](https://gsap.com/docs/v3/) | Smooth animations (free, used by pro sites) | The warlock appearing |
+
+**Demo day tip:** libraries load from the internet. Download the library file into our folder instead, so the game still works if the Wi-Fi is bad.
+
+**Not for this project:** React, Next.js and other frameworks. They're great to learn after demo day, but they'd mean rebuilding our game from scratch.
+
+---
+
+## Part 9 · Road to demo day
 
 | When | Goal |
 | --- | --- |

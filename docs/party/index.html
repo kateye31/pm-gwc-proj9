@@ -301,6 +301,9 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .row-where code { white-space: nowrap; }
 .row-where code, .helper-a code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13.5px; color: var(--parch); background: var(--night); border-radius: 5px; padding: 1px 6px; }
 .row-done b { color: var(--parch); font-weight: 700; }
+.row-steps { margin: 4px 0 2px; padding-left: 22px; display: grid; gap: 6px; font-size: 14.5px; line-height: 1.45; color: var(--parch); }
+.row-steps li::marker { color: var(--torch); font-weight: 700; }
+.row.is-done .row-steps { display: none; }
 .row-ask { justify-self: start; margin-left: -4px; }
 .row.is-done .row-where, .row.is-done .row-done, .row.is-done .row-ask { display: none; }
 
@@ -1073,7 +1076,11 @@ body.party-mode { overflow-x: hidden; }
 
       <div class="stack" id="today-body" style="gap:var(--s3)">
         <div class="grid-2">
-        <form class="card" id="checkin">
+        <div class="card" id="checkin-closed">
+          <h2>Check in</h2>
+          <p class="sub" style="margin-top:var(--s1)">This opens when the next meeting starts. See you there!</p>
+        </div>
+        <form class="card" id="checkin" hidden>
           <h2>Check in · 20 seconds</h2>
           <p class="foot" style="margin:4px 0 20px">Four taps. We ask the same questions every meeting, so you can see how far you've come.</p>
           <div class="q">
@@ -1105,6 +1112,7 @@ body.party-mode { overflow-x: hidden; }
             <div class="card">
               <div class="head"><h2>My tasks</h2><button type="button" class="link-btn" data-go="tasks">All team tasks</button></div>
               <ul class="rows" id="my-tasks" style="margin-top:10px"></ul>
+              <button type="button" class="person-more press" id="my-more" hidden aria-controls="my-tasks"><span></span><svg class="chev" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 5.5L7 9l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
             </div>
             <div class="card">
               <h2 id="here-h">Who came</h2>
@@ -1138,7 +1146,7 @@ body.party-mode { overflow-x: hidden; }
             <button class="btn press" type="button" id="help-copy">Copy question</button>
           </div>
           <div class="helper-a" id="help-a" hidden aria-live="polite"></div>
-          <p class="foot">AI can be wrong, so test its Java or ask a teammate. Never paste your PIN. Still stuck after 15 minutes? Post in Discord.</p>
+          <p class="foot">New to AI chat? <a href="https://www.youtube.com/watch?v=X_Aet9ndh_Y" target="_blank" rel="noopener">Watch the 1-minute video</a>. AI can be wrong, so test its Java in the <a href="https://www.programiz.com/java-programming/online-compiler/" target="_blank" rel="noopener">online Java compiler</a> or ask a teammate. Never paste your PIN. Still stuck after 15 minutes? Post in Discord.</p>
         </form>
         <div class="card meet-strip" id="catchup" hidden>
           <div><h2>Catch up on the Council</h2><p class="sub" id="catchup-sub"></p></div>
@@ -1874,7 +1882,10 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
   function renderHere() {
     const f = $("here"); f.innerHTML = ""; const fresh = [];
     const latest = meetings[0];
-    $("here-h").textContent = latest && latest.date === todayKey ? "Who's here" : "Who came";
+    // The check-in is for meetings only: it opens once Katrina starts today's meeting on Live
+    const meetingToday = !!latest && latest.date === todayKey;
+    $("checkin").hidden = !meetingToday; $("checkin-closed").hidden = meetingToday;
+    $("here-h").textContent = meetingToday ? "Who's here" : "Who came";
     $("here-sub").textContent = latest ? meetName(latest) : "Shows who came once the first meeting starts.";
     // Only the people who came. Nobody gets an empty "missing" circle.
     const came = latest ? KIDS.filter((p) => (latest.attended || []).includes(p)) : [];
@@ -2013,7 +2024,7 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
     { name: "Choose your knight", text: "Pick a knight, a topic and a difficulty", oop: "Your knight is an object", ic: '<path d="M7 20l3-6M17 20l-3-6"/><circle cx="12" cy="8" r="4"/>' },
     { name: "The dungeon", text: "Dropped in the dark. The warlock appears", oop: "The story begins", ic: '<path d="M5 21V10l7-6 7 6v11"/><path d="M10 21v-4a2 2 0 0 1 4 0v4"/>' },
     { name: "The Maze", text: "Pick the right direction, 5 turns, multiple choice", oop: "Classes and objects", chamber: 1, ic: '<path d="M4 4h16v16H4zM4 9h9M11 14h9M8 9v6M16 4v5"/>' },
-    { name: "Alchemy Lab", text: "Guess what the code prints to build the spell, 4 words", oop: "Methods and return values", chamber: 1, ic: '<path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7.5 15h9"/>' },
+    { name: "Alchemy Lab", text: "Guess what the code prints to build the spell, 4 words", oop: "Methods and encapsulation", chamber: 1, ic: '<path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7.5 15h9"/>' },
     { name: "Hall of Illusions", text: "Three look-alike code doors, only one is real", oop: "Inheritance", chamber: 1, ic: '<path d="M3 21V9a3 3 0 0 1 6 0v12M9 21V9a3 3 0 0 1 6 0v12M15 21V9a3 3 0 0 1 6 0v12"/>' },
     { name: "The Final Door", text: "Answer the warlock to win 3 keys, open-ended", oop: "Polymorphism, the final boss", chamber: 1, ic: '<circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/>' },
   ];
@@ -2127,13 +2138,25 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
     const my = $("my-tasks"); my.innerHTML = "";
     const mine = tasks.filter((t) => t.owner === me).sort((a, b) => (a.status === "done") - (b.status === "done") || String(a.due).localeCompare(String(b.due)));
     if (!mine.length) { const e = document.createElement("li"); e.className = "empty"; e.textContent = "Nothing on your list yet. Claim one at the meeting."; my.appendChild(e); }
-    mine.forEach((t) => my.appendChild(row(t, { ask: !PREVIEW, open: true })));
+    // My quest stays short: your next 3 open tasks, only the first one opened up.
+    // "Show all" reveals the rest (finished ones too). The others fold behind Details.
+    const myOpenList = mine.filter((t) => t.status !== "done"), nextUp = myOpenList[0];
+    const shownMine = myShowAll ? mine : myOpenList.slice(0, 3);
+    shownMine.forEach((t) => my.appendChild(row(t, { ask: !PREVIEW, open: t === nextUp })));
+    if (mine.length && !myOpenList.length && !myShowAll) { const e = document.createElement("li"); e.className = "empty"; e.textContent = "All done. Nice work."; my.appendChild(e); }
+    const myMore = $("my-more"); myMore.hidden = !(mine.length > shownMine.length || myShowAll);
+    myMore.setAttribute("aria-expanded", String(myShowAll));
+    const left = myOpenList.length - Math.min(3, myOpenList.length), doneN = mine.length - myOpenList.length;
+    myMore.querySelector("span").textContent = myShowAll ? "Show less"
+      : `Show all ${mine.length} tasks` + (left ? ` · ${left} more to do` : "") + (doneN ? ` · ${doneN} done` : "");
     renderBadges(); maybeNudge();
     renderPulse();
   }
   // "game.js · line 147 · escapeScreen()" so nobody has to guess where a task lives
   const whereText = (t) => [t.file, t.line ? "line " + t.line : "", t.fn].filter(Boolean).join(" · ");
   const showAll = new Set(), openRows = new Set();
+  let myShowAll = false;
+  $("my-more").onclick = () => { myShowAll = !myShowAll; renderTasks(); };
   const CHEV = '<svg class="chev" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 5.5L7 9l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   // opts.open: details always visible (your own list on My quest). Otherwise a "Details" toggle opens them.
   function row(t, opts = {}) {
@@ -2158,6 +2181,12 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
       body.appendChild(w);
     }
     if (t.done) { const d = document.createElement("span"); d.className = "row-done"; d.innerHTML = "<b>Done when</b> "; d.append(t.done); body.appendChild(d); }
+    // Numbered steps, one small action each, so nobody has to decode a paragraph
+    if (Array.isArray(t.steps) && t.steps.length) {
+      const ol = document.createElement("ol"); ol.className = "row-steps";
+      t.steps.forEach((s) => { const li = document.createElement("li"); li.textContent = s; ol.appendChild(li); });
+      body.appendChild(ol);
+    }
     if (ask) { const a = document.createElement("button"); a.type = "button"; a.className = "link-btn row-ask"; a.textContent = "Ask about this task"; a.onclick = () => askAbout(t); body.appendChild(a); }
     const tk = li.querySelector(".tick"); tk.setAttribute("aria-label", `${SAY[s]}. Mark as ${SAY[NEXT[s]].toLowerCase()}`);
     const mine = owner || (me && t.owner === me);
