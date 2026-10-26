@@ -64,20 +64,10 @@ const LAB = {
   title: "The Alchemy Lab",
   concept: "Methods and return values",
   story: "Bubbling potions line the shelves. Each one whispers a word when you read its code.",
+  // Leslie's, matching her PR on the team repo. She redid all 4 steps as one knight-themed
+  // run rather than keeping the original OPEN/SESAME pair, so the spell reads as one phrase:
+  // "Squire doing king's work".
   steps: [
-    {
-      code: 'class Potion {\n    String word() { return "OPEN"; }\n}\n\nSystem.out.println(new Potion().word());',
-      choices: ["OPEN", "word", "Potion"],
-      answer: 0,
-      hint: "What does the word() method return?",
-    },
-    {
-      code: 'String s = "sesame";\nSystem.out.println(s.toUpperCase());',
-      choices: ["sesame", "SESAME", "s"],
-      answer: 1,
-      hint: "toUpperCase() returns a new String in capital letters.",
-    },
-    // Steps 3 and 4: Leslie's, matching her PR on the team repo. Spell: "Squire doing king's work".
     {
       code: 'class Knight {\n    String title() { return "Squire"; }\n}\n\nSystem.out.println(new Knight().title());',
       choices: ["Squire", "title", "Knight"],
@@ -89,6 +79,18 @@ const LAB = {
       choices: ["do", "doing", "action"],
       answer: 1,
       hint: "The variable 'action' holds the string 'doing'.",
+    },
+    {
+      code: 'String possessive = "king";\nSystem.out.println(possessive + "\'s");',
+      choices: ["king", "king's", "possessive"],
+      answer: 1,
+      hint: "Adding '\\'s' to 'king' makes it possessive.",
+    },
+    {
+      code: 'String task = "work";\nSystem.out.println(task);',
+      choices: ["work", "task", "task."],
+      answer: 0,
+      hint: "The variable 'task' holds the string 'work'.",
     },
   ],
 };

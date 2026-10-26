@@ -17,7 +17,7 @@ Open `index.html` in your browser. No installs.
 | Start | Choose your knight and difficulty | Your knight is an object | `KNIGHTS`, `DIFFICULTIES` |
 | Intro | The warlock traps you | | `WARLOCK` |
 | 1. The Maze | 5 turns, pick the right direction (multiple choice) | Classes and objects | `MAZE` |
-| 2. The Alchemy Lab | Guess what the code prints; the words build a spell | Methods and encapsulation | `LAB` |
+| 2. The Alchemy Lab | Guess what the code prints; the words build a spell | Methods and return values | `LAB` |
 | 3. Hall of Illusions | 3 look-alike code doors, only one is real | Inheritance | `HALL` |
 | 4. The Final Door | Answer the warlock in your own words, earn 3 keys | Polymorphism, the final boss | `FINAL` |
 | Escape | You win, play again | | |

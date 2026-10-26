@@ -82,58 +82,44 @@ const MAZE = {
 // 4 steps. Guess what each snippet PRINTS to the screen (System.out.println does the printing).
 // Whatever the right choice's TEXT says gets added as one word of the final spell.
 // So the 4 right-choice texts, in order, spell out the magic words.
+//
+// ✅ LESLIE NOTE: this chamber's done! She redid all 4 steps as one knight-themed run
+//    (not just her assigned 2) so the spell reads as a real phrase: "Squire doing king's
+//    work" — matches the idiom Katrina suggested, and hand-traced correct, no bugs.
+//    Matches her PR on the team repo (branch "leslie"). Nothing left to do here.
 const LAB = {
   title: "The Alchemy Lab",
-  concept: "Methods and encapsulation",
+  concept: "Methods and return values",
   story: "Bubbling potions line the shelves. Each one whispers a word when you read its code.",
   steps: [
-    // Step 1: calls a method, the method returns "OPEN", so that prints.
+    // Step 1: calls a method, the method returns "Squire", so that prints.
     {
-      code: 'class Potion {\n    String word() { return "OPEN"; }\n}\n\nSystem.out.println(new Potion().word());',
-      choices: ["OPEN", "word", "Potion"],
+      code: 'class Knight {\n    String title() { return "Squire"; }\n}\n\nSystem.out.println(new Knight().title());',
+      choices: ["Squire", "title", "Knight"],
       answer: 0,
-      hint: "What does the word() method return?",
+      hint: "What does the title() method return?",
     },
-    // Step 2: .toUpperCase() makes a new ALL-CAPS copy of the string. "sesame" -> "SESAME".
+    // Step 2: the variable action holds "doing", and printing it prints its value.
     {
-      code: 'String s = "sesame";\nSystem.out.println(s.toUpperCase());',
-      choices: ["sesame", "SESAME", "s"],
+      code: 'String action = "doing";\nSystem.out.println(action);',
+      choices: ["do", "doing", "action"],
       answer: 1,
-      hint: "toUpperCase() returns a new String in capital letters.",
+      hint: "The variable 'action' holds the string 'doing'.",
     },
-
-    // ---- LESLIE NOTE: your 2 steps start here ----
-    // 👀 Before anything else: open index.html and actually PLAY through to the Lab (or in
-    //    VS Code, tell Copilot "open preview" so you can see it live). Katrina's note: she
-    //    tried it and the spell that printed might not be the one you were going for —
-    //    seeing it on screen is faster than tracing it in your head.
-
-    // Step 3: "Key: " + 42 glues together into "Key: 42". Then we substring it.
+    // Step 3: + glues strings together. "king" + "'s" -> "king's".
     {
-      code: 'int num = 42;\nString magic = "Key: " + num;\nSystem.out.println(magic.substring(5));',
-      choices: ["42", "Key: ", "magic"],
+      code: 'String possessive = "king";\nSystem.out.println(possessive + "\'s");',
+      choices: ["king", "king's", "possessive"],
+      answer: 1,
+      hint: "Adding '\\'s' to 'king' makes it possessive.",
+    },
+    // Step 4: same idea as step 2, a plain variable print.
+    {
+      code: 'String task = "work";\nSystem.out.println(task);',
+      choices: ["work", "task", "task."],
       answer: 0,
-      hint: "substring(5) extracts the part of the string after the first 5 characters.",
+      hint: "The variable 'task' holds the string 'work'.",
     },
-
-    // Step 4 — Katrina's note: "this might be a bug here
-    //   System.out.println("Al" + "chemy".substring(2)); only prints out chemy"
-    {
-      code: 'System.out.println("Al" + "chemy".substring(2));',
-      choices: ["Alchemy", "chemy", "Al"],
-      answer: 1,
-      hint: "substring(2) extracts the part of the string starting from index 2.",
-    },
-    // 🔎 LESLIE NOTE: run it (see the "open preview" note above) and check what actually
-    //    prints against the 3 choices here. Once that's sorted you should be good.
-    //
-    // 🪄 Then: make sure this is the spell YOU want. You could keep it close to the
-    //    original idea — "OPEN SESAME 42 Alchemy" — or go full knight-themed with an
-    //    idiom or phrase instead, like "Squire doing king's work" or "Sword stuck in
-    //    stone." Totally your creative call. Katrina already looked a few up if you'd
-    //    rather have exact text to copy-paste into the code than invent your own —
-    //    just ask her for the list.
-    // ---- end LESLIE NOTE ----
   ],
 };
 
