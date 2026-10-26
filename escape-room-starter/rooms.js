@@ -62,7 +62,7 @@ const MAZE = {
 // 4 steps. Guess what each snippet prints; the printed words join into the spell.
 const LAB = {
   title: "The Alchemy Lab",
-  concept: "Methods and encapsulation",
+  concept: "Methods and return values",
   story: "Bubbling potions line the shelves. Each one whispers a word when you read its code.",
   steps: [
     {
@@ -77,9 +77,19 @@ const LAB = {
       answer: 1,
       hint: "toUpperCase() returns a new String in capital letters.",
     },
-    // TODO (Leslie): 2 more steps, so the spell has 4 words. Ideas from Sanjana's research:
-    //   - Encapsulation: a private field read through a public getter, e.g. getSecret() returns "DOOR"
-    //   - Constructor arguments: new Potion("RISE").word() prints what?
+    // Steps 3 and 4: Leslie's, matching her PR on the team repo. Spell: "Squire doing king's work".
+    {
+      code: 'class Knight {\n    String title() { return "Squire"; }\n}\n\nSystem.out.println(new Knight().title());',
+      choices: ["Squire", "title", "Knight"],
+      answer: 0,
+      hint: "What does the title() method return?",
+    },
+    {
+      code: 'String action = "doing";\nSystem.out.println(action);',
+      choices: ["do", "doing", "action"],
+      answer: 1,
+      hint: "The variable 'action' holds the string 'doing'.",
+    },
   ],
 };
 
