@@ -218,6 +218,14 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .row-done b { color: var(--parch); font-weight: 700; }
 .row-steps { margin: 4px 0 2px; padding-left: 22px; display: grid; gap: 6px; font-size: 14.5px; line-height: 1.45; color: var(--parch); }
 .row-steps li::marker { color: var(--torch); font-weight: 700; }
+.row-steps a { color: var(--torch); text-underline-offset: 3px; }
+/* Team guide: a card in the sidebar, a button in the phone top bar */
+.guide-link { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--plank); border-radius: 12px; background: var(--wood-2); color: var(--parch); text-decoration: none; }
+.guide-link b { display: block; font-size: 15px; font-weight: 700; }
+.guide-link small { display: block; font-size: 13px; color: var(--parch-3); }
+.guide-ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--torch); color: var(--on-torch); }
+@media (hover: hover) and (pointer: fine) { .guide-link:hover { border-color: var(--torch); } .guide-top:hover { border-color: var(--torch); } }
+.guide-top { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid var(--plank); border-radius: 999px; background: var(--wood-2); color: var(--parch); font-size: 14px; font-weight: 700; text-decoration: none; }
 .row.is-done .row-steps { display: none; }
 .row-ask { justify-self: start; margin-left: -4px; }
 .row.is-done .row-where, .row.is-done .row-done, .row.is-done .row-ask { display: none; }
@@ -716,6 +724,11 @@ body {
       <div><b>Knight's Escape</b><small>Project 9 · Girls Who Code</small></div>
     </div>
     <nav class="nav" id="nav"></nav>
+    <!-- The most important doc: always one click away -->
+    <a class="guide-link press js-guide" href="#" target="_blank" rel="noopener">
+      <span class="guide-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8 7.5h8M8 11h6"/></svg></span>
+      <span><b>Team guide</b><small>Setup, git steps, AI tips</small></span>
+    </a>
     <div class="side-foot">
       <div class="days"><b class="js-days">–</b><span>days until<br>demo, Nov 12</span></div>
       <label class="preview-pick" id="preview-pick" hidden for="preview-as">Preview as
@@ -737,6 +750,7 @@ body {
       <svg width="30" height="30" viewBox="0 0 34 34" aria-hidden="true"><rect x="1" y="1" width="32" height="32" rx="9" fill="#7a2e06"/><path d="M9 29V13.5L17 7l8 6.5V29" fill="#2d1200"/><rect x="13" y="14" width="8" height="7" fill="#ffc21a"/><path d="M17 14v7M13 17.5h8" stroke="#2d1200" stroke-width="1.4"/></svg>
       <div><b>Knight's Escape</b></div>
     </div>
+    <a class="guide-top press js-guide" href="#" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>Guide</a>
     <div class="days"><b class="js-days">–</b><span>days to<br>demo</span></div>
   </header>
 
@@ -826,7 +840,7 @@ body {
             <button class="btn press" type="button" id="help-copy">Copy question</button>
           </div>
           <div class="helper-a" id="help-a" hidden aria-live="polite"></div>
-          <p class="foot">New to AI chat? <a href="https://www.youtube.com/watch?v=X_Aet9ndh_Y" target="_blank" rel="noopener">Watch the 1-minute video</a>. AI can be wrong, so test its Java in the <a href="https://www.programiz.com/java-programming/online-compiler/" target="_blank" rel="noopener">online Java compiler</a> or ask a teammate. Never paste your PIN. Still stuck after 15 minutes? Post in Discord.</p>
+          <p class="foot">New to AI chat? <a href="https://www.youtube.com/watch?v=X_Aet9ndh_Y" target="_blank" rel="noopener">Watch the 1-minute video</a>, or read <a class="js-guide" data-part="6" href="#" target="_blank" rel="noopener">Team guide, Part 6</a>. AI can be wrong, so test its Java in the <a href="https://www.programiz.com/java-programming/online-compiler/" target="_blank" rel="noopener">online Java compiler</a> or ask a teammate. Never paste your PIN. Still stuck after 15 minutes? Post in Discord.</p>
         </form>
         <div class="card meet-strip" id="catchup" hidden>
           <div><h2>Catch up on the Council</h2><p class="sub" id="catchup-sub"></p></div>
@@ -839,7 +853,7 @@ body {
           <div class="controls">
             <button class="btn solid press" type="button" onclick="window.P9_PARTY && window.P9_PARTY('play')">Play on this phone</button>
             <button class="btn press" type="button" data-go="council">Council screen</button>
-            <a class="btn press" style="text-decoration:none" href="https://github.com/kateye31/pm-gwc-proj9/blob/main/escape-room-starter/TEAM-GUIDE.md" target="_blank" rel="noopener">Team guide</a>
+            <a class="btn press js-guide" style="text-decoration:none" href="#" target="_blank" rel="noopener">Team guide</a>
           </div>
         </div>
       </div>
@@ -1675,6 +1689,24 @@ window.P9_STARTER = /*@STARTER@*/{};
   }
   // "game.js · line 147 · escapeScreen()" so nobody has to guess where a task lives
   const whereText = (t) => [t.file, t.line ? "line " + t.line : "", t.fn].filter(Boolean).join(" · ");
+  // ---------- Team guide links ----------
+  // One place for the guide's address. Part numbers jump straight to that part on GitHub.
+  const GUIDE = "https://github.com/kateye31/pm-gwc-proj9/blob/main/escape-room-starter/TEAM-GUIDE.md";
+  const GUIDE_PARTS = { 1: "part-1--what-were-building", 2: "part-2--get-set-up-do-this-once-about-20-minutes", 3: "part-3--how-to-make-a-change-every-task",
+    4: "part-4--which-file-do-i-edit", 5: "part-5--every-week", 6: "part-6--asking-ai-for-help-the-right-way", 7: "part-7--learn-the-concepts-from-sanjanas-research",
+    8: "part-8--free-tools-and-resources", 9: "part-9--road-to-demo-day" };
+  const guideUrl = (part) => GUIDE + (GUIDE_PARTS[part] ? "#" + GUIDE_PARTS[part] : "");
+  document.querySelectorAll(".js-guide").forEach((a) => { a.href = guideUrl(a.dataset.part); });
+  // "Team Guide, Part 3" inside a task step becomes a link to Part 3 (built from text nodes, no HTML injection)
+  function linkGuide(li, text) {
+    const re = /Team Guide(?:, Part (\d))?/gi; let last = 0, m;
+    while ((m = re.exec(text))) {
+      li.append(text.slice(last, m.index));
+      const a = document.createElement("a"); a.href = guideUrl(m[1]); a.target = "_blank"; a.rel = "noopener"; a.textContent = m[0];
+      li.appendChild(a); last = re.lastIndex;
+    }
+    li.append(text.slice(last));
+  }
   const showAll = new Set(), openRows = new Set();
   let myShowAll = false;
   $("my-more").onclick = () => { myShowAll = !myShowAll; renderTasks(); };
@@ -1705,7 +1737,7 @@ window.P9_STARTER = /*@STARTER@*/{};
     // Numbered steps, one small action each, so nobody has to decode a paragraph
     if (Array.isArray(t.steps) && t.steps.length) {
       const ol = document.createElement("ol"); ol.className = "row-steps";
-      t.steps.forEach((s) => { const li = document.createElement("li"); li.textContent = s; ol.appendChild(li); });
+      t.steps.forEach((s) => { const li = document.createElement("li"); linkGuide(li, s); ol.appendChild(li); });
       body.appendChild(ol);
     }
     if (ask) { const a = document.createElement("button"); a.type = "button"; a.className = "link-btn row-ask"; a.textContent = "Ask about this task"; a.onclick = () => askAbout(t); body.appendChild(a); }
