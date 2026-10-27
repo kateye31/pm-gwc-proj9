@@ -198,6 +198,7 @@ On the team board, tap **Ask for help** (bottom right on every screen), or **Ask
 > **Please:** give me a hint / explain the idea / check my answer (don't just write it for me)
 
 ### Copy-and-paste starters
+- 🧠 **Explain it simply (when you're stuck):** "Explain [the idea, like encapsulation] like I'm new to Java. Make it ADHD-friendly: short chunks, a few emojis, one everyday example (like a vending machine), then a tiny code example, then quiz me with one question."
 - 📘 **Learn a concept:** "Explain the difference between a class and an object in Java with an example that's NOT about knights. Then quiz me with one question."
 - ✅ **Check your puzzle:** "Here's my Maze turn: [paste]. Is the Java correct, and is my answer index right? Tell me what to fix, don't rewrite it."
 - 🐛 **Fix a bug:** "My game shows a blank screen after the Maze. Code: [paste]. Error: [paste]. Give me a hint, not the full fix."

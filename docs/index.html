@@ -304,10 +304,33 @@ a { color: var(--parch); text-underline-offset: 3px; }
 .row-steps { margin: 4px 0 2px; padding-left: 22px; display: grid; gap: 6px; font-size: 14.5px; line-height: 1.45; color: var(--parch); }
 .row-steps li::marker { color: var(--torch); font-weight: 700; }
 .row-steps a { color: var(--torch); text-underline-offset: 3px; }
+/* Concept explainers (Game plan > Charter): folded by default, short chunks when open */
+.learn { margin-top: var(--s2); border: 1px solid var(--plank); border-radius: 12px; background: var(--night); }
+.learn > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 36px minmax(0, 1fr) 14px; gap: 12px; align-items: center; padding: 12px 14px; }
+.learn > summary::-webkit-details-marker { display: none; }
+.learn > summary b { display: block; font-size: 15.5px; font-weight: 700; }
+.learn > summary small { display: block; font-size: 13.5px; color: var(--parch-3); }
+.learn[open] > summary .chev { transform: rotate(180deg); }
+.learn-ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--wood-2); font-size: 18px; }
+.learn-body { display: grid; gap: var(--s2); padding: 0 18px 18px 62px; max-width: calc(68ch + 62px); font-size: 15.5px; line-height: 1.6; }
+.learn[open] .learn-body { animation: reveal 200ms var(--ease-out); }
+.learn-body h4 { margin: var(--s1) 0 0; font-size: 15.5px; }
+.learn-body ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.learn-body .sub { margin-bottom: -8px; }
+.learn-body pre { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--wood); border: 1px solid var(--line); overflow-x: auto; }
+.learn-body code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13.5px; line-height: 1.55; color: var(--parch); }
+.learn-pic, .learn-game { padding: 10px 14px; border-radius: 10px; background: var(--wood-2); }
+@media (max-width: 640px) { .learn-body { padding: 0 14px 16px; } }
+@media (prefers-reduced-motion: reduce) { .learn[open] .learn-body { animation: none; } }
+/* What's new: a single slim line at the top of My quest */
+.news { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); padding: 10px 14px; border: 1px solid var(--plank); border-radius: 12px; background: var(--wood-2); }
+.news p { flex: 1 1 240px; min-width: 0; font-size: 15px; }
+.news-tag { padding: 1px 9px; border-radius: 999px; background: var(--torch); color: var(--on-torch); font-size: 12.5px; font-weight: 700; }
+.news .news-go { height: 34px; padding: 0 14px; font-size: 14px; }
 /* Team guide: a card in the sidebar, a button in the phone top bar */
 .guide-link { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--plank); border-radius: 12px; background: var(--wood-2); color: var(--parch); text-decoration: none; }
 .guide-link b { display: block; font-size: 15px; font-weight: 700; }
-.guide-link small { display: block; font-size: 13px; color: var(--parch-3); }
+.guide-link small { display: block; font-size: 13px; color: var(--parch-2); }
 .guide-ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--torch); color: var(--on-torch); }
 @media (hover: hover) and (pointer: fine) { .guide-link:hover { border-color: var(--torch); } .guide-top:hover { border-color: var(--torch); } }
 /* The narrow phone top bar fits the castle icon, Guide, GitHub and the countdown; the name text steps aside */
@@ -1103,6 +1126,13 @@ body.party-mode { overflow-x: hidden; }
       </div>
 
       <div class="stack" id="today-body" style="gap:var(--s3)">
+        <!-- What's new: one line at a time, dismissed per device -->
+        <div class="news" id="news" hidden role="status">
+          <span class="news-tag">New</span>
+          <p id="news-t"></p>
+          <button class="btn press news-go" type="button" id="news-go">Read it</button>
+          <button class="link-btn" type="button" id="news-x">Got it</button>
+        </div>
         <div class="grid-2">
         <div class="card" id="checkin-closed">
           <h2>Check in</h2>
@@ -1393,6 +1423,51 @@ Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Co
               <tr><td>The Final Door</td><td>Polymorphism, the final boss: different objects answer the same method call. Then explain it in your own words</td><td><a href="https://www.programiz.com/java-programming/polymorphism" target="_blank" rel="noopener">Programiz: polymorphism</a></td></tr>
             </tbody>
           </table></div>
+          <!-- Concept explainers: folded until someone opens one. Link to them with #learn-<name> -->
+          <details class="learn" id="learn-encapsulation">
+            <summary><span class="learn-ic" aria-hidden="true">📘</span><span><b>What is encapsulation?</b><small>2-minute read · the Alchemy Lab's idea</small></span><svg class="chev" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 5.5L7 9l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+            <div class="learn-body">
+              <p><b>Encapsulation</b> means hiding an object's data inside it, so the only way in is through its public methods (like getters and setters).</p>
+              <p class="learn-pic">🥤 Think of a vending machine. The snacks (the data) are locked behind glass. You can't reach in and grab one. You use the buttons and the coin slot (the public methods), and the machine decides the rules.</p>
+              <h4>🧱 3 steps to encapsulate a class</h4>
+              <ol>
+                <li><b>Make the fields private.</b> That locks the data, so other classes can't change it directly.</li>
+                <li><b>Add public getters.</b> Like window-shopping: other classes can <i>see</i> the data.</li>
+                <li><b>Add public setters</b> (if you need them). Like the coin slot: other classes can change the data, but only by your rules.</li>
+              </ol>
+              <h4>💻 Without vs. with encapsulation</h4>
+              <p class="sub">❌ Without it, anyone can put a bad value straight in:</p>
+              <pre><code>class BankAccount {
+    public double balance;   // anyone can change this!
+}
+
+BankAccount account = new BankAccount();
+account.balance = -5000;     // 🛑 a negative balance is allowed</code></pre>
+              <p class="sub">✅ With it, the data is hidden and the setter checks the rule first:</p>
+              <pre><code>class BankAccount {
+    private double balance;                  // 1. hide the data
+
+    public double getBalance() {             // 2. getter: let people look
+        return balance;
+    }
+
+    public void setBalance(double amount) {  // 3. setter: check the rule first
+        if (amount >= 0) {
+            this.balance = amount;
+        } else {
+            System.out.println("Error: Balance cannot be negative.");
+        }
+    }
+}
+
+BankAccount account = new BankAccount();
+account.balance = -5000;     // ❌ won't even compile now
+account.setBalance(-5000);   // ⚠️ prints the error
+account.setBalance(150);     // ✅ works</code></pre>
+              <p class="learn-game">🏰 <b>In our game:</b> in Lab step 4, the word "work" lives in a private field. The warlock can't grab it. He has to ask the getter.</p>
+              <p class="foot">Still fuzzy? Tap <b>Ask for help</b>, then <b>Explain it simply 🧠</b>. Or read <a href="https://www.programiz.com/java-programming/encapsulation" target="_blank" rel="noopener">Programiz: encapsulation</a>.</p>
+            </div>
+          </details>
           <h3 style="font-size:15px;margin:16px 0 6px">Platforms from Sanjana's research</h3>
           <div class="tbl-wrap"><table class="tbl">
             <tbody>
@@ -2100,6 +2175,33 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
   showPlan(["dungeon", "schedule", "charter"].includes(store.get("p9-plan", "dungeon")) ? store.get("p9-plan", "dungeon") : "dungeon", false);
   addEventListener("resize", placePill); if (document.fonts) document.fonts.ready.then(placePill);
 
+  // ---------- Concept explainers + What's new ----------
+  // An explainer lives folded in Game plan > Charter. Any link to #learn-<name> opens it right there.
+  function openLearn(id) {
+    const d = $(id); if (!d) return;
+    go("plan", true); showPlan("charter", false); d.open = true;
+    // go() scrolls to the top for its screen change, so scroll to the explainer after that settles
+    setTimeout(() => d.scrollIntoView({ block: "start" }), 80);
+  }
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#learn-"]'); if (!a) return;
+    e.preventDefault(); openLearn(a.getAttribute("href").slice(1));
+  });
+  // One line at a time on My quest. "Got it" or "Read it" hides that item on this device.
+  const NEWS = [
+    { id: "learn-encapsulation", text: "What is encapsulation? A 2-minute read, with a vending machine 🥤", go: () => openLearn("learn-encapsulation") },
+  ];
+  const newsSeen = () => store.get("p9-news-seen", []) || [];
+  function renderNews() {
+    const item = NEWS.find((n) => !newsSeen().includes(n.id));
+    $("news").hidden = !item; if (!item) return;
+    $("news-t").textContent = item.text;
+    const done = () => { store.set("p9-news-seen", [...newsSeen(), item.id]); renderNews(); };
+    $("news-go").onclick = () => { done(); item.go(); };
+    $("news-x").onclick = done;
+  }
+  renderNews();
+
   $("copy").onclick = () => {
     const text = "Did: …\nNext: …\nStuck on: … (or \"nothing\")";
     const fallback = () => { const r = document.createRange(); r.selectNodeContents($("tpl").firstChild); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Selected. Press Ctrl+C."); };
@@ -2192,10 +2294,13 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
   document.querySelectorAll(".js-guide").forEach((a) => { a.href = guideUrl(a.dataset.part); });
   // "Team Guide, Part 3" inside a task step becomes a link to Part 3 (built from text nodes, no HTML injection)
   function linkGuide(li, text) {
-    const re = /Team Guide(?:, Part (\d))?/gi; let last = 0, m;
+    // Also "encapsulation explainer" opens the explainer on the board
+    const re = /Team Guide(?:, Part (\d))?|encapsulation explainer/gi; let last = 0, m;
     while ((m = re.exec(text))) {
       li.append(text.slice(last, m.index));
-      const a = document.createElement("a"); a.href = guideUrl(m[1]); a.target = "_blank"; a.rel = "noopener"; a.textContent = m[0];
+      const a = document.createElement("a"); a.textContent = m[0];
+      if (/explainer/i.test(m[0])) a.href = "#learn-encapsulation";
+      else { a.href = guideUrl(m[1]); a.target = "_blank"; a.rel = "noopener"; }
       li.appendChild(a); last = re.lastIndex;
     }
     li.append(text.slice(last));
@@ -2328,6 +2433,7 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
     ["What does this error mean?", "What does this error mean, and where should I look? I pasted it below."],
     ["Check my puzzle", "Is the Java in my puzzle correct, and does my answer number point to the right choice? Tell me what to fix, don't rewrite it."],
     ["Explain a concept", "Explain the difference between a class and an object with an example that's not about knights. Then quiz me with one question."],
+    ["Explain it simply 🧠", "Explain [the idea, like encapsulation] like I'm new to Java. Make it ADHD-friendly: short chunks, a few emojis, one everyday example (like a vending machine), then a tiny code example, then quiz me with one question."],
   ];
   const HELP_BRIEF = `You're helping a student on a Girls Who Code team building "Knight's Escape", a Java OOP escape room for college students. The game is plain HTML/CSS/JavaScript with no frameworks: rooms.js holds all the puzzles as data, game.js runs the screens (one function per screen), style.css is the look, index.html is the page. The puzzles show Java snippets. A warlock traps you and you escape through 4 chambers: the Maze (classes and objects), the Alchemy Lab (methods and encapsulation), the Hall of Illusions (inheritance), the Final Door (polymorphism). The team works in git branches and opens pull requests that their mentor Katrina reviews.
 
@@ -2401,7 +2507,11 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   $("help-vscode").onclick = () => { if (helpReady()) copyText(vscodePrompt(), "Copied. In VS Code, open the AI chat (Ctrl+Alt+I) and paste."); };
   HELP_STARTERS.forEach(([label, text]) => {
     const b = document.createElement("button"); b.type = "button"; b.className = "chip press"; b.textContent = label;
-    b.onclick = () => { helpTask = null; $("help-q").value = text; if (/pasted/.test(text)) $("helper").querySelector("details").open = true; $("help-q").focus(); };
+    b.onclick = () => {
+      helpTask = null; const q = $("help-q"); q.value = text; if (/pasted/.test(text)) $("helper").querySelector("details").open = true; q.focus();
+      // A [blank] in the starter gets selected, so typing replaces it
+      const i = text.indexOf("["), j = text.indexOf("]"); if (i >= 0 && j > i) q.setSelectionRange(i, j + 1);
+    };
     $("help-starters").appendChild(b);
   });
   $("help-q").addEventListener("input", (e) => { if (!e.target.value.trim()) helpTask = null; });
@@ -2644,7 +2754,9 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   });
 
   renderMe(); renderHere(); renderTasks();
+  const learnLink = /^#learn-[\w-]+$/.test(location.hash) ? location.hash.slice(1) : "";
   go(startScreen, false);
+  if (learnLink) openLearn(learnLink); // a shared link like #learn-encapsulation opens that explainer
   if (window.claude && window.claude.use) {
     // Unknown viewer (no user capability, signed out, a test mock) always means "not the owner".
     Promise.resolve().then(() => window.claude.use("user")).then(async (u) => {
