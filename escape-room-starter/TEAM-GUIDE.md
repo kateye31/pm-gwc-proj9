@@ -117,6 +117,12 @@ git pull origin 1.0
 ```
 Then start your next task with a **new** branch (Step 2).
 
+> ✅ **How to know it's really on GitHub (GitHub Desktop):** look at the top button.
+> - **Fetch origin** with no numbers = everything is pushed and up to date. 🎉
+> - **Push origin ↑1** = you have work that's only on your laptop. Click it.
+> - **Pull origin ↓1** = there's newer work on GitHub. Click it first, then push.
+> Always finish with it saying **Fetch origin**.
+
 > 🚨 **Stuck, merge conflict, or pushed to the wrong place?** Stop. Don't force anything. Post in Discord and we'll fix it together.
 
 ---
