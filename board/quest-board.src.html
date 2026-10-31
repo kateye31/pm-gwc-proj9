@@ -820,7 +820,7 @@ body {
         </div>
         <form class="card" id="checkin" hidden>
           <h2>Check in · 20 seconds</h2>
-          <p class="foot" style="margin:4px 0 20px">Four taps. We ask the same questions every meeting, so you can see how far you've come.</p>
+          <p class="foot" style="margin:4px 0 20px">Five taps. We ask the same questions every meeting, so you can see how far you've come.</p>
           <div class="q">
             <span id="q-mood">How are you feeling?</span>
             <div class="faces-pick" id="mood" role="radiogroup" aria-labelledby="q-mood"></div>
@@ -839,6 +839,11 @@ body {
             <span id="q-oop">How well do you get classes and objects?</span>
             <div class="scale" id="oop" role="radiogroup" aria-labelledby="q-oop"></div>
             <div class="scale-ends"><span>No idea yet</span><span>Could teach it</span></div>
+          </div>
+          <div class="q">
+            <span id="q-played">How many times have you opened index.html and played the game?</span>
+            <div class="scale" id="played" role="radiogroup" aria-labelledby="q-played"></div>
+            <div class="scale-ends"><span>Not yet</span><span>Lots</span></div>
           </div>
           <div class="checkin-go">
             <button class="btn solid press" type="submit" id="checkin-go" disabled>Pick your name first</button>
@@ -975,7 +980,7 @@ body {
         <div class="grid-2">
           <div class="card">
             <h2>Wednesday check-in</h2>
-            <p class="foot" style="margin:4px 0 14px">Post in Discord #general by 8pm.</p>
+            <p class="foot" style="margin:4px 0 14px">Post in Discord #wed-check-in by 8pm.</p>
             <div class="scroll-note" id="tpl">Did: …
 Next: …
 Stuck on: … (or "nothing")<button class="btn press" type="button" id="copy">Copy</button></div>
@@ -1416,13 +1421,15 @@ window.P9_STARTER = /*@STARTER@*/{};
     return `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="${HEAD}" fill="${fill}" stroke="#2d1200" stroke-width="3"/><circle cx="16" cy="37" r="4.5" fill="#f08a4b" opacity=".45"/><circle cx="48" cy="37" r="4.5" fill="#f08a4b" opacity=".45"/>${eyes}${mouth}</svg>`;
   }
   window.P9_FACE = face;
-  const pick = { mood: 0, github: 0, vscode: 0, oop: 0 };
+  const pick = { mood: 0, github: 0, vscode: 0, oop: 0, played: 0 };
+  // "How many times have you played the game?" Saved as 1-5, shown with these labels
+  const PLAYED = ["0", "1", "2–3", "4–5", "6+"];
   function radioGroup(el, render, key) {
     el.innerHTML = "";
     for (let i = 1; i <= 5; i++) {
       const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "radio"); b.className = (key === "mood" ? "face-btn " : "") + "press";
       b.innerHTML = render(i); b.setAttribute("aria-checked", String(pick[key] === i));
-      b.setAttribute("aria-label", key === "mood" ? MOODS[i - 1] : `${i} out of 5`);
+      b.setAttribute("aria-label", key === "mood" ? MOODS[i - 1] : key === "played" ? `Played ${PLAYED[i - 1]} times` : `${i} out of 5`);
       b.onclick = () => {
         pick[key] = i;
         [...el.children].forEach((c, j) => c.setAttribute("aria-checked", String(j + 1 === i)));
@@ -1437,6 +1444,7 @@ window.P9_STARTER = /*@STARTER@*/{};
     radioGroup($("git"), (i) => String(i), "github");
     radioGroup($("vsc"), (i) => String(i), "vscode");
     radioGroup($("oop"), (i) => String(i), "oop");
+    radioGroup($("played"), (i) => PLAYED[i - 1], "played");
   };
   drawPicks();
 
@@ -1445,20 +1453,20 @@ window.P9_STARTER = /*@STARTER@*/{};
   function syncCheckinBtn() {
     const btn = $("checkin-go");
     const mine = checkins.find((c) => c.name === me && c.date === todayKey);
-    const ready = me && pick.mood && pick.github && pick.vscode && pick.oop;
+    const ready = me && pick.mood && pick.github && pick.vscode && pick.oop && pick.played;
     btn.disabled = PREVIEW || !me || !cref || !ready;
-    btn.textContent = !me ? "Pick your name first" : !ready ? "Answer all four" : mine ? "Update my check-in" : "Check in";
+    btn.textContent = !me ? "Pick your name first" : !ready ? "Answer all five" : mine ? "Update my check-in" : "Check in";
     $("checkin-state").textContent = PREVIEW ? "Preview: answers don't save." : !cref ? "Saving works on claude.ai." : mine ? "Checked in today." : "";
   }
   function loadMine() {
     const mine = checkins.find((c) => c.name === me && c.date === todayKey);
-    if (mine) { pick.mood = mine.mood; pick.github = mine.github; pick.vscode = mine.vscode || 0; pick.oop = mine.oop; drawPicks(); }
+    if (mine) { pick.mood = mine.mood; pick.github = mine.github; pick.vscode = mine.vscode || 0; pick.oop = mine.oop; pick.played = mine.played || 0; drawPicks(); }
     syncCheckinBtn();
   }
   $("checkin").addEventListener("submit", (ev) => {
     ev.preventDefault();
     if (!me || !cref || !pick.mood) return;
-    cref.doc(`${todayKey}_${me}`).set({ name: me, date: todayKey, mood: pick.mood, github: pick.github, vscode: pick.vscode, oop: pick.oop })
+    cref.doc(`${todayKey}_${me}`).set({ name: me, date: todayKey, mood: pick.mood, github: pick.github, vscode: pick.vscode, oop: pick.oop, played: pick.played })
       .then(() => { markHere(me); toast(`Thanks, ${me}! You're checked in.`); }).catch(fail);
   });
 
@@ -2124,6 +2132,7 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
       const card = document.createElement("div"); card.className = "card kid";
       card.innerHTML = `<div class="kid-top">${c ? face(c.mood) : '<span class="away"></span>'}<div><b></b><small></small></div></div>
         <dl><dt>GitHub · VS Code · OOP</dt><dd>${c ? [c.github, c.vscode || "–", c.oop].join(" · ") : "–"}</dd>
+        <dt>Played the game</dt><dd>${c && c.played ? PLAYED[c.played - 1] + "×" : "–"}</dd>
         <dt>Tasks done</dt><dd>${mine.filter((t) => t.status === "done").length} of ${mine.length}</dd>
         <dt>Late</dt><dd class="${late ? "warn" : ""}">${late}</dd></dl><p class="next"></p>`;
       card.querySelector("b").textContent = p;
@@ -2183,7 +2192,7 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     L.push("## 🙋 Who checked in", "");
     STUDENT_LIST.forEach((p) => {
       const c = checkins.find((x) => x.name === p && x.date === todayKey);
-      L.push(c ? `- **${p}** · ${MOODS[c.mood - 1]} · GitHub ${c.github}/5 · VS Code ${c.vscode || "–"}/5 · OOP ${c.oop}/5` : `- **${p}** · not checked in`);
+      L.push(c ? `- **${p}** · ${MOODS[c.mood - 1]} · GitHub ${c.github}/5 · VS Code ${c.vscode || "–"}/5 · OOP ${c.oop}/5` + (c.played ? ` · played ${PLAYED[c.played - 1]}×` : "") : `- **${p}** · not checked in`);
     });
     const absent = STUDENT_LIST.filter((p) => !answers.some((a) => a.name === p));
     L.push("", "## 🎯 Next steps", "", "- [ ] Turn each top pick into one task on the board (with an owner and a date)");

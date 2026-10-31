@@ -159,7 +159,7 @@ Then start your next task with a **new** branch (Step 2).
 | --- | --- | --- | --- |
 | Each meeting | **Check in:** your mood + how comfy you are with GitHub, VS Code and OOP (1–5) | Team board | 20 sec |
 | Each meeting | **Council game:** vote on game decisions | Phone, party link | ~10 min |
-| By Wednesday 8pm | **Check-in post:** Did / Next / Stuck on | Discord #general | 2 min |
+| By Wednesday 8pm | **Check-in post:** Did / Next / Stuck on | Discord #wed-check-in | 2 min |
 | By Wednesday | **Question of the week:** ask 1 student outside the team, post their answer | Discord #research | 5 min |
 | By Wednesday night | **When2meet:** fill in your free times for next weekend's meeting | Discord #polls | 1 min |
 | Anytime | **Tick your tasks** as you go: to do → doing → done | Team board | 5 sec |
