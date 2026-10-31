@@ -19,7 +19,8 @@ Team: Leslie, Sanjana (build), Shirley, Tvishaa (design). Mentor: Katrina.
   - The Council markup lives in `council.html` (inlined by build.py); `council.js` depends on its ids.
   - Party mode (`party.html/css/js`, inlined by build.py): `#host` is the streamed big screen (controls only for the owner), `#play` is the phone controller (daily 4-letter room code + name). It reuses `window.P9_ROUNDS` from council.js and writes the same `workshop_sessions` / `workshop_answers` records, plus `party_players`. Inspired by party games; never copy another company's branding or art.
   - The game design belongs to the team (Group 9 design roadmap: warlock, 4 chambers). Don't invent rooms.
-  - Mentor-only tools live in `discord-kit.src.html` (build with `python board/build.py <out> discord-kit.src.html`), never on the team board.
+  - The Discord kit's posts live in `discord-kit.src.html` (private, gitignored). `build.py` inlines them into Live on the private Claude board only; the public site build never gets them (notes about the girls). The standalone kit still builds with `python board/build.py <out> discord-kit.src.html`.
+  - Katrina edits the board herself: task Edit buttons, and "Edit the board" (rewrite text, hide/drag cards, add her own cards), saved as `kind: "page"` records in `workshop_sessions`. Her kit wording saves as `kind: "kit"` records. Never overwrite her edits; when she rewrites a post or task, match what she actually sent.
   - Data comes from `window.claude.use("db")`: `tasks` and `checkins` (`<date>_<name>`). Never hardcode records in the page.
   - Motion: transform/opacity only, ease `--ease-out`, under 300ms, respect `prefers-reduced-motion`.
   - Editing this file does not update the live page; Claude republishes it.

@@ -92,6 +92,7 @@ flowchart LR
 2. **Two hosts, same calls.** On claude.ai the artifact runtime provides `db`, `user` (is this the owner?), `sample` (inline AI answers) and `downloads`. On GitHub Pages, [`board/site/shim.js`](board/site/shim.js) answers the same calls with Firestore, so the girls get a link that needs no sign-in.
 3. **The Council is shared state.** The host screen writes the round and timer to `workshop_sessions/meeting-1`, each phone writes its own answer, and everyone renders from the same records. Phones join with a 4-letter room code that changes every day.
 4. **Reminders stay on the device.** The badge counts your open tasks. The reminder shows once per visit, and "Remind me tomorrow" or "Don't remind me again" are saved in that browser only.
+5. **The mentor edits the board in place.** Every task has an Edit button for her (title, owner, due date, Done when, and steps she can drag into order). "Edit the board" lets her rewrite any text, hide or drag cards, and add her own cards. Each change is a `kind: "page"` record in `workshop_sessions`, so the team sees it at once, and the page source never changes. Saved text is cleaned to bold, italics, code and links before it's shown. A text edit only applies while the original it replaced is still there, so a later source change can't misplace it.
 
 ## Privacy and safety
 
@@ -100,6 +101,7 @@ The team is four students, so the board stores as little as possible.
 - **First names only.** No emails, accounts or real passwords. PINs are stored as SHA-256 hashes, never as the PIN.
 - **A PIN is a light gate, not real security.** It stops classmates from checking in as each other. The real protection is the Firestore rules: only the board's own collections, at most 12 fields per record, and everything expires on Dec 31, 2026.
 - **The mentor view** unlocks with a key whose hash is in [`config.js`](docs/config.js); the key itself is never in the repo.
+- **The Discord kit stays private.** Its posts include notes about the students, so `build.py` puts it inside Live on the mentor's private Claude copy only. The public site and this repo never contain it.
 - **Art is human-made.** Public-domain paintings and manuscripts (Wikimedia Commons), credited on the page where they appear: the Round Table (Lancelot manuscript, BnF MS fr. 120, c. 1400), Gawain (Cotton Nero A.x, c. 1400), J. M. W. Turner's *Ulysses Deriding Polyphemus* (1829) and J. R. Skelton's *Beowulf and the Dragon* (1908). The RACI card uses one licensed illustration, *Image by vectorjuice on Freepik*, credited under it. No AI-generated images.
 - **These screenshots use sample check-ins.** Tasks, meetings and Council answers are the team's; moods and skill ratings are made up, so nobody's real ratings are in a public README.
 

@@ -38,6 +38,26 @@ STARTER = HERE.parent / "escape-room-starter"
 files = {name: (STARTER / name).read_text(encoding="utf-8").replace("\r\n", "\n") for name in ("rooms.js", "game.js", "style.css", "index.html")}
 src = src.replace("/*@STARTER@*/{}", json.dumps(files).replace("</", "<\\/"))
 
+# The Discord kit's posts go into Live on the private Claude board only. The public site (P9_NO_FONTS)
+# never gets them: they're notes about the girls, and that site's code is public on GitHub.
+import re
+kit_js = ""
+KIT = HERE / "discord-kit.src.html"
+if src_name == "quest-board.src.html" and not os.environ.get("P9_NO_FONTS") and KIT.exists():
+    kit = KIT.read_text(encoding="utf-8")
+    consts = "\n".join(re.findall(r'^\s*const (?:BOARD|PARTY|FIGMA|SLIDES) = ".*?";', kit, re.M))
+    a = kit.index("  const GROUPS = [")
+    b = kit.index("\n  ];\n", a) + len("\n  ];\n")
+    fields = []
+    for label, k, attrs in re.findall(r'<label for="f-[\w-]+">([^<]+)<input id="f-[\w-]+" data-k="(\w+)"([^>]*)>', kit):
+        val = re.search(r'value="([^"]*)"', attrs)
+        ph = re.search(r'placeholder="([^"]*)"', attrs)
+        fields.append({"k": k, "label": label.strip(), "value": val.group(1) if val else "", "placeholder": ph.group(1) if ph else ""})
+    kit_js = (f"window.P9_KIT_FIELDS = {json.dumps(fields)};\n"
+              f"window.P9_KIT = ({{ v, lines }}) => {{\n{consts}\n{kit[a:b]}  return GROUPS;\n}};")
+    kit_js = re.sub(r"</(script)", r"<\\/\1", kit_js, flags=re.I)
+src = src.replace("/*@KIT_JS@*/", kit_js)
+
 # Artwork: "@ART:name@" becomes a data URI for art/name.jpg
 for img in sorted((HERE / "art").iterdir()):
     if img.suffix.lower() not in (".jpg", ".png", ".webp"):

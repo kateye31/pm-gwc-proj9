@@ -746,6 +746,74 @@ body {
   .stage .node::before { left: 26px; right: auto; top: 54px; bottom: -18px; width: 2px; height: auto; }
 }
 @media (max-width: 400px) { .face-btn { font-size: 11px; } .face-btn svg { width: 38px; height: 38px; } }
+
+/* Task editor (Katrina only): opens in place of the task */
+.row-edit { display: inline-grid; }
+.task-ed { grid-column: 1 / -1; display: grid; gap: 12px; padding: 4px 0 6px; }
+.task-ed label { display: grid; gap: 4px; font-size: 13.5px; color: var(--parch-2); }
+.task-ed input, .task-ed select, .task-ed textarea { font: inherit; font-size: 15px; width: 100%; min-width: 0; border-radius: 10px; border: 1px solid transparent; background: var(--night); color: var(--parch); padding: 9px 12px; }
+.task-ed textarea { resize: vertical; line-height: 1.45; }
+.task-ed input:focus, .task-ed select:focus, .task-ed textarea:focus { outline: none; border-color: var(--torch); }
+.task-ed .ed-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s1); }
+.task-ed .ed-where { display: grid; grid-template-columns: minmax(0, 1fr) 90px minmax(0, 1fr); gap: var(--s1); }
+@media (max-width: 640px) { .task-ed .ed-where { grid-template-columns: 1fr 1fr; } .task-ed .ed-where label:first-child { grid-column: 1 / -1; } }
+.ed-steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; counter-reset: st; }
+.ed-step { display: grid; grid-template-columns: 22px 20px minmax(0, 1fr) auto; gap: 6px; align-items: start; counter-increment: st; border-radius: 10px; }
+.ed-step::before { content: counter(st); grid-column: 2; grid-row: 1; padding-top: 9px; text-align: right; color: var(--torch); font-weight: 700; font-size: 14px; }
+.ed-step .grip { grid-column: 1; grid-row: 1; }
+.ed-step textarea { grid-column: 3; grid-row: 1; }
+.ed-step .ed-tools { grid-column: 4; grid-row: 1; display: flex; gap: 2px; padding-top: 4px; }
+.ed-step.dragging, .pe-block.dragging { opacity: .45; }
+.grip { width: 22px; height: 34px; border: 0; background: none; color: var(--parch-3); border-radius: 7px; display: grid; place-items: center; cursor: grab; padding: 0; }
+.grip:active { cursor: grabbing; }
+.mini { width: 28px; height: 28px; border: 0; background: none; border-radius: 7px; color: var(--parch-3); display: grid; place-items: center; padding: 0; }
+@media (hover: hover) and (pointer: fine) { .mini:hover, .grip:hover { background: var(--wood-2); color: var(--parch); } }
+.mini:disabled { opacity: .3; }
+.ed-go { display: flex; flex-wrap: wrap; gap: var(--s1); align-items: center; }
+
+/* Edit the board (Katrina only): rewrite text, hide or move cards, add her own cards */
+.edit-toggle { justify-self: start; height: 36px; padding: 0 14px; font-size: 14.5px; }
+.edit-toggle[hidden], .pe-revert[hidden], .pe-banner[hidden] { display: none; }
+body.pe-on .pe-text { cursor: text; border-radius: 6px; box-shadow: 0 0 0 1px var(--line); transition: box-shadow 160ms ease; }
+@media (hover: hover) and (pointer: fine) { body.pe-on .pe-text:hover { box-shadow: 0 0 0 1px var(--parch-3); } }
+body.pe-on .pe-text:focus { outline: none; box-shadow: 0 0 0 2px var(--torch); background: var(--night); }
+body.pe-on .pe-text.pe-edited { box-shadow: 0 0 0 1px var(--torch-2); }
+.pe-block { position: relative; }
+.pe-hidden { display: none !important; }
+body.pe-on .pe-hidden:not([hidden]) { display: block !important; opacity: .5; outline: 1px dashed var(--parch-3); outline-offset: 4px; }
+.pe-tools { position: absolute; top: -16px; right: 12px; z-index: 3; display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 10px; background: var(--wood-2); border: 1px solid var(--plank); box-shadow: var(--shadow); }
+.pe-tools .grip { height: 28px; }
+.pe-tools .pe-hid { padding: 0 6px; font-size: 13px; font-weight: 700; color: var(--ember); }
+.pe-add { width: 100%; border-style: dashed; color: var(--parch-2); }
+.pe-banner { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 40; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; width: max-content; max-width: min(760px, calc(100vw - 32px)); padding: 10px 10px 10px 18px; border-radius: 14px; background: var(--wood-2); border: 1px solid var(--torch-2); box-shadow: var(--shadow); font-size: 14.5px; color: var(--parch); transform: translateX(-50%); }
+.pe-banner p { flex: 1 1 260px; }
+body.pe-on .help-fab, body.pe-on .tabbar { display: none; }
+.pe-revert { position: absolute; z-index: 41; height: 30px; padding: 0 10px; font-size: 13px; }
+@media (max-width: 640px) { .pe-banner { bottom: calc(12px + env(safe-area-inset-bottom, 0px)); font-size: 14px; } .pe-banner p { flex-basis: 200px; } }
+
+/* Discord kit (Live, private Claude board only) */
+.kit-fields { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s2); margin: var(--s2) 0 4px; }
+.kit-fields label { display: grid; gap: 4px; font-size: 13.5px; color: var(--parch-2); flex: 1 1 220px; }
+.kit-fields input { font: inherit; font-size: 15px; height: 40px; border-radius: 10px; border: 1px solid transparent; background: var(--night); color: var(--parch); padding: 0 12px; min-width: 0; }
+.kit-fields input:focus { outline: none; border-color: var(--torch); }
+.kit-group { margin-top: var(--s3); }
+.kit-group > h3 { font-size: 17px; display: flex; align-items: baseline; gap: 10px; }
+.kit-group > h3 small { font-weight: 400; font-size: 13.5px; color: var(--parch-3); }
+.kit-post { margin-top: 12px; border: 1px solid var(--plank); border-radius: 14px; background: var(--night); }
+.kit-post.posted { opacity: .55; }
+.kit-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 10px 12px 10px 14px; border-bottom: 1px solid var(--line); }
+.kit-where { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 15px; }
+.kit-chan { font-size: 13.5px; font-weight: 700; color: var(--parch); background: var(--wood-2); border: 1px solid var(--plank); border-radius: 7px; padding: 1px 8px; white-space: nowrap; }
+.kit-mine { font-size: 12.5px; color: var(--on-torch); background: var(--torch); border-radius: 6px; padding: 0 6px; }
+.kit-top .ed-go .btn { height: 34px; padding: 0 12px; font-size: 14px; }
+.kit-msg { padding: 12px 16px; display: grid; gap: 6px; font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; }
+.kit-msg ul { margin: 0; padding-left: 20px; }
+.kit-msg .blank { color: var(--ember); }
+.kit-msg .link { color: var(--torch); }
+.kit-why { padding: 0 16px 12px; font-size: 13.5px; color: var(--parch-3); }
+.kit-ed { padding: 12px 14px; display: grid; gap: 8px; }
+.kit-ed textarea { font: inherit; font-size: 15px; line-height: 1.5; width: 100%; min-height: 220px; border-radius: 10px; border: 1px solid var(--torch); background: var(--wood); color: var(--parch); padding: 10px 12px; resize: vertical; }
+.kit-ed textarea:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) { .press, .toast, .seg-ctl .pill, .face-btn svg { transition-duration: 0ms; } }
 </style>
 
@@ -777,6 +845,7 @@ body {
           <option value="preview-tvishaa">Tvishaa</option>
         </select>
       </label>
+      <button class="btn press edit-toggle" type="button" id="edit-toggle" hidden>Edit the board</button>
       <div class="whoami"><span id="whoami-t">Not picked yet</span><button type="button" id="whoami-change">Change</button></div>
     </div>
   </aside>
@@ -1151,6 +1220,15 @@ account.setBalance(150);     // ✅ works</code></pre>
         <p class="foot" style="margin-top:4px">Tap a name to mark who came. Anyone who checks in on a meeting day is added on their own.</p>
         <div class="meet-admin" id="meet-admin"></div>
       </div>
+      <div class="card" id="kit-card">
+        <div class="head"><div><h2>Discord kit</h2><p class="foot" style="margin-top:4px">This week's posts, in order. Edit a post to make it yours, copy it into Discord, then tick it posted.</p></div></div>
+        <div id="kit-body"></div>
+      </div>
+      <div class="card">
+        <div class="head"><h2>Edit the board</h2><button class="btn solid press" type="button" id="edit-start">Start editing</button></div>
+        <p class="foot" style="margin-top:4px">Rewrite any text, hide or drag cards, and add your own cards. The team sees your changes as soon as you make them. Tasks have their own Edit button in Team tasks.</p>
+        <p class="foot" id="edit-count" style="margin-top:10px"></p>
+      </div>
       <div class="grid-2">
         <div class="card">
           <div class="head"><h2>Council right now</h2><button class="btn solid press" type="button" onclick="window.P9_PARTY && window.P9_PARTY('host')">Open host screen</button></div>
@@ -1209,6 +1287,11 @@ account.setBalance(150);     // ✅ works</code></pre>
 <!--@PARTY_HTML@-->
 
 <div class="toast hide" id="toast" role="status" aria-live="polite"></div>
+<div class="pe-banner" id="pe-banner" role="region" aria-label="Editing the board" hidden>
+  <p><b>Editing the board.</b> Click any text to rewrite it. Drag the dots to move a card, or use the eye to hide it. Everything saves on its own.</p>
+  <button class="btn solid press" type="button" id="pe-done">Done</button>
+</div>
+<button class="btn press pe-revert" type="button" id="pe-revert" hidden>Back to the original</button>
 <!-- Ask for help floats bottom-right on every screen; the form inside is #helper (moved here by the script) -->
 <div class="help-panel out" id="help-panel" role="dialog" aria-label="Ask for help" hidden></div>
 <button class="help-fab press" type="button" id="help-fab" aria-controls="help-panel" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M9.5 9.2a2.5 2.5 0 1 1 3.3 2.4c-.5.2-.8.6-.8 1.1"/><path d="M12 14.6h.01"/></svg><span>Ask for help</span></button>
@@ -1234,6 +1317,10 @@ window.p9SaveText = async (filename, text) => {
 };
 // The starter game's files, so "Ask for help" can point at real line numbers (build.py fills this in)
 window.P9_STARTER = /*@STARTER@*/{};
+</script>
+<script>
+// The Discord kit's posts (build.py fills this in on the private Claude build only)
+/*@KIT_JS@*/
 </script>
 <script>
 (() => {
@@ -1286,6 +1373,7 @@ window.P9_STARTER = /*@STARTER@*/{};
   function showOwnerNav() {
     document.querySelectorAll('[data-go="mentor"]').forEach((el) => { if (el.closest(".nav,.tabbar")) el.hidden = !owner; });
     $("preview-pick").hidden = !owner;
+    $("edit-toggle").hidden = !owner || PREVIEW;
     if (typeof syncOwnerPicker === "function") { syncOwnerPicker(); renderTasks(); }
     $("tabbar").style.gridTemplateColumns = `repeat(${owner ? 5 : 4}, 1fr)`;
   }
@@ -1772,6 +1860,12 @@ window.P9_STARTER = /*@STARTER@*/{};
     done: '<svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor"/><path d="M6 10.3l2.6 2.6 5.4-5.6" fill="none" stroke="#1f2310" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   };
   const X = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  // Small icons for the editors: pencil, drag dots, up, down, eye
+  const PEN = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M9.2 2.6l2.2 2.2-6.8 6.8-2.8.6.6-2.8z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+  const GRIP = '<svg width="12" height="16" viewBox="0 0 12 16" aria-hidden="true"><g fill="currentColor"><circle cx="4" cy="3.5" r="1.3"/><circle cx="8" cy="3.5" r="1.3"/><circle cx="4" cy="8" r="1.3"/><circle cx="8" cy="8" r="1.3"/><circle cx="4" cy="12.5" r="1.3"/><circle cx="8" cy="12.5" r="1.3"/></g></svg>';
+  const UP = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 8.5L7 5l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const DOWN = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 5.5L7 9l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const EYE = '<svg width="16" height="14" viewBox="0 0 16 14" aria-hidden="true"><path d="M1.5 7S4 2.5 8 2.5 14.5 7 14.5 7 12 11.5 8 11.5 1.5 7 1.5 7z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="7" r="2" fill="currentColor"/></svg>';
   let tasks = [], ref = null, readOnly = false, filter = store.get("p9-filter", "all");
   function syncOwnerPicker() {
     const list = owner ? PEOPLE : me ? [me] : [];
@@ -1785,6 +1879,7 @@ window.P9_STARTER = /*@STARTER@*/{};
   const short = (s) => { const d = new Date(s + "T00:00"); return isNaN(d) ? "" : d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); };
   const isLate = (t) => t.status !== "done" && t.due && new Date(t.due + "T23:59:59") < new Date();
   function renderTasks() {
+    if (editingTask) { tasksStale = true; return; }
     const f = $("filters"); f.innerHTML = "";
     [["all", "Everyone"], ...PEOPLE.map((p) => [p, p])].forEach(([k, label]) => {
       const open = tasks.filter((t) => t.status !== "done" && (k === "all" || t.owner === k)).length;
@@ -1909,8 +2004,90 @@ window.P9_STARTER = /*@STARTER@*/{};
       if (!del.classList.contains("armed")) { del.classList.add("armed"); del.textContent = "Remove?"; armed = setTimeout(() => { del.classList.remove("armed"); del.innerHTML = X; }, 2600); return; }
       clearTimeout(armed); ref.doc(t.id).delete().then(() => toast("Task removed")).catch(fail);
     };
+    if (owner && !PREVIEW) {
+      const ed = document.createElement("button"); ed.type = "button"; ed.className = "del row-edit press"; ed.setAttribute("aria-label", "Edit task"); ed.title = "Edit task"; ed.innerHTML = PEN;
+      ed.onclick = () => editTask(li, t);
+      li.querySelector(".meta").appendChild(ed);
+    }
     li.querySelector(".meta").appendChild(del);
     return li;
+  }
+  // Katrina's task editor: every field of one task, with steps you can drag into order.
+  // While it's open the lists don't redraw, so a teammate ticking a task can't wipe what she's typing.
+  let editingTask = "", tasksStale = false;
+  function editTask(li, t) {
+    if (editingTask) return;
+    editingTask = t.id;
+    const f = document.createElement("form"); f.className = "task-ed";
+    f.innerHTML = `<label>Task<input name="title" required maxlength="200"></label>
+      <label>Done when<input name="done" maxlength="300"></label>
+      <div class="ed-2"><label>Who<select name="owner"></select></label><label>Due<input name="due" type="date"></label></div>
+      <div class="ed-where"><label>File<input name="file" maxlength="60" placeholder="rooms.js"></label><label>Line<input name="line" inputmode="numeric" maxlength="5"></label><label>Function or search text<input name="fn" maxlength="80"></label></div>
+      <div><p class="label" style="margin-bottom:6px">Steps · drag the dots to reorder</p><ol class="ed-steps"></ol>
+        <button type="button" class="link-btn ed-add" style="margin-top:8px">+ Add a step</button></div>
+      <div class="ed-go"><button class="btn solid press" type="submit">Save</button><button class="btn press ed-cancel" type="button">Cancel</button></div>`;
+    const field = (n) => f.querySelector(`[name="${n}"]`);
+    PEOPLE.forEach((p) => { const o = document.createElement("option"); o.value = o.textContent = p; field("owner").appendChild(o); });
+    field("title").value = t.title || ""; field("done").value = t.done || ""; field("owner").value = t.owner || PEOPLE[0];
+    field("due").value = t.due || ""; field("file").value = t.file || ""; field("line").value = t.line || ""; field("fn").value = t.fn || "";
+    const list = f.querySelector(".ed-steps");
+    const grow = (ta) => { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + 2 + "px"; };
+    const syncArrows = () => list.querySelectorAll(".ed-step").forEach((s, i, all) => { s.querySelector('[data-a="up"]').disabled = !i; s.querySelector('[data-a="down"]').disabled = i === all.length - 1; });
+    function addStep(text, focus) {
+      const s = document.createElement("li"); s.className = "ed-step";
+      s.innerHTML = `<button type="button" class="grip" draggable="true" aria-label="Drag to reorder">${GRIP}</button><textarea rows="1" aria-label="Step"></textarea>
+        <span class="ed-tools"><button type="button" class="mini" data-a="up" aria-label="Move step up">${UP}</button><button type="button" class="mini" data-a="down" aria-label="Move step down">${DOWN}</button><button type="button" class="mini" data-a="del" aria-label="Delete step">${X}</button></span>`;
+      const ta = s.querySelector("textarea"); ta.value = text || ""; ta.oninput = () => grow(ta);
+      s.querySelector(".ed-tools").onclick = (e) => {
+        const a = e.target.closest("[data-a]"); if (!a) return;
+        if (a.dataset.a === "up" && s.previousElementSibling) s.previousElementSibling.before(s);
+        if (a.dataset.a === "down" && s.nextElementSibling) s.nextElementSibling.after(s);
+        if (a.dataset.a === "del") s.remove();
+        syncArrows();
+      };
+      list.appendChild(s); requestAnimationFrame(() => grow(ta)); syncArrows();
+      if (focus) ta.focus();
+    }
+    (Array.isArray(t.steps) ? t.steps : []).forEach((s) => addStep(s));
+    makeSortable(list, ".ed-step", syncArrows);
+    f.querySelector(".ed-add").onclick = () => addStep("", true);
+    const close = () => { editingTask = ""; tasksStale = false; renderTasks(); };
+    f.querySelector(".ed-cancel").onclick = close;
+    f.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+    f.onsubmit = (ev) => {
+      ev.preventDefault();
+      const val = (n) => field(n).value.trim();
+      const data = {}; Object.keys(t).forEach((k) => { if (k !== "id") data[k] = t[k]; });
+      data.title = val("title"); data.owner = val("owner"); data.due = val("due");
+      ["done", "file", "fn"].forEach((k) => { if (val(k)) data[k] = val(k); else delete data[k]; });
+      const line = parseInt(val("line"), 10); if (line > 0) data.line = line; else delete data.line;
+      const steps = [...list.querySelectorAll("textarea")].map((ta) => ta.value.trim()).filter(Boolean);
+      if (steps.length) data.steps = steps; else delete data.steps;
+      if (!data.title) return;
+      ref.doc(t.id).set(data).then(() => { toast("Task saved"); close(); }).catch(fail);
+    };
+    li.className = "row is-editing"; li.replaceChildren(f);
+    field("title").focus();
+  }
+  // Drag to reorder with the mouse. The ↑ ↓ buttons do the same for keyboards and phones.
+  function makeSortable(box, sel, onDrop) {
+    let drag = null;
+    const child = (n) => { while (n && n.parentElement !== box) n = n.parentElement; return n && n.matches(sel) ? n : null; };
+    box.addEventListener("dragstart", (e) => {
+      const grip = e.target.closest && e.target.closest(".grip"), item = grip && child(grip);
+      if (!item) return;
+      e.stopPropagation(); drag = item; item.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move"; try { e.dataTransfer.setData("text/plain", ""); e.dataTransfer.setDragImage(item, 24, 18); } catch {}
+    });
+    box.addEventListener("dragover", (e) => {
+      if (!drag) return;
+      const over = child(e.target); e.preventDefault(); e.stopPropagation();
+      if (!over || over === drag) return;
+      const r = over.getBoundingClientRect();
+      over[e.clientY > r.top + r.height / 2 ? "after" : "before"](drag);
+    });
+    box.addEventListener("drop", (e) => { if (drag) { e.preventDefault(); e.stopPropagation(); } });
+    box.addEventListener("dragend", (e) => { if (!drag) return; e.stopPropagation(); const d = drag; drag = null; d.classList.remove("dragging"); if (onDrop) onDrop(d); });
   }
   function note(msg, err) { const n = $("note"); n.textContent = msg; n.classList.toggle("err", !!err); n.hidden = !msg; }
   function fail(e) {
@@ -2310,7 +2487,314 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     const a = document.createElement("a"); a.href = `${BOARD}#${tok}`; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
   });
 
-  renderMe(); renderHere(); renderTasks();
+  // ---------- Edit the board (Katrina only) ----------
+  // She can rewrite any text, hide or move cards, and add her own cards. Each change is a "page" record in
+  // workshop_sessions, so everyone sees it. A text edit remembers the original it replaced: if the page source
+  // later changes that text, her old edit stops applying instead of landing on the wrong line.
+  const PE_TEXT = "h1, h2, h3, h4, p, li, dt, dd, td, th, figcaption, summary b, summary small";
+  const PE_INLINE = new Set(["B", "STRONG", "I", "EM", "A", "CODE", "BR", "KBD"]);
+  const peHash = (s) => { let h = 5381; for (const c of String(s)) h = ((h * 33) ^ c.codePointAt(0)) >>> 0; return h.toString(36); };
+  const peText = new Map(), peOrig = new Map(), peBlocks = new Map(), peParents = new Map(), peBoxes = new Map(), peSorted = new Set();
+  // A card's fingerprint is its heading. Hides and moves only apply while it matches, so they never land on a different card.
+  const peSig = new Map(), peSigOf = (el) => { const h = el.querySelector("h1, h2, h3, summary b"); return peHash((h ? h.textContent : el.textContent.slice(0, 120)).trim()); };
+  let peRecs = {}, peOn = false;
+  function peKey(el) {
+    const parts = [];
+    for (let n = el; n && n !== document.body; n = n.parentElement) {
+      if (n.id) { parts.unshift(n.id); break; }
+      parts.unshift(n.tagName.toLowerCase() + [...n.parentElement.children].filter((c) => c.tagName === n.tagName).indexOf(n));
+    }
+    return parts.join("/");
+  }
+  // Anyone can write to the database, so saved text is cleaned before it's shown: bold, italics, code and links only
+  function peClean(html) {
+    const t = document.createElement("template"); t.innerHTML = String(html || "");
+    (function walk(node) {
+      [...node.childNodes].forEach((n) => {
+        if (n.nodeType === 3) return;
+        if (n.nodeType !== 1 || /^(SCRIPT|STYLE|TEMPLATE|IFRAME|OBJECT|SVG|IMG)$/i.test(n.tagName)) { n.remove(); return; }
+        walk(n);
+        if (!PE_INLINE.has(n.tagName)) { if (/^(DIV|P)$/.test(n.tagName) && n.previousSibling) n.before(document.createElement("br")); n.replaceWith(...n.childNodes); return; }
+        [...n.attributes].forEach((a) => { if (!(n.tagName === "A" && a.name === "href")) n.removeAttribute(a.name); });
+        if (n.tagName === "A") {
+          const href = n.getAttribute("href") || "";
+          if (!/^(https?:|#|mailto:)/i.test(href)) n.removeAttribute("href");
+          else if (/^https?:/i.test(href)) { n.target = "_blank"; n.rel = "noopener"; }
+        }
+      });
+    })(t.content);
+    return t.innerHTML.trim();
+  }
+  // Tag what's in the page source now, before anything is drawn from data
+  document.querySelectorAll("main .screen").forEach((scr) => {
+    scr.querySelectorAll(PE_TEXT).forEach((el) => {
+      if (el.id || el.querySelector("[id]") || !el.textContent.trim() || el.closest("form, button, label, select, pre, [role=tablist]") || /\bjs-/.test(el.className)) return;
+      if ([...el.querySelectorAll("*")].some((c) => !PE_INLINE.has(c.tagName))) return;
+      const k = peKey(el); peText.set(k, el); peOrig.set(k, el.innerHTML); el.dataset.pe = k;
+    });
+    scr.querySelectorAll(".card:not(form), details.learn").forEach((el) => {
+      const k = peKey(el); peBlocks.set(k, el); peSig.set(k, peSigOf(el)); el.dataset.peb = k;
+      if (!peParents.has(el.parentElement)) peParents.set(el.parentElement, peKey(el.parentElement));
+    });
+    // Her own cards go at the end of a screen (or of one Game plan tab)
+    if (scr.id === "s-plan") scr.querySelectorAll(":scope > .panel").forEach((p) => peBoxes.set(p.id, p));
+    else peBoxes.set(scr.id, scr);
+  });
+  const peId = (k) => "page-" + peHash(k);
+  function peSave(k, patch) {
+    if (!sref) { toast("Still loading. Try again in a second."); return; }
+    const rec = { ...(peRecs[k] || { kind: "page", key: k }), ...patch, at: Date.now() };
+    Object.keys(rec).forEach((f) => { if (rec[f] === undefined) delete rec[f]; });
+    peRecs[k] = rec; peApply();
+    sref.doc(peId(k)).set(rec).catch(() => toast("That didn't save. Check your connection and try again."));
+  }
+  function peDrop(k) {
+    delete peRecs[k]; peApply();
+    if (sref) sref.doc(peId(k)).delete().catch(() => toast("That didn't save. Check your connection and try again."));
+  }
+  function peSaveOrder(box) {
+    if (!peParents.has(box)) peParents.set(box, peKey(box));
+    const order = [...box.children].map((c) => c.dataset && c.dataset.peb).filter(Boolean);
+    peSave("order:" + peParents.get(box), { order, sigs: order.map((k) => peSig.get(k) || "") });
+  }
+  function peSortable(box) { if (peSorted.has(box)) return; peSorted.add(box); makeSortable(box, "[data-peb]", () => peSaveOrder(box)); }
+  function peApply() {
+    peText.forEach((el, k) => {
+      if (el === document.activeElement) return;
+      const r = peRecs[k], ok = !!(r && typeof r.html === "string" && r.o === peHash(peOrig.get(k)));
+      const want = ok ? peClean(r.html) : peOrig.get(k);
+      if (el.innerHTML !== want) el.innerHTML = want;
+      el.classList.toggle("pe-edited", ok);
+    });
+    Object.values(peRecs).filter((r) => /^own-/.test(r.key) && peBoxes.has(r.in)).forEach((r) => {
+      let el = peBlocks.get(r.key);
+      if (!el) {
+        const box = peBoxes.get(r.in);
+        el = document.createElement("div"); el.className = "card pe-own"; el.dataset.peb = r.key;
+        el.innerHTML = '<h2 data-own="h"></h2><p data-own="html" style="margin-top:8px"></p>';
+        const add = box.querySelector(":scope > .pe-add"); if (add) add.before(el); else box.appendChild(el);
+        peBlocks.set(r.key, el); if (!peParents.has(box)) peParents.set(box, peKey(box));
+        if (peOn) { peDecorate(el); peSortable(box); }
+      }
+      const h = el.querySelector('[data-own="h"]'), b = el.querySelector('[data-own="html"]');
+      if (h !== document.activeElement) h.textContent = r.h || "";
+      if (b !== document.activeElement) b.innerHTML = peClean(r.html || "");
+    });
+    peBlocks.forEach((el, k) => { if (/^own-/.test(k) && !peRecs[k]) { el.remove(); peBlocks.delete(k); } });
+    peBlocks.forEach((el, k) => {
+      const r = peRecs[k], hide = !!(r && r.hide && (!peSig.has(k) || r.sig === peSig.get(k))); el.classList.toggle("pe-hidden", hide);
+      const t = el.querySelector(".pe-tools"); if (t) { t.querySelector(".pe-hid").hidden = !hide; t.querySelector('[data-a="hide"]').setAttribute("aria-label", hide ? "Show to the team" : "Hide from the team"); }
+    });
+    Object.values(peRecs).filter((r) => /^order:/.test(r.key) && Array.isArray(r.order)).forEach((r) => {
+      const hit = [...peParents].find(([, pk]) => "order:" + pk === r.key); if (!hit) return;
+      const sigs = Array.isArray(r.sigs) ? r.sigs : [];
+      const box = hit[0], els = r.order.map((k, i) => (!peSig.has(k) || sigs[i] === peSig.get(k)) && peBlocks.get(k)).filter((e) => e && e.parentElement === box);
+      const cur = [...box.children].filter((c) => els.includes(c));
+      if (cur.every((c, i) => c === els[i])) return;
+      const marks = cur.map((c) => { const m = document.createComment(""); c.before(m); return m; });
+      els.forEach((e, i) => marks[i].replaceWith(e));
+    });
+    peCount();
+  }
+  function peCount() {
+    const n = Object.keys(peRecs).length, box = $("edit-count"); if (!box) return;
+    box.textContent = n ? `${n} change${n === 1 ? "" : "s"} on the board right now. ` : "No changes yet. The board shows the original text.";
+    if (n) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "link-btn"; b.textContent = "Undo all my changes";
+      b.onclick = () => { if (b.dataset.armed) { Object.keys(peRecs).forEach(peDrop); toast("Back to the original board"); return; } b.dataset.armed = "1"; b.textContent = "Tap again to undo everything"; };
+      box.appendChild(b);
+    }
+  }
+  function peEditable(el, on) {
+    el.classList.toggle("pe-text", on);
+    if (on) { el.contentEditable = "true"; el.spellcheck = true; } else el.removeAttribute("contenteditable");
+  }
+  function peDecorate(el) {
+    if (el.querySelector(".pe-tools")) return;
+    const k = el.dataset.peb, own = /^own-/.test(k);
+    el.classList.add("pe-block");
+    const t = document.createElement("div"); t.className = "pe-tools";
+    t.innerHTML = `<span class="pe-hid" hidden>Hidden</span><button type="button" class="grip" draggable="true" aria-label="Drag to move this card">${GRIP}</button>`
+      + `<button type="button" class="mini" data-a="up" aria-label="Move up">${UP}</button><button type="button" class="mini" data-a="down" aria-label="Move down">${DOWN}</button>`
+      + `<button type="button" class="mini" data-a="hide" aria-label="Hide from the team">${EYE}</button>` + (own ? `<button type="button" class="mini" data-a="del" aria-label="Delete this card">${X}</button>` : "");
+    t.addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      const a = e.target.closest("[data-a]"); if (!a) return;
+      const sibs = [...el.parentElement.children].filter((c) => c.dataset && c.dataset.peb), i = sibs.indexOf(el);
+      if (a.dataset.a === "up" && i > 0) { sibs[i - 1].before(el); peSaveOrder(el.parentElement); }
+      if (a.dataset.a === "down" && i < sibs.length - 1) { sibs[i + 1].after(el); peSaveOrder(el.parentElement); }
+      if (a.dataset.a === "hide") {
+        const r = peRecs[k] || {}, hide = !r.hide;
+        if (!hide && !own && Object.keys(r).every((f) => ["kind", "key", "hide", "at"].includes(f))) peDrop(k); else peSave(k, { hide: hide || undefined, sig: peSig.get(k) });
+        toast(hide ? "Hidden from the team" : "The team can see it again");
+      }
+      if (a.dataset.a === "del") { if (!a.dataset.armed) { a.dataset.armed = "1"; a.setAttribute("aria-label", "Tap again to delete"); a.style.color = "var(--ember)"; return; } peDrop(k); toast("Card deleted"); }
+    });
+    // First inside the card, so its buttons come before the card's content (and before any fold inside it)
+    (el.tagName === "DETAILS" ? el.querySelector(":scope > summary") || el : el).prepend(t);
+    if (own) el.querySelectorAll("[data-own]").forEach((x) => peEditable(x, true));
+    peApply();
+  }
+  function peStart() {
+    if (!owner || PREVIEW) return;
+    peOn = true; document.body.classList.add("pe-on"); $("pe-banner").hidden = false; $("edit-toggle").textContent = "Stop editing";
+    peText.forEach((el) => peEditable(el, true));
+    peBlocks.forEach(peDecorate);
+    peParents.forEach((k, box) => peSortable(box));
+    peBoxes.forEach((box, k) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "btn press pe-add"; b.textContent = "+ Add your own card here";
+      b.onclick = () => { const id = "own-" + Date.now().toString(36); peSave(id, { in: k, h: "Your heading", html: "Write anything here." }); const h = peBlocks.get(id) && peBlocks.get(id).querySelector('[data-own="h"]'); if (h) { h.focus(); document.execCommand("selectAll", false, null); } };
+      box.appendChild(b); peSortable(box);
+    });
+  }
+  function peStop() {
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    peOn = false; document.body.classList.remove("pe-on"); $("pe-banner").hidden = true; $("pe-revert").hidden = true; $("edit-toggle").textContent = "Edit the board";
+    document.querySelectorAll(".pe-tools, .pe-add").forEach((n) => n.remove());
+    document.querySelectorAll(".pe-text").forEach((el) => peEditable(el, false));
+    document.querySelectorAll(".pe-block").forEach((el) => el.classList.remove("pe-block"));
+  }
+  $("edit-toggle").onclick = () => (peOn ? peStop() : peStart());
+  $("edit-start").onclick = () => { peStart(); toast("Click any text to change it"); };
+  $("pe-done").onclick = () => { peStop(); toast("Saved. The team sees your changes."); };
+  function peSaveText(el) {
+    const own = el.closest(".pe-own");
+    if (own) {
+      const k = own.dataset.peb, r = peRecs[k]; if (!r) return;
+      const f = el.dataset.own, v = f === "h" ? el.textContent.trim() : peClean(el.innerHTML);
+      if (v !== r[f]) peSave(k, { [f]: v });
+      return;
+    }
+    const k = el.dataset.pe; if (!k) return;
+    const html = peClean(el.innerHTML), orig = peClean(peOrig.get(k));
+    // Empty or unchanged means "use the original" (to remove a whole card, hide it)
+    if (!el.textContent.trim() || html === orig) { if (peRecs[k]) peDrop(k); else el.innerHTML = peOrig.get(k); return; }
+    if (!peRecs[k] || peRecs[k].html !== html) peSave(k, { o: peHash(peOrig.get(k)), html });
+  }
+  let peBefore = "";
+  document.addEventListener("focusin", (e) => {
+    const el = peOn && e.target.closest && e.target.closest(".pe-text"); if (!el) return;
+    peBefore = el.innerHTML;
+    const rv = $("pe-revert"), edited = el.classList.contains("pe-edited");
+    rv.hidden = !edited;
+    if (edited) { const r = el.getBoundingClientRect(); rv.style.left = Math.max(8, r.left + window.scrollX) + "px"; rv.style.top = r.bottom + window.scrollY + 6 + "px"; rv.onmousedown = (ev) => { ev.preventDefault(); peDrop(el.dataset.pe); el.innerHTML = peOrig.get(el.dataset.pe); el.blur(); }; }
+  });
+  document.addEventListener("focusout", (e) => {
+    const el = peOn && e.target.closest && e.target.closest(".pe-text"); if (!el) return;
+    $("pe-revert").hidden = true; peSaveText(el);
+  });
+  document.addEventListener("keydown", (e) => {
+    const el = peOn && e.target.closest && e.target.closest(".pe-text"); if (!el) return;
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); el.blur(); }
+    else if (e.key === "Enter") { e.preventDefault(); document.execCommand("insertLineBreak"); }
+    else if (e.key === "Escape") { el.innerHTML = peBefore; el.blur(); }
+    // A space inside a fold's title would open and close the fold instead of typing
+    else if (e.key === " " && el.closest("summary")) { e.preventDefault(); document.execCommand("insertText", false, " "); }
+  });
+  document.addEventListener("keyup", (e) => { if (peOn && e.key === " " && e.target.closest && e.target.closest("summary .pe-text")) e.preventDefault(); });
+  document.addEventListener("paste", (e) => {
+    const el = peOn && e.target.closest && e.target.closest(".pe-text"); if (!el) return;
+    e.preventDefault(); document.execCommand("insertText", false, (e.clipboardData || window.clipboardData).getData("text/plain"));
+  });
+  // While editing, clicking text places the cursor: links, folds and buttons in it don't fire
+  document.addEventListener("click", (e) => {
+    if (!peOn || !e.target.closest) return;
+    if (e.target.closest(".pe-text")) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+
+  // ---------- Discord kit (Live) ----------
+  // The posts come from discord-kit.src.html. build.py puts them only in the private Claude board, never the public site.
+  // Katrina's own wording, her "posted" ticks and the blanks save as "kit" records in workshop_sessions.
+  let kitRecs = {}, kitEditing = "";
+  const kitId = (id) => id === "@fields" ? "kit-fields" : "kit-" + id;
+  const kitVals = () => (kitRecs["@fields"] && kitRecs["@fields"].values) || {};
+  const kitV = (k, label) => {
+    const d = (window.P9_KIT_FIELDS || []).find((f) => f.k === k), saved = kitVals()[k];
+    const t = String(saved != null ? saved : (d && d.value) || "").trim(); return t || `[${label}]`;
+  };
+  const kitLines = (k, label) => { const t = kitV(k, label); return t.startsWith("[") ? `- ${t}` : t.split(/\n+/).filter(Boolean).map((l) => `- ${l.trim()}`).join("\n"); };
+  function kitSave(id, patch) {
+    if (!sref) return;
+    const rec = { ...(kitRecs[id] || { kind: "kit", id }), ...patch };
+    Object.keys(rec).forEach((f) => { if (rec[f] === undefined) delete rec[f]; });
+    kitRecs[id] = rec;
+    sref.doc(kitId(id)).set(rec).catch(() => toast("That didn't save. Check your connection and try again."));
+  }
+  // Discord-style preview: **bold**, - bullets, links; unfilled [blanks] stand out
+  const kitEsc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const kitInline = (s) => kitEsc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/(https?:\/\/[^\s<]+)/g, '<span class="link">$1</span>').replace(/\[([^\]]+)\]/g, '<span class="blank">[$1]</span>');
+  function kitPreview(text) {
+    const out = []; let list = null;
+    text.split("\n").forEach((line) => {
+      if (/^- /.test(line)) { (list = list || []).push(`<li>${kitInline(line.slice(2))}</li>`); return; }
+      if (list) { out.push(`<ul>${list.join("")}</ul>`); list = null; }
+      if (line.trim()) out.push(`<p>${kitInline(line)}</p>`);
+    });
+    if (list) out.push(`<ul>${list.join("")}</ul>`);
+    return out.join("");
+  }
+  function renderKit() {
+    const body = $("kit-body"); if (!body) return;
+    if (typeof window.P9_KIT !== "function") {
+      body.innerHTML = `<p class="sub" style="margin-top:12px">The kit has notes about the girls, so it only lives on your private Claude board, never this public site. Open Live there to use it.</p>
+        <a class="btn press" style="margin-top:12px;text-decoration:none" href="https://claude.ai/artifact/UrpAbfWJajpaH2bgAimNvh#katrina" target="_blank" rel="noopener">Open my private board</a>`;
+      return;
+    }
+    if (!body.querySelector(".kit-fields")) {
+      body.innerHTML = '<div class="kit-fields"></div><div class="kit-feed"></div>';
+      (window.P9_KIT_FIELDS || []).forEach((f) => {
+        const l = document.createElement("label"); l.textContent = f.label;
+        const i = document.createElement("input"); i.dataset.k = f.k; i.placeholder = f.placeholder || "";
+        let t; i.oninput = () => { clearTimeout(t); t = setTimeout(() => { kitSave("@fields", { values: { ...kitVals(), [f.k]: i.value } }); kitFeed(); }, 400); };
+        l.appendChild(i); body.querySelector(".kit-fields").appendChild(l);
+      });
+    }
+    body.querySelectorAll(".kit-fields input").forEach((i) => { if (i !== document.activeElement) { const s = kitVals()[i.dataset.k]; const d = (window.P9_KIT_FIELDS || []).find((f) => f.k === i.dataset.k); i.value = s != null ? s : (d && d.value) || ""; } });
+    kitFeed();
+  }
+  function kitFeed() {
+    const feed = $("kit-body").querySelector(".kit-feed"); if (!feed || kitEditing) return;
+    feed.innerHTML = "";
+    window.P9_KIT({ v: kitV, lines: kitLines }).forEach((g) => {
+      const sec = document.createElement("section"); sec.className = "kit-group";
+      sec.innerHTML = "<h3><span></span><small></small></h3>"; sec.querySelector("span").textContent = g.title; sec.querySelector("small").textContent = g.note || "";
+      g.posts.forEach((p) => {
+        const r = kitRecs[p.id] || {}, mine = typeof r.text === "string", text = mine ? r.text : p.text();
+        const card = document.createElement("article"); card.className = "kit-post" + (r.posted ? " posted" : "");
+        card.innerHTML = `<div class="kit-top"><div class="kit-where"><span class="kit-chan"></span><b></b>${mine ? '<span class="kit-mine">Your version</span>' : ""}</div>
+          <div class="ed-go"><button class="btn press" type="button" data-a="edit">Edit</button><button class="btn press" type="button" data-a="posted" aria-pressed="${!!r.posted}">${r.posted ? "Posted ✓" : "Mark posted"}</button><button class="btn solid press" type="button" data-a="copy">Copy</button></div></div>
+          <div class="kit-msg">${kitPreview(text)}</div><p class="kit-why"></p>`;
+        card.querySelector(".kit-chan").textContent = p.chan;
+        card.querySelector(".kit-where b").textContent = typeof p.what === "function" ? p.what() : p.what;
+        card.querySelector(".kit-why").textContent = p.why || "";
+        card.querySelector(".ed-go").onclick = (e) => {
+          const a = e.target.closest("[data-a]"); if (!a) return;
+          if (a.dataset.a === "copy") {
+            const sel = () => { const rg = document.createRange(); rg.selectNodeContents(card.querySelector(".kit-msg")); const s = getSelection(); s.removeAllRanges(); s.addRange(rg); toast("Selected. Press Ctrl+C."); };
+            try { navigator.clipboard.writeText(text).then(() => toast(/\[[^\]]+\]/.test(text.replace(/https?:\/\/\S+/g, "")) ? "Copied. Some blanks are still empty!" : "Copied! Paste it in Discord."), sel); } catch { sel(); }
+          }
+          if (a.dataset.a === "posted") { kitSave(p.id, { posted: !r.posted || undefined }); kitFeed(); }
+          if (a.dataset.a === "edit") {
+            kitEditing = p.id;
+            const ed = document.createElement("div"); ed.className = "kit-ed";
+            ed.innerHTML = `<textarea aria-label="Post text"></textarea><div class="ed-go"><button class="btn solid press" type="button" data-e="save">Save my version</button><button class="btn press" type="button" data-e="cancel">Cancel</button>${mine ? '<button class="link-btn" type="button" data-e="reset">Go back to Claude\'s version</button>' : ""}</div>`;
+            const ta = ed.querySelector("textarea"); ta.value = text;
+            ed.onclick = (ev) => {
+              const b = ev.target.closest("[data-e]"); if (!b) return;
+              if (b.dataset.e === "save") { kitSave(p.id, { text: ta.value }); toast("Saved your version"); }
+              if (b.dataset.e === "reset") kitSave(p.id, { text: undefined });
+              kitEditing = ""; kitFeed();
+            };
+            card.querySelector(".kit-msg").replaceWith(ed); ta.focus();
+          }
+        };
+        sec.appendChild(card);
+      });
+      feed.appendChild(sec);
+    });
+  }
+
+  renderMe(); renderHere(); renderTasks(); renderKit();
   const learnLink = /^#learn-[\w-]+$/.test(location.hash) ? location.hash.slice(1) : "";
   go(startScreen, false);
   if (learnLink) openLearn(learnLink); // a shared link like #learn-encapsulation opens that explainer
@@ -2329,7 +2813,13 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
       db.collection("workshop_answers").onSnapshot((snap) => { answers = snap.docs.map((d) => d.data()).filter((a) => a.session === "meeting-1"); renderPulse(); }, () => {});
       db.collection("workshop_decisions").onSnapshot((snap) => { decisions = snap.docs.map((d) => d.data()).filter((d) => d.session === "meeting-1"); renderPulse(); }, () => {});
       sref = db.collection("workshop_sessions");
-      sref.onSnapshot((snap) => { meetings = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((m) => m.kind === "attendance" && typeof m.n === "number").sort((a, b) => b.n - a.n); renderHere(); }, () => {});
+      sref.onSnapshot((snap) => {
+        const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        meetings = all.filter((m) => m.kind === "attendance" && typeof m.n === "number").sort((a, b) => b.n - a.n); renderHere();
+        // Katrina's board edits and her Discord kit, kept in the same collection
+        peRecs = Object.fromEntries(all.filter((r) => r.kind === "page" && typeof r.key === "string").map(({ id, ...r }) => [r.key, r])); peApply();
+        kitRecs = Object.fromEntries(all.filter((r) => r.kind === "kit" && typeof r.id === "string").map((r) => [r.id, r])); renderKit();
+      }, () => {});
       cref = db.collection("checkins");
       cref.onSnapshot((snap) => { checkins = snap.docs.map((d) => d.data()); renderHere(); loadMine(); }, () => {});
       ref = db.collection("tasks");
