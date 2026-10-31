@@ -976,6 +976,29 @@ body {
         <div class="card">
           <h2>The road to Nov 12</h2>
           <div class="tl-scroll"><div class="tl"><div class="today" id="today"><span>You are here</span></div><div class="tl-bar" id="tl-bar"></div><div class="legs" id="legs"></div></div></div>
+          <!-- Meeting recaps for anyone who missed one. Folded; link with #learn-meeting-<n> -->
+          <details class="learn" id="learn-meeting-4">
+            <summary><span class="learn-ic" aria-hidden="true">📝</span><span><b>Missed Meeting 4 (Sat Oct 31)? Read this</b><small>2-minute recap · 5 things to do</small></span><svg class="chev" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 5.5L7 9l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+            <div class="learn-body">
+              <h4>🎉 What happened</h4>
+              <ul style="margin:0;padding-left:20px;display:grid;gap:6px">
+                <li>Leslie finished the Alchemy Lab. The spell now says <b>Squire doing king's work</b>.</li>
+                <li>Everyone answered the Council. Tvishaa broke the hint tie, so the game will <b>explain the misstep</b> when you get one wrong.</li>
+                <li>Shirley's motivation notes and Tvishaa's saved progress are great ideas for <b>after demo day</b>.</li>
+              </ul>
+              <h4>✅ Do these 5 things</h4>
+              <ol>
+                <li><b>Check in today</b> on My quest (5 taps). There's a new question: how many times you've played the game.</li>
+                <li><b>Tick what you've already done.</b> Joined GitHub or Discord? Did a task? Tap its circle on Team tasks. It takes 5 seconds and keeps the board true.</li>
+                <li><b>Get the newest code:</b> <a class="js-guide" data-part="3" href="#" target="_blank" rel="noopener">Team Guide, Part 3, Step 1</a>.</li>
+                <li><b>Open your next task</b> (My quest, tap Details) and do step 1 today, even if it's just playing the game.</li>
+                <li><b>Reply in #wed-check-in:</b> the one task you'll do first, by when, and what's stopping you (time, or not sure where to start?). Either answer is fine, it helps Katrina help you.</li>
+              </ol>
+              <h4>📅 The dates that matter</h4>
+              <p><b>Wed Nov 4:</b> anything not started by then gets cut. <b>Mon Nov 9:</b> freeze, only fixes after that. <b>Thu Nov 12:</b> demo day.</p>
+              <p class="learn-game">💛 Stuck more than 15 minutes? Tap <b>Ask for help</b> (bottom right), then post in Discord. Asking is part of the job.</p>
+            </div>
+          </details>
         </div>
         <div class="grid-2">
           <div class="card">
@@ -1708,9 +1731,11 @@ window.P9_STARTER = /*@STARTER@*/{};
   // An explainer lives folded in Game plan > Charter. Any link to #learn-<name> opens it right there.
   function openLearn(id) {
     const d = $(id); if (!d) return;
-    go("plan", true); showPlan("charter", false); d.open = true;
+    // Open whichever Game plan tab holds it (Charter for concepts, Schedule for meeting recaps)
+    const tab = (d.closest('[id^="p-"]') || { id: "p-charter" }).id.slice(2);
+    go("plan", true); showPlan(tab, false); d.open = true;
     // go() scrolls to the top for its screen change, so scroll to the explainer after that settles
-    setTimeout(() => d.scrollIntoView({ block: "start" }), 80);
+    setTimeout(() => window.scrollTo({ top: d.getBoundingClientRect().top + window.scrollY - 16 }), 360);
   }
   document.addEventListener("click", (e) => {
     const a = e.target.closest('a[href^="#learn-"]'); if (!a) return;
@@ -1718,6 +1743,7 @@ window.P9_STARTER = /*@STARTER@*/{};
   });
   // One line at a time on My quest. "Got it" or "Read it" hides that item on this device.
   const NEWS = [
+    { id: "learn-meeting-4", text: "Missed Meeting 4? Here's the 2-minute recap and 5 things to do 📝", go: () => openLearn("learn-meeting-4") },
     { id: "learn-encapsulation", text: "What is encapsulation? A 2-minute read, with a vending machine 🥤", go: () => openLearn("learn-encapsulation") },
   ];
   const newsSeen = () => store.get("p9-news-seen", []) || [];
