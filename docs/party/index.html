@@ -1067,6 +1067,23 @@ body.party-mode { overflow-x: hidden; }
 }
 @media (max-width: 400px) { .face-btn { font-size: 11px; } .face-btn svg { width: 38px; height: 38px; } }
 
+/* Team polls (My quest): one tap to vote, results show once you've voted */
+#polls-card[hidden] { display: none; }
+.poll { margin-top: 12px; }
+.poll + .poll { padding-top: 14px; border-top: 1px solid var(--line); }
+.poll h3 { font-size: 16px; }
+.poll-by { font-size: 13.5px; color: var(--parch-3); margin-top: 2px; }
+.poll-opts { display: grid; gap: 8px; margin-top: 12px; }
+.poll-opt { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; padding: 0 14px; border-radius: 11px; border: 1px solid var(--plank); background: var(--night); color: var(--parch); font-size: 15.5px; font-weight: 700; text-align: left; }
+.poll-opt[aria-pressed="true"] { border-color: var(--torch); }
+.poll-opt .fill { position: absolute; inset: 0; transform-origin: left; background: var(--wood-2); transition: transform 260ms var(--ease-out); }
+.poll-opt[aria-pressed="true"] .fill { background: color-mix(in srgb, var(--torch) 22%, var(--night)); }
+.poll-opt span { position: relative; }
+.poll-opt .n { font-family: var(--num); font-weight: var(--num-weight); color: var(--parch-2); }
+@media (hover: hover) and (pointer: fine) { .poll-opt:not(:disabled):hover { border-color: var(--parch-3); } }
+.poll-foot { margin-top: 8px; font-size: 13.5px; color: var(--parch-3); }
+@media (prefers-reduced-motion: reduce) { .poll-opt .fill { transition: none; } }
+
 /* Task editor (Katrina only): opens in place of the task */
 .row-edit { display: inline-grid; }
 .task-ed { grid-column: 1 / -1; display: grid; gap: 12px; padding: 4px 0 6px; }
@@ -1245,6 +1262,10 @@ body.pe-on .help-fab, body.pe-on .tabbar { display: none; }
               <div class="head"><h2>My tasks</h2><button type="button" class="link-btn" data-go="tasks">All team tasks</button></div>
               <ul class="rows" id="my-tasks" style="margin-top:10px"></ul>
               <button type="button" class="person-more press" id="my-more" hidden aria-controls="my-tasks"><span></span><svg class="chev" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 5.5L7 9l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </div>
+            <div class="card" id="polls-card" hidden>
+              <h2>Team polls</h2>
+              <div id="polls"></div>
             </div>
             <div class="card">
               <h2 id="here-h">Who came</h2>
@@ -1916,7 +1937,7 @@ window.P9_STARTER = {"rooms.js": "// ALL GAME CONTENT LIVES HERE. Edit this file
       + ROWS.map(([work, what, letters]) => `<div class="raci-row" role="row"><span class="raci-work" role="rowheader"><span><b>${work}</b><small>${what}</small></span></span>${[...letters].map((l, i) => `<span class="rc-cell${mine(i)}" role="cell" data-who="${WHO[i][0]}"><span class="rc ${l}" aria-label="${WHO[i][0]} ${SAY[l]}">${l}</span></span>`).join("")}</div>`).join("");
   }
   function renderMe() {
-    renderRaci();
+    renderRaci(); renderPolls();
     if (typeof syncOwnerPicker === "function") syncOwnerPicker();
     $("hello").hidden = !!me;
     $("today-body").hidden = !me;
@@ -3276,7 +3297,50 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     });
   }
 
-  renderMe(); renderHere(); renderTasks(); renderKit();
+  // ---------- Team polls (My quest) ----------
+  // A poll is a workshop_sessions record (kind "poll": q, options, credit, closes). Each vote is a
+  // workshop_answers record with session "poll-<id>", one per person, so voting again just changes it.
+  // The Council only reads its own session, so votes never show up there.
+  // var, not let: renderMe() can call renderPolls() before this line has run
+  var polls, pollVotes = [], vref = null;
+  function renderPolls() {
+    if (!polls) return;
+    const VOTERS = PEOPLE.filter((p) => p !== "Katrina");
+    const open = polls.filter((p) => p.open !== false && Array.isArray(p.options));
+    $("polls-card").hidden = !open.length;
+    const box = $("polls"); box.innerHTML = "";
+    open.forEach((p) => {
+      const votes = pollVotes.filter((v) => v.session === "poll-" + p.id && VOTERS.includes(v.name));
+      const mine = votes.find((v) => v.name === me), closed = !!(p.closes && iso(day0()) > p.closes);
+      const canVote = !PREVIEW && !closed && VOTERS.includes(me);
+      const show = !!mine || closed || owner;
+      const el = document.createElement("div"); el.className = "poll";
+      el.innerHTML = '<h3></h3><p class="poll-by"></p><div class="poll-opts" role="group"></div><p class="poll-foot"></p>';
+      el.querySelector("h3").textContent = p.q; el.querySelector(".poll-by").textContent = p.credit || "";
+      el.querySelector(".poll-opts").setAttribute("aria-label", p.q);
+      p.options.forEach((o) => {
+        const n = votes.filter((v) => v.pick === o).length;
+        const b = document.createElement("button"); b.type = "button"; b.className = "poll-opt press";
+        b.setAttribute("aria-pressed", String(!!mine && mine.pick === o)); b.disabled = !canVote;
+        b.innerHTML = `<i class="fill" style="transform:scaleX(${show && votes.length ? n / votes.length : 0})"></i><span></span><span class="n"></span>`;
+        b.querySelector("span").textContent = o; b.querySelector(".n").textContent = show ? String(n) : "";
+        b.onclick = () => {
+          if (!vref) return;
+          vref.doc(`poll-${p.id}_${me}`).set({ session: "poll-" + p.id, round: "poll", name: me, pick: o, idea: "", due: "", updatedAt: Date.now() })
+            .then(() => toast(`Voted ${o}. You can change it until it closes.`)).catch(() => toast("That didn't save. Check your connection and try again."));
+        };
+        el.querySelector(".poll-opts").appendChild(b);
+      });
+      const by = p.closes ? " · closes " + short(p.closes) : "";
+      el.querySelector(".poll-foot").textContent = closed ? `Closed · ${votes.length} of ${VOTERS.length} voted`
+        : !VOTERS.includes(me) && !owner ? "Pick your name at the top to vote" + by
+        : (mine ? `${votes.length} of ${VOTERS.length} voted · tap another to change your vote` : owner && !VOTERS.includes(me) ? `${votes.length} of ${VOTERS.length} voted (${VOTERS.filter((n) => !votes.some((v) => v.name === n)).join(", ") || "everyone in"})` : `Results show after you vote · ${votes.length} of ${VOTERS.length} voted`) + by;
+      box.appendChild(el);
+    });
+  }
+
+  polls = [];
+  renderMe(); renderHere(); renderTasks(); renderKit(); renderPolls();
   const learnLink = /^#learn-[\w-]+$/.test(location.hash) ? location.hash.slice(1) : "";
   go(startScreen, false);
   if (learnLink) openLearn(learnLink); // a shared link like #learn-encapsulation opens that explainer
@@ -3292,7 +3356,12 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     window.claude.use("db").then((db) => {
       if (!db) { note("Sign in to claude.ai to see the team's tasks."); syncCheckinBtn(); return; }
       db.doc("workshop_sessions/meeting-1").onSnapshot((d) => { session = d.exists ? d.data() : null; renderPulse(); }, () => {});
-      db.collection("workshop_answers").onSnapshot((snap) => { answers = snap.docs.map((d) => d.data()).filter((a) => a.session === "meeting-1"); renderPulse(); }, () => {});
+      vref = db.collection("workshop_answers");
+      vref.onSnapshot((snap) => {
+        const all = snap.docs.map((d) => d.data());
+        answers = all.filter((a) => a.session === "meeting-1"); renderPulse();
+        pollVotes = all.filter((a) => typeof a.session === "string" && a.session.startsWith("poll-")); renderPolls();
+      }, () => {});
       db.collection("workshop_decisions").onSnapshot((snap) => { decisions = snap.docs.map((d) => d.data()).filter((d) => d.session === "meeting-1"); renderPulse(); }, () => {});
       sref = db.collection("workshop_sessions");
       sref.onSnapshot((snap) => {
@@ -3301,6 +3370,7 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
         // Katrina's board edits and her Discord kit, kept in the same collection
         peRecs = Object.fromEntries(all.filter((r) => r.kind === "page" && typeof r.key === "string").map(({ id, ...r }) => [r.key, r])); peApply();
         kitRecs = Object.fromEntries(all.filter((r) => r.kind === "kit" && typeof r.id === "string").map((r) => [r.id, r])); renderKit();
+        polls = all.filter((r) => r.kind === "poll" && typeof r.q === "string").map((r) => ({ ...r, id: r.pollId || r.id.replace(/^poll-/, "") })); renderPolls();
       }, () => {});
       cref = db.collection("checkins");
       cref.onSnapshot((snap) => { checkins = snap.docs.map((d) => d.data()); renderHere(); loadMine(); }, () => {});
