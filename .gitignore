@@ -17,3 +17,6 @@ board/art/quest-council.png
 
 # Lock files some tools drop here while running
 state/
+
+# Private PINs
+board/.env

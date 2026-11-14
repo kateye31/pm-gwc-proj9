@@ -1437,7 +1437,7 @@ window.P9_STARTER = /*@STARTER@*/{};
     Sanjana: "37ba7dba927b62bf2d71469592eb4d3a1b40940efe45d4bab10df0f2fe1ae3bb",
     Shirley: "3a2134fb3cad2d8f3f44e1408656f3562ffdc5ebc6e715c5c23d77d970e50bc5",
     Tvishaa: "439c1da9aa2d0e18e62562a24b93523fe3be51bb99ae9aabb60a5460efea2d1d",
-    Katrina: "5f9b844685892b40f15fed7ad0344e30371558921a83bb123adb584fb8324100",
+    Katrina: "2edc9bb112244c75f898cd394a40fda6ce31f1b498ba53abf311e8d44668826b",
   };
   window.P9_PINS = PINS;
   const pinHash = async (name, pin) => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(name.toLowerCase() + ":" + pin)))].map((b) => b.toString(16).padStart(2, "0")).join("");
