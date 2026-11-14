@@ -1662,7 +1662,8 @@ window.P9_STARTER = /*@STARTER@*/{};
     const f = $("here"); f.innerHTML = ""; const fresh = [];
     const latest = meetings[0];
     // The check-in is for meetings only: it opens once Katrina starts today's meeting on Live
-    const meetingToday = !!latest && latest.date === todayKey;
+    // Also open all day on these dates, even before Katrina taps "Start meeting" (final meeting, Sat Nov 14)
+    const meetingToday = (!!latest && latest.date === todayKey) || ["2026-11-14"].includes(todayKey);
     $("checkin").hidden = !meetingToday; $("checkin-closed").hidden = meetingToday;
     $("here-h").textContent = meetingToday ? "Who's here" : "Who came";
     $("here-sub").textContent = latest ? meetName(latest) : "Shows who came once the first meeting starts.";
