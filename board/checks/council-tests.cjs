@@ -14,7 +14,7 @@ module.exports = async function councilTests({ page, evaluate, send, url, mock }
   await click('.nav [data-go="council"]');
   await click('[data-person="Katrina"]');
   assert.equal(await evaluate("document.getElementById('council-host').hidden"), false);
-  assert.equal(await evaluate("document.querySelectorAll('#council-rounds li').length"), 6);
+  assert.equal(await evaluate("document.querySelectorAll('#council-rounds li').length"), 8);
   assert.equal(await evaluate("document.querySelectorAll('#council-bonus li').length"), 2);
   // A second page simulates a student device. The mock shares data via storage events.
   const { targetId } = await send('Target.createTarget', { url: 'about:blank' });
@@ -82,7 +82,7 @@ module.exports = async function councilTests({ page, evaluate, send, url, mock }
   await waitFor(evaluate, "document.getElementById('council-arrivals').textContent.includes('Leslie · sent')");
   await click('#council-reveal');
   assert.equal(await evaluate("document.querySelectorAll('#council-result-rows img').length"), 0, 'User text must not become HTML');
-  await click('[data-round="7"]'); await click('#council-start');
+  await click('[data-round="9"]'); await click('#council-start');
   await waitFor(student, "document.getElementById('council-question').textContent.includes('understand now')");
   await waitFor(student, "!document.getElementById('council-submit').disabled");
   await student("document.getElementById('council-idea').value='Private means only the object can change it'; document.getElementById('council-submit').click()");

@@ -5,19 +5,20 @@
   const STUDENTS = ['Leslie', 'Sanjana', 'Shirley', 'Tvishaa'];
   const PEOPLE = [...STUDENTS, 'Katrina'];
   const SESSION = 'meeting-final';
-  const ART = { gawain: '@ART:gawain@', odyssey: '@ART:odyssey@', beowulf: '@ART:beowulf@' };
+  const ART = { gawain: '@ART:gawain@', odyssey: '@ART:odyssey@', beowulf: '@ART:beowulf@',
+    // The team's own work: Tvishaa's drawings and a screenshot of Shirley's game
+    lab: '@ART:tvishaa-lab@', door: '@ART:tvishaa-door@', maze: '@ART:tvishaa-maze@', fall: '@ART:shirley-fall@' };
   // Final meeting (Sat Nov 14): wrap-up decisions for the showcase and the Devpost.
   // Earlier rounds live in council.v1.js; their answers stay in the DB under session 'meeting-1'.
   const ROUNDS = [
     { id: 'colors', label: 'Our colors', category: 'Make the art and the game match', seconds: 60,
       question: 'Which look should our game have?',
-      prompt: 'Look at Shirley\u2019s light fall screens next to Tvishaa\u2019s drawings. Pick the look you want players to see.',
-      impact: 'The :root colors in style.css. Whoever owns it pushes by tonight, before Katrina merges.',
-      coach: 'Screenshare both side by side first. Praise both. This is about matching, not about whose is better.',
+      prompt: 'Compare Tvishaa\u2019s chamber drawings with the light fall look in the game now. Shirley\u2019s page animations stay either way: this is only about colors.',
+      impact: 'The :root colors in style.css and the chamber scenes. Whoever owns it pushes by tonight, before Katrina merges.',
+      coach: 'Praise both first: the drawings are beautiful, and the animations are some of the best work in the game.',
       options: [
-        ['light', 'Keep the light fall look', 'Shirley\u2019s warm, soft colors stay as they are.', 'gawain'],
-        ['dark', 'Go darker, like the drawings', 'Darker bricks and shadows so the game matches Tvishaa\u2019s chambers.', 'odyssey'],
-        ['mix', 'Mix them', 'Shirley\u2019s layout and buttons, with colors picked from Tvishaa\u2019s drawings.', 'beowulf'] ] },
+        ['dark', 'Tvishaa\u2019s drawings', 'Dark bricks, wood and moss, with her drawings as the chamber scenes. Art by Tvishaa.', 'lab'],
+        ['light', 'Keep the light fall look', 'The soft fall colors the game has now. Screenshot of Shirley\u2019s screen.', 'fall'] ] },
     { id: 'name', label: 'Our name', category: 'Devpost \u00b7 project name', seconds: 60,
       question: 'What do we call our game?',
       prompt: 'Devpost needs a project name, 60 characters max. Pick one or write your own.',
@@ -51,6 +52,24 @@
         ['home', 'Everyone at home', 'Each of us films our line on a phone. One person puts it together.', 'gawain'],
         ['person', 'Together, in person', 'One laptop, one camera. Easiest for the zoom into the screen.', 'odyssey'],
         ['both', 'Some of each', 'Intro lines at home, the zoom shot and gameplay together.', 'beowulf'] ] },
+    { id: 'thumbstar', label: 'Thumbnail: the star', category: 'Devpost \u00b7 the cover image', seconds: 45,
+      question: 'What should be the star of our thumbnail?',
+      prompt: 'The thumbnail is the first thing people see on Devpost. Pick the one big picture in the middle.',
+      impact: 'What the thumbnail designer puts front and center.',
+      coach: 'Our own art beats stock pictures. One big picture plus the name is plenty.',
+      options: [
+        ['door', 'The castle door', 'Tvishaa\u2019s door, with our name over it. Art by Tvishaa.', 'door'],
+        ['maze', 'The maze from above', 'Tvishaa\u2019s maze map, start to end. Art by Tvishaa.', 'maze'],
+        ['knight', 'A knight vs. the warlock', 'A new drawing: a knight facing the warlock and his staff.', 'gawain'] ] },
+    { id: 'thumblogo', label: 'Thumbnail: logos', category: 'Devpost \u00b7 the cover image', seconds: 30,
+      question: 'Should the thumbnail show logos?',
+      prompt: 'We\u2019re UCF Knights in Girls Who Code. Do we show that on the cover?',
+      impact: 'Whether the designer adds logos, or keeps it to our art and name.',
+      coach: 'Logos belong to UCF and GWC, so check the showcase rules before using them.',
+      options: [
+        ['both', 'UCF + GWC logos', 'Small, in a corner. Shows who made it.'],
+        ['gwc', 'Just the GWC logo', 'Our club, nothing else.'],
+        ['none', 'No logos', 'Just our art and our name. Cleaner.'] ] },
     { id: 'thumbnail', label: 'Our thumbnail', category: 'Devpost \u00b7 the cover image', seconds: 30,
       question: 'Who wants to design the thumbnail?',
       prompt: 'The thumbnail is the picture people see first on Devpost. It should be our own art.',
