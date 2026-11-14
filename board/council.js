@@ -75,6 +75,9 @@
   ];
   // Shared with the party screen (party.js), which runs the same rounds on a big screen + phones.
   window.P9_ROUNDS = ROUNDS; window.P9_ART = ART; window.P9_SESSION = SESSION;
+  // Can't come to the meeting? These students can answer every round early, on that day only.
+  // Their answers stay hidden until Katrina reveals each round.
+  window.P9_EARLY = { date: '2026-11-14', names: ['Tvishaa'] };
 
   let person = '';
   try { person = JSON.parse(localStorage.getItem('p9-council-person')) || ''; } catch {}

@@ -165,7 +165,9 @@
   let draft = { round: "", pick: "", idea: "", due: "" };
   // After the live Council ends, a player who missed rounds answers them on her own, no host or timer.
   const missing = () => ALL.filter((r) => !r.optional && !answers.some((a) => a.round === r.id && a.name === me));
-  const catchUp = () => councilOver() && missing().length > 0;
+  // Away today (window.P9_EARLY in council.js)? She answers early, before the live rounds.
+  const early = (n) => { const e = window.P9_EARLY; return !!e && e.date === today && e.names.includes(n); };
+  const catchUp = () => (councilOver() || early(me)) && missing().length > 0;
   const playRound = () => catchUp() ? missing()[0] : round();
   function renderPlay() {
     if (!me) { syncJoin(); return; }
@@ -177,6 +179,7 @@
     $("j-wait").hidden = answering; $("j-answer").hidden = !answering;
     if (!answering) {
       const t = councilOver() ? ["That's a wrap!", "Thanks for shaping the game. Time to build."]
+        : early(me) ? ["All done!", "Thank you! Your answers join the team's when Katrina reveals each round."]
         : state.phase === "revealed" ? ["Look up!", "The answers are on the big screen."]
         : state.phase === "paused" ? ["Paused", "Hang tight. The host paused the round."]
         : state.round === 0 && !answers.length ? ["You're in!", "Look at the big screen. The host will start soon."]
@@ -232,7 +235,7 @@
       const code = $("j-code").value.trim().toUpperCase();
       const typed = $("j-name").value.trim().toLowerCase();
       const name = STUDENTS.find((n) => n.toLowerCase() === typed);
-      if (!councilOver() && code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
+      if (!councilOver() && !early(name) && code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
       if (typed === "katrina") { $("j-err").textContent = "Katrina, you're the host. Open the host screen instead."; return; }
       if (!name) { $("j-err").textContent = "Type your first name as it is on the team list."; return; }
       if (store.get("p9-verified", "") !== name) {

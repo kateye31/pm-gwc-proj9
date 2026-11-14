@@ -2834,15 +2834,20 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     });
   }
   // Missed the meeting? Once the live Council is over, she answers the rounds she skipped right here, no screenshare.
+  // The Council rounds (council.js) load after this script, so check again once the page is ready
+  addEventListener("load", () => renderCatchup());
   function renderCatchup() {
     const box = $("catchup"); if (!box) return;
     const core = (window.P9_ROUNDS || []).filter((r) => !r.optional);
     // The host's round pointer can move backward (Back, to review a round), so it's not a safe
     // "is the Council over" check. Go by which rounds have actually been revealed instead.
     const over = session && core.length > 0 && core.every((r) => (session.revealed || []).includes(r.id));
+    // Away today (window.P9_EARLY in council.js)? She can answer before the meeting.
+    const E = window.P9_EARLY, early = !!E && E.date === iso(day0()) && E.names.includes(me);
     const left = me && me !== "Katrina" && !PREVIEW ? core.filter((r) => !answers.some((a) => a.round === r.id && a.name === me)) : [];
-    box.hidden = !over || !left.length;
+    box.hidden = !(over || early) || !left.length;
     const due = iso(day0()) === "2026-11-14" ? " Please send them by tonight (Saturday)." : "";
+    if (early && !over) { $("catchup-sub").textContent = `Can't make it today? Answer the ${left.length} Council question${left.length === 1 ? "" : "s"} now. About 5 minutes, no timer. Your answers stay hidden until the team reveals them.`; return; }
     $("catchup-sub").textContent = `You have ${left.length} question${left.length === 1 ? "" : "s"} from the last meeting. No timer and no big screen, about 5 minutes. Your answers join the team's.${due}`;
   }
   function renderPulse() {
@@ -3486,6 +3491,9 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   ];
   // Shared with the party screen (party.js), which runs the same rounds on a big screen + phones.
   window.P9_ROUNDS = ROUNDS; window.P9_ART = ART; window.P9_SESSION = SESSION;
+  // Can't come to the meeting? These students can answer every round early, on that day only.
+  // Their answers stay hidden until Katrina reveals each round.
+  window.P9_EARLY = { date: '2026-11-14', names: ['Tvishaa'] };
 
   let person = '';
   try { person = JSON.parse(localStorage.getItem('p9-council-person')) || ''; } catch {}
@@ -3959,7 +3967,9 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   let draft = { round: "", pick: "", idea: "", due: "" };
   // After the live Council ends, a player who missed rounds answers them on her own, no host or timer.
   const missing = () => ALL.filter((r) => !r.optional && !answers.some((a) => a.round === r.id && a.name === me));
-  const catchUp = () => councilOver() && missing().length > 0;
+  // Away today (window.P9_EARLY in council.js)? She answers early, before the live rounds.
+  const early = (n) => { const e = window.P9_EARLY; return !!e && e.date === today && e.names.includes(n); };
+  const catchUp = () => (councilOver() || early(me)) && missing().length > 0;
   const playRound = () => catchUp() ? missing()[0] : round();
   function renderPlay() {
     if (!me) { syncJoin(); return; }
@@ -3971,6 +3981,7 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     $("j-wait").hidden = answering; $("j-answer").hidden = !answering;
     if (!answering) {
       const t = councilOver() ? ["That's a wrap!", "Thanks for shaping the game. Time to build."]
+        : early(me) ? ["All done!", "Thank you! Your answers join the team's when Katrina reveals each round."]
         : state.phase === "revealed" ? ["Look up!", "The answers are on the big screen."]
         : state.phase === "paused" ? ["Paused", "Hang tight. The host paused the round."]
         : state.round === 0 && !answers.length ? ["You're in!", "Look at the big screen. The host will start soon."]
@@ -4026,7 +4037,7 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
       const code = $("j-code").value.trim().toUpperCase();
       const typed = $("j-name").value.trim().toLowerCase();
       const name = STUDENTS.find((n) => n.toLowerCase() === typed);
-      if (!councilOver() && code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
+      if (!councilOver() && !early(name) && code !== CODE) { $("j-err").textContent = "That room code doesn't match. Check the big screen."; return; }
       if (typed === "katrina") { $("j-err").textContent = "Katrina, you're the host. Open the host screen instead."; return; }
       if (!name) { $("j-err").textContent = "Type your first name as it is on the team list."; return; }
       if (store.get("p9-verified", "") !== name) {
