@@ -25,6 +25,8 @@
   --torch-2: #f0a00e;
   --on-torch: #2a1300;
   --ember: #f08a4b;
+  --coral: #ff8a73;
+  --sky: #7cc8ff;
   --moss: #c2ba52;
   --stone: #211b17;
   --stone-hi: rgba(246, 232, 207, .12);
@@ -238,6 +240,13 @@ a { color: var(--parch); text-underline-offset: 3px; }
 @media (max-width: 640px) { .learn-body { padding: 0 14px 16px; } }
 @media (prefers-reduced-motion: reduce) { .learn[open] .learn-body { animation: none; } }
 /* What's new: a single slim line at the top of My quest */
+/* Last-meeting banner: a coral-to-blue title, shown on that day only */
+.last-meet { text-align: center; padding: var(--s1) 0 0; animation: last-in 260ms var(--ease-out) both; }
+.last-meet h2 { font-family: var(--display); font-weight: 400; font-size: clamp(38px, 6vw, 60px); line-height: 1; text-wrap: balance; }
+.last-meet h2 span { background: linear-gradient(90deg, var(--coral), var(--sky)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.last-meet p { margin-top: 6px; color: var(--parch-2); font-size: 16px; }
+@keyframes last-in { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .last-meet { animation: none; } }
 .news { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); padding: 10px 14px; border: 1px solid var(--plank); border-radius: 12px; background: var(--wood-2); }
 .news p { flex: 1 1 240px; min-width: 0; font-size: 15px; }
 .news-tag { padding: 1px 9px; border-radius: 999px; background: var(--torch); color: var(--on-torch); font-size: 12.5px; font-weight: 700; }
@@ -892,6 +901,11 @@ body.pe-on .help-fab, body.pe-on .tabbar { display: none; }
       </div>
 
       <div class="stack" id="today-body" style="gap:var(--s3)">
+        <!-- Shown on Sat Nov 14 only (see LAST_MEETING in the script) -->
+        <div class="last-meet" id="last-meet" hidden>
+          <h2><span>Last meeting, yay!</span> 🎉</h2>
+          <p>Your last check-in. We wrap up by 10:45.</p>
+        </div>
         <!-- What's new: one line at a time, dismissed per device -->
         <div class="news" id="news" hidden role="status">
           <span class="news-tag">New</span>
@@ -1002,7 +1016,7 @@ body.pe-on .help-fab, body.pe-on .tabbar { display: none; }
     <section class="screen" id="s-council" data-s="council" hidden>
       <div class="screen-head">
         <h1>Quest Council</h1>
-        <p>Six quick rounds on what's still open. Everyone answers on their own, then we reveal together. 12 minutes, then we build.</p>
+        <p>Six quick rounds to wrap up: our colors, name, pitch and Devpost. Everyone answers on their own, then we reveal together.</p>
       </div>
       <div class="card decided">
         <h2>You already decided</h2>
@@ -1853,6 +1867,8 @@ window.P9_STARTER = /*@STARTER@*/{};
     const a = e.target.closest('a[href^="#learn-"]'); if (!a) return;
     e.preventDefault(); openLearn(a.getAttribute("href").slice(1));
   });
+  const LAST_MEETING = "2026-11-14";
+  $("last-meet").hidden = iso(day0()) !== LAST_MEETING;
   // One line at a time on My quest. "Got it" or "Read it" hides that item on this device.
   const NEWS = [
     { id: "showcase-nov19", text: "The showcase moved to Thu Nov 19, 6pm, HEC 119. See the new dates 📅", go: () => { go("plan", true); showPlan("schedule", false); } },
@@ -2299,8 +2315,9 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   }).catch(() => {});
 
   // ---------- Live (owner only) ----------
-  const ROUND_LABELS = ["Remember it", "Your own path", "Our helping hand", "The Maze", "Our warlock", "Our creative twist", "Proof it teaches", "My next small win"];
-  const ROUND_IDS = ["recall", "personal", "hint", "maze", "warlock", "twist", "proof", "commitment"];
+  const ROUND_LABELS = (window.P9_ROUNDS || []).map((r) => r.label);
+  const ROUND_IDS = (window.P9_ROUNDS || []).map((r) => r.id);
+  const COUNCIL_SESSION = window.P9_SESSION || "meeting-final";
   const PHASE = { ready: "Waiting to start", running: "Answering now", paused: "Paused", revealed: "Answers revealed", catchup: "Catch-up open" };
   let session = null, answers = [];
   function renderResults() {
@@ -2346,7 +2363,8 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     const over = session && core.length > 0 && core.every((r) => (session.revealed || []).includes(r.id));
     const left = me && me !== "Katrina" && !PREVIEW ? core.filter((r) => !answers.some((a) => a.round === r.id && a.name === me)) : [];
     box.hidden = !over || !left.length;
-    $("catchup-sub").textContent = `You have ${left.length} question${left.length === 1 ? "" : "s"} from the last meeting. No timer and no big screen, about 5 minutes. Your answers join the team's.`;
+    const due = iso(day0()) === "2026-11-14" ? " Please send them by tonight (Saturday)." : "";
+    $("catchup-sub").textContent = `You have ${left.length} question${left.length === 1 ? "" : "s"} from the last meeting. No timer and no big screen, about 5 minutes. Your answers join the team's.${due}`;
   }
   function renderPulse() {
     if (typeof renderNotes === "function") renderNotes();
@@ -2876,14 +2894,14 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   if (window.claude && window.claude.use) {
     window.claude.use("db").then((db) => {
       if (!db) { note("Sign in to claude.ai to see the team's tasks."); syncCheckinBtn(); return; }
-      db.doc("workshop_sessions/meeting-1").onSnapshot((d) => { session = d.exists ? d.data() : null; renderPulse(); }, () => {});
+      db.doc("workshop_sessions/" + COUNCIL_SESSION).onSnapshot((d) => { session = d.exists ? d.data() : null; renderPulse(); }, () => {});
       vref = db.collection("workshop_answers");
       vref.onSnapshot((snap) => {
         const all = snap.docs.map((d) => d.data());
-        answers = all.filter((a) => a.session === "meeting-1"); renderPulse();
+        answers = all.filter((a) => a.session === COUNCIL_SESSION); renderPulse();
         pollVotes = all.filter((a) => typeof a.session === "string" && a.session.startsWith("poll-")); renderPolls();
       }, () => {});
-      db.collection("workshop_decisions").onSnapshot((snap) => { decisions = snap.docs.map((d) => d.data()).filter((d) => d.session === "meeting-1"); renderPulse(); }, () => {});
+      db.collection("workshop_decisions").onSnapshot((snap) => { decisions = snap.docs.map((d) => d.data()).filter((d) => d.session === COUNCIL_SESSION); renderPulse(); }, () => {});
       sref = db.collection("workshop_sessions");
       sref.onSnapshot((snap) => {
         const all = snap.docs.map((d) => ({ id: d.id, ...d.data() }));

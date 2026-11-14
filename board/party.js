@@ -1,6 +1,6 @@
 // Party mode: #host is the big screen Katrina streams; #play is each student's phone.
 // It runs the same Council rounds and writes the same records as council.js
-// (workshop_sessions/meeting-1, workshop_answers), so the Council screen, the brief and Live stay in sync.
+// (workshop_sessions/<P9_SESSION>, workshop_answers), so the Council screen, the brief and Live stay in sync.
 (() => {
   const $ = (id) => document.getElementById(id);
   const ALL = window.P9_ROUNDS || [];
@@ -9,7 +9,7 @@
   const STUDENTS = ["Leslie", "Sanjana", "Shirley", "Tvishaa"];
   const COLOR = { Leslie: "var(--c3)", Sanjana: "var(--c2)", Shirley: "var(--c1)", Tvishaa: "var(--c4)" };
   const OPT = ["var(--c1)", "var(--c2)", "var(--c3)"];
-  const SESSION = "meeting-1";
+  const SESSION = window.P9_SESSION || "meeting-final";
   const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const anim = (t, v) => { if (window.gsap && !calm && t && (t.length === undefined || t.length)) window.gsap.from(t, v); };
   const face = window.P9_FACE || (() => "");

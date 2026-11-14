@@ -76,7 +76,7 @@ async function main() {
     await evaluate('window.scrollTo(0, 0)');
     const mobile = await page('Page.captureScreenshot', { format: 'png' });
     fs.writeFileSync(path.join(__dirname, 'mobile.png'), Buffer.from(mobile.data, 'base64'));
-    await evaluate("document.querySelector('.nav [data-go=council]').click(); document.getElementById('council-rehearse').click(); document.getElementById('council-start').click(); document.querySelector('[data-person=Leslie]').click(); document.querySelector('input[value=quiz]').click(); document.getElementById('council-submit').click()");
+    await evaluate("document.querySelector('.nav [data-go=council]').click(); document.getElementById('council-rehearse').click(); document.getElementById('council-start').click(); document.querySelector('[data-person=Leslie]').click(); document.querySelector('input[value=dark]').click(); document.getElementById('council-submit').click()");
     assert.equal(await evaluate("document.getElementById('council-arrivals').textContent.includes('Leslie · sent')"), true);
     await evaluate("document.querySelector('[data-person=Katrina]').click(); document.getElementById('council-reveal').click()");
     assert.equal(await evaluate("document.getElementById('council-result-count').textContent"), '1/4 voices');

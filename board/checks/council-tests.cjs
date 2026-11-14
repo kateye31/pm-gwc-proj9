@@ -33,13 +33,13 @@ module.exports = async function councilTests({ page, evaluate, send, url, mock }
   assert.equal(await student("document.getElementById('council-host').hidden"), true);
   await click('#council-start');
   await waitFor(student, "!document.getElementById('council-submit').disabled");
-  await student("document.querySelector('input[value=quiz]').click(); document.getElementById('council-idea').value='Explain with a tiny Knight example'; document.getElementById('council-submit').click()");
+  await student("document.querySelector('input[value=dark]').click(); document.getElementById('council-idea').value='Explain with a tiny Knight example'; document.getElementById('council-submit').click()");
   await waitFor(evaluate, "document.getElementById('council-arrivals').textContent.includes('Leslie · sent')");
   assert.equal(await evaluate("document.getElementById('council-results').hidden"), true);
   assert.equal(await evaluate("document.getElementById('council-brief').textContent.includes('Knight example')"), false);
   // Update the same answer: one record, not a second vote.
-  await student("document.querySelector('input[value=cards]').click(); document.getElementById('council-submit').click()");
-  await waitFor(evaluate, "JSON.parse(localStorage.getItem('quest-board-qa-db'))['workshop_answers/meeting-1_recall_Leslie']?.pick === 'cards'");
+  await student("document.querySelector('input[value=light]').click(); document.getElementById('council-submit').click()");
+  await waitFor(evaluate, "JSON.parse(localStorage.getItem('quest-board-qa-db'))['workshop_answers/meeting-final_colors_Leslie']?.pick === 'light'");
   await click('#council-pause');
   await waitFor(student, "document.getElementById('council-phase').textContent.startsWith('Paused')");
   assert.equal(await student("document.getElementById('council-submit').disabled"), true);
@@ -48,7 +48,7 @@ module.exports = async function councilTests({ page, evaluate, send, url, mock }
   // Seat choice is local storage on the same QA computer; explicitly restore the host.
   await click('[data-person="Katrina"]');
   await click('#council-start');
-  await evaluate("qaDB.doc('workshop_sessions/meeting-1').update({ deadline: Date.now() - 1000 })");
+  await evaluate("qaDB.doc('workshop_sessions/meeting-final').update({ deadline: Date.now() - 1000 })");
   await waitFor(student, "document.getElementById('council-phase').textContent.startsWith('Time is up')");
   assert.equal(await student("document.getElementById('council-submit').disabled"), true);
   await click('#council-extend');
@@ -67,7 +67,7 @@ module.exports = async function councilTests({ page, evaluate, send, url, mock }
   assert.equal(await student("document.getElementById('council-idea').value"), 'KEEP THIS DRAFT');
   await student('window.qaFailWrites=false');
   await click('#council-next');
-  await waitFor(student, "document.getElementById('council-question').textContent.includes('adapt to each player')");
+  await waitFor(student, "document.getElementById('council-question').textContent.includes('call our game')");
   await click('#council-start');
   await waitFor(student, "!document.getElementById('council-submit').disabled");
   await student("document.querySelector('input[value=own]').click(); document.getElementById('council-idea').value='A dragon lost its library card'; document.getElementById('council-submit').click()");
@@ -75,23 +75,23 @@ module.exports = async function councilTests({ page, evaluate, send, url, mock }
   await click('#council-reveal');
   await waitFor(evaluate, "document.getElementById('council-result-rows').textContent.includes('lost its library card')");
   // Free-text ideas and proposed commitments are retained without creating tasks.
-  await click('[data-round="5"]'); await click('#council-start');
-  await waitFor(student, "document.getElementById('council-question').textContent.includes('tiny detail')");
+  await click('[data-round="3"]'); await click('#council-start');
+  await waitFor(student, "document.getElementById('council-question').textContent.includes('proud of')");
   await waitFor(student, "!document.getElementById('council-submit').disabled");
   await student("document.getElementById('council-idea').value='<img src=x onerror=alert(1)> A polite dragon'; document.getElementById('council-submit').click()");
   await waitFor(evaluate, "document.getElementById('council-arrivals').textContent.includes('Leslie · sent')");
   await click('#council-reveal');
   assert.equal(await evaluate("document.querySelectorAll('#council-result-rows img').length"), 0, 'User text must not become HTML');
   await click('[data-round="7"]'); await click('#council-start');
-  await waitFor(student, "document.getElementById('council-question').textContent.includes('next time')");
+  await waitFor(student, "document.getElementById('council-question').textContent.includes('understand now')");
   await waitFor(student, "!document.getElementById('council-submit').disabled");
-  await student("document.getElementById('council-idea').value='Draft one useful hint'; document.getElementById('council-due').value='2026-10-30'; document.getElementById('council-submit').click()");
+  await student("document.getElementById('council-idea').value='Private means only the object can change it'; document.getElementById('council-submit').click()");
   await waitFor(evaluate, "document.getElementById('council-arrivals').textContent.includes('Leslie · sent')");
   await click('#council-reveal');
   assert.equal(await evaluate("Object.keys(JSON.parse(localStorage.getItem('quest-board-qa-db'))).filter(k=>k.startsWith('tasks/')).length"), 3);
   await evaluate("window.qaBrief=null; window.p9SaveText=async(name,text)=>{window.qaBrief=text;return true}; document.getElementById('council-export').click()");
   const brief = await evaluate('window.qaBrief');
-  assert.match(brief, /Draft one useful hint.*2026-10-30/);
+  assert.match(brief, /only the object can change it/);
   assert.match(brief, /Start with a worked example/);
   assert.match(brief, /No tasks were created automatically/);
   // Mood is now five tap targets (radio group) instead of a range slider.

@@ -4,80 +4,77 @@
   const $ = (id) => document.getElementById(id);
   const STUDENTS = ['Leslie', 'Sanjana', 'Shirley', 'Tvishaa'];
   const PEOPLE = [...STUDENTS, 'Katrina'];
-  const SESSION = 'meeting-1';
+  const SESSION = 'meeting-final';
   const ART = { gawain: '@ART:gawain@', odyssey: '@ART:odyssey@', beowulf: '@ART:beowulf@' };
-  // Only questions the team hasn't answered yet. Their earlier polls already chose the player
-  // (college, 4 of 4), the problem (personalized help + remembering) and the story (design deck).
+  // Final meeting (Sat Nov 14): wrap-up decisions for the showcase and the Devpost.
+  // Earlier rounds live in council.v1.js; their answers stay in the DB under session 'meeting-1'.
   const ROUNDS = [
-    { id: 'recall', label: 'Remember it', category: 'You voted: struggle to remember', seconds: 60,
-      question: 'How does our game help players remember?',
-      prompt: 'Your polls said remembering OOP is the hard part. Pick one way the game brings ideas back, then add your own spin.',
-      impact: 'What players carry out of each chamber, and what the Final Door asks.',
-      coach: 'Remind them this came from their own poll (Leslie ranked it #1). Keep it to one mechanic for the first version.',
+    { id: 'colors', label: 'Our colors', category: 'Make the art and the game match', seconds: 60,
+      question: 'Which look should our game have?',
+      prompt: 'Look at Shirley\u2019s light fall screens next to Tvishaa\u2019s drawings. Pick the look you want players to see.',
+      impact: 'The :root colors in style.css. Whoever owns it pushes by tonight, before Katrina merges.',
+      coach: 'Screenshare both side by side first. Praise both. This is about matching, not about whose is better.',
       options: [
-        ['cards', 'Keys are flashcards', 'Every key you win shows the idea you just used, and you keep them.', 'gawain'],
-        ['quiz', 'The warlock quizzes back', 'At the Final Door he re-asks one question from each chamber.', 'odyssey'],
-        ['book', 'A growing spell book', 'Each cracked puzzle adds its code to your spell book to review.', 'beowulf'] ] },
-    { id: 'personal', label: 'Your own path', category: 'You voted: personalized help', seconds: 60,
-      question: 'How does the game adapt to each player?',
-      prompt: '"Want personalized help" was the #1 problem for three of you. What is the smallest version we can build by Nov 12?',
-      impact: 'What "choose your difficulty" on the knight-select screen actually changes.',
-      coach: 'Steer toward the smallest version: one setting or one rule. No accounts, no AI calls, no saved progress.',
+        ['light', 'Keep the light fall look', 'Shirley\u2019s warm, soft colors stay as they are.', 'gawain'],
+        ['dark', 'Go darker, like the drawings', 'Darker bricks and shadows so the game matches Tvishaa\u2019s chambers.', 'odyssey'],
+        ['mix', 'Mix them', 'Shirley\u2019s layout and buttons, with colors picked from Tvishaa\u2019s drawings.', 'beowulf'] ] },
+    { id: 'name', label: 'Our name', category: 'Devpost \u00b7 project name', seconds: 60,
+      question: 'What do we call our game?',
+      prompt: 'Devpost needs a project name, 60 characters max. Pick one or write your own.',
+      impact: 'The project name on Devpost, the title screen and the video.',
+      coach: 'If it\u2019s a tie, read the top two out loud and revote fast.',
       options: [
-        ['levels', 'Pick your rank', 'Squire, Knight or Champion changes how many hints you get.', 'gawain'],
-        ['adaptive', 'Hints that adapt', 'Wrong twice? The next hint gets more specific.', 'odyssey'],
-        ['report', 'A weak-spot scroll', 'At the end, see which chamber tripped you up and what to review.', 'beowulf'] ] },
-    { id: 'hint', label: 'Our helping hand', category: 'Design for getting stuck', seconds: 60,
-      question: 'How does the castle help a stuck player?',
-      prompt: 'A hint should teach a step, not hand over the answer. What would help a college student new to OOP?',
-      impact: 'The wording of the hint and wrong-answer feedback.',
-      coach: 'Keep hints as text in the first version. Talking characters, audio and animation can wait.',
+        ['escape', 'Knight\u2019s Escape', 'Short and simple.', 'gawain'],
+        ['castle', 'Escape the Warlock\u2019s Castle', 'Says the story right away.', 'odyssey'],
+        ['quest', 'Knight\u2019s Escape: An OOP Quest', 'Says what you learn too.', 'beowulf'] ] },
+    { id: 'pitch', label: 'Our pitch', category: 'Devpost \u00b7 elevator pitch', seconds: 90,
+      question: 'Which tagline sounds most like us?',
+      prompt: 'One short line that tells a stranger what our game is. Pick one, then change any words you want.',
+      impact: 'The elevator pitch on Devpost, and the first thing we say at the showcase.',
+      coach: 'Read each one out loud. Ask: would you say this to a friend? Swap in their words.',
       options: [
-        ['guide', 'A friendly guide', 'A character asks a useful question: "Which part is the blueprint?"', 'gawain'],
-        ['clue', 'A clue in the room', 'A short inscription gives an example using a different object.', 'odyssey'],
-        ['explain', 'Explain the misstep', 'A wrong answer explains the confusion and invites another try.', 'beowulf'] ] },
-    { id: 'maze', label: 'The Maze', category: 'Make chamber 1 playable', seconds: 90,
-      question: 'What are the 5 turns in the Maze about?',
-      prompt: 'The design deck says: pick the right direction, multiple choice, 5 turns. What does each turn test?',
-      impact: 'The first five questions in rooms.js.',
-      coach: 'Ask: "What does a right answer prove the player understands?" Keep multiple-choice buttons; skip a live code editor.',
-      options: [
-        ['blueprint', 'Blueprint or object?', 'Each turn shows code; pick the path that names the class vs. the object.', 'gawain'],
-        ['trace', 'Follow the code', 'Trace a tiny Java snippet; each answer is a direction.', 'odyssey'],
-        ['repair', 'Spot the broken line', 'One direction has a bug in creating the Knight. Avoid it.', 'beowulf'] ] },
-    { id: 'warlock', label: 'Our warlock', category: 'Give the villain a voice', seconds: 60,
-      question: 'Who is the warlock, and why did he trap you?',
-      prompt: 'The story is yours already. Decide his personality, then write one line he says.',
-      impact: 'His opening speech and how he taunts you in each chamber.',
-      coach: 'Read every line out loud. Keep the funniest; it becomes the opening of the game.',
-      options: [
-        ['riddler', 'A bored riddle-lover', 'He traps knights because nobody plays his puzzles anymore.', 'gawain'],
-        ['failed', 'A knight who failed', 'He never escaped his own test and wants company.', 'odyssey'],
-        ['trickster', 'A sly trickster', 'He lies on purpose in the Hall of Illusions.', 'beowulf'] ] },
-    { id: 'twist', label: 'Our creative twist', category: 'Your signature move', seconds: 120,
-      question: 'What tiny detail could only come from us?',
-      prompt: 'Invent a funny character, room name, clue, line of dialogue or ending. Keep it small enough to draw or write today.',
-      impact: 'Student-authored story and visual details, not more required features.',
-      coach: 'Give quiet thinking time before anyone speaks. Read every idea. Combine ideas only with the authors\u2019 agreement.',
+        ['objects', 'Think in objects', '\u201cTrapped in a warlock\u2019s castle, the only way out is to think in objects. An escape room that makes OOP click.\u201d', 'gawain'],
+        ['doors', 'Every door is a concept', '\u201cA browser escape room where every locked door is an OOP concept. Learn classes, objects and encapsulation by escaping.\u201d', 'odyssey'],
+        ['ucf', 'By UCF Knights', '\u201cMade by UCF Knights for anyone who finds OOP confusing: solve the warlock\u2019s puzzles and escape the castle.\u201d', 'beowulf'] ] },
+    { id: 'about', label: 'Our story', category: 'Devpost \u00b7 About', seconds: 120,
+      question: 'Which part of the About will you write, and what are you proud of?',
+      prompt: 'Name one section: Inspiration, What it does, How we built it, Challenges, What we learned. Then finish: \u201cI built ___ and I\u2019m proud of it because ___.\u201d',
+      impact: 'The Devpost About. Everyone\u2019s proud line goes in Accomplishments.',
+      coach: 'Two people on one section is fine. The proud lines are the real material if Katrina submits.',
       free: true },
-    { id: 'proof', label: 'Proof it teaches', category: 'Bonus \u00b7 test the learning', seconds: 60, optional: true,
-      question: 'How will we know a player learned something?',
-      prompt: 'Your polls asked for "applying concepts to new problems." Choose one simple thing to watch during a playtest.',
-      impact: 'One check for an outside playtester, without building analytics.',
-      coach: 'Enjoyment surveys alone do not show learning. Ask for a small demonstration of understanding.',
+    { id: 'video', label: 'Our video', category: 'Devpost \u00b7 the video', seconds: 60,
+      question: 'How do we film our video?',
+      prompt: 'Short intro (\u201cOOP is so confusing\u2026 what if we made a game?\u201d), then zoom into the game. Where do we film it?',
+      impact: 'When and where we record, and who says which line.',
+      coach: 'Film horizontally. Gameplay is a screen recording, so it can be done at home either way.',
       options: [
-        ['explain', 'Explain it back', 'Ask the player to explain class versus object in their own words.', 'gawain'],
-        ['transfer', 'Try a fresh example', 'After the chamber, ask a similar question with different names.', 'odyssey'],
-        ['observe', 'Watch and ask why', 'Watch where they hesitate, then ask how they chose an answer.', 'beowulf'] ] },
-    { id: 'commitment', label: 'My next small win', category: 'Bonus \u00b7 turn ideas into action', seconds: 90, optional: true,
-      question: 'What can you show us next time?',
-      prompt: 'Name one small result you can own, when you can show it, and any help you need. It is okay to ask for a partner or a smaller task.',
-      impact: 'A proposed commitment to discuss and add to Tasks together.',
-      coach: 'Ask what fits their actual week. A proposed commitment is not an assigned task until the student and team agree.',
-      free: true, due: true }
+        ['home', 'Everyone at home', 'Each of us films our line on a phone. One person puts it together.', 'gawain'],
+        ['person', 'Together, in person', 'One laptop, one camera. Easiest for the zoom into the screen.', 'odyssey'],
+        ['both', 'Some of each', 'Intro lines at home, the zoom shot and gameplay together.', 'beowulf'] ] },
+    { id: 'thumbnail', label: 'Our thumbnail', category: 'Devpost \u00b7 the cover image', seconds: 30,
+      question: 'Who wants to design the thumbnail?',
+      prompt: 'The thumbnail is the picture people see first on Devpost. It should be our own art.',
+      impact: 'Who makes the Devpost cover image, and who helps.',
+      coach: 'More than one yes? Pair them up.',
+      options: [
+        ['me', 'I\u2019ll design it', 'I want to make the thumbnail.', 'gawain'],
+        ['help', 'I\u2019ll help', 'I can give ideas or draw a piece of it.', 'odyssey'],
+        ['pass', 'Not me this time', 'I\u2019ll help somewhere else.', 'beowulf'] ] },
+    { id: 'script', label: 'My video line', category: 'Bonus \u00b7 the video intro', seconds: 90, optional: true,
+      question: 'Write one line for the video intro.',
+      prompt: 'Something real you felt about learning OOP, like \u201cI don\u2019t even know where to start.\u201d Say it how you\u2019d actually say it.',
+      impact: 'The 5\u201315 second intro before we zoom into the game.',
+      coach: 'Read them all out loud. The funniest, most honest ones win.',
+      free: true },
+    { id: 'learned', label: 'What I learned', category: 'Bonus \u00b7 Devpost What we learned', seconds: 60, optional: true,
+      question: 'What\u2019s one OOP idea you understand now?',
+      prompt: 'One sentence, in your own words. Like: \u201cprivate means only the object can change it.\u201d',
+      impact: 'The \u201cWhat we learned\u201d section on Devpost.',
+      coach: 'Any answer counts. This is also what judges ask at the showcase.',
+      free: true }
   ];
   // Shared with the party screen (party.js), which runs the same rounds on a big screen + phones.
-  window.P9_ROUNDS = ROUNDS; window.P9_ART = ART;
+  window.P9_ROUNDS = ROUNDS; window.P9_ART = ART; window.P9_SESSION = SESSION;
 
   let person = '';
   try { person = JSON.parse(localStorage.getItem('p9-council-person')) || ''; } catch {}
@@ -165,7 +162,7 @@
   function buildQuestion() {
     const r = round();
     $('council-category').textContent = r.category;
-    $('council-number').textContent = r.optional ? 'Optional round · protect the build time' : `Round ${state.round + 1} of 6`;
+    $('council-number').textContent = r.optional ? 'Optional round · protect the build time' : `Round ${state.round + 1} of ${ROUNDS.filter((x) => !x.optional).length}`;
     $('council-question').textContent = r.question;
     $('council-prompt').textContent = r.prompt;
     $('council-impact').textContent = r.impact;
@@ -209,7 +206,7 @@
     $('council-start').textContent = state.phase === 'paused' ? 'Resume round' : state.phase === 'revealed' ? 'Reopen timed round' : 'Start round';
     $('council-pause').disabled = hostDisabled || !running;
     $('council-extend').disabled = hostDisabled || !['running', 'paused'].includes(state.phase);
-    $('council-next').textContent = state.round === 5 ? 'Finish core rounds ↓' : state.round === ROUNDS.length - 1 ? 'View our brief ↓' : 'Next round →';
+    $('council-next').textContent = state.round === ROUNDS.filter((x) => !x.optional).length - 1 ? 'Finish core rounds ↓' : state.round === ROUNDS.length - 1 ? 'View our brief ↓' : 'Next round →';
     $('council-submit').disabled = !canAnswer();
     $('council-submit').textContent = busy ? 'Saving…' : !person ? 'Pick your name first' : host() ? 'Host listens · students answer' : !connected() ? 'Waiting for shared connection' : canAnswer() ? savedAnswer() ? 'Update my answer' : 'Lock in my answer' : state.phase === 'paused' ? 'Round paused · draft kept' : 'Wait for the host to open';
     // Writing a draft is allowed while paused or closed. Only submission is gated.
@@ -313,7 +310,7 @@
   $('council-reveal').onclick = () => writeState({ phase: 'revealed', remaining: secondsLeft(), deadline: 0, revealed: [...new Set([...state.revealed, round().id])] });
   $('council-catchup').onclick = () => writeState({ phase: 'catchup', deadline: 0 });
   $('council-next').onclick = () => {
-    if (state.round === 5 || state.round === ROUNDS.length - 1) $('council-brief-title').scrollIntoView({ behavior: 'instant', block: 'center' });
+    if (state.round === ROUNDS.filter((x) => !x.optional).length - 1 || state.round === ROUNDS.length - 1) $('council-brief-title').scrollIntoView({ behavior: 'instant', block: 'center' });
     else chooseRound(state.round + 1);
   };
   $('council-decision').onsubmit = async (event) => {
@@ -329,14 +326,14 @@
     finally { busy = false; render(); }
   };
   $('council-export').onclick = () => {
-    const lines = ["Knight's Escape — Meeting 1", rehearsal ? 'LOCAL REHEARSAL — not shared team decisions' : 'Working brief — confirm with missing teammates', ''];
+    const lines = ["Knight's Escape — Final meeting (Sat Nov 14)", rehearsal ? 'LOCAL REHEARSAL — not shared team decisions' : 'Working brief — confirm with missing teammates', ''];
     ROUNDS.forEach((r) => {
       const entry = briefEntry(r); lines.push(entry.heading, entry.body, entry.detail);
       if (revealed(r.id)) roundAnswers(r).forEach((a) => lines.push(`- ${a.name}: ${answerLabel(r, a)}${a.idea && !r.free && a.pick !== 'own' ? ' — ' + a.idea : ''}${a.due ? ' · Can show: ' + a.due : ''}`));
       lines.push('');
     });
-    lines.push('Next: 18-minute build sprint, then agree on one small task per student with a date. No tasks were created automatically.');
-    window.p9SaveText(rehearsal ? 'meeting-1-rehearsal.txt' : 'meeting-1-working-brief.txt', lines.join('\n'));
+    lines.push('Next: Katrina merges Sun to Tue (Nov 15 to 17). Devpost due Wed Nov 18, 11:45pm. Showcase Thu Nov 19, 6pm, HEC 119. No tasks were created automatically.');
+    window.p9SaveText(rehearsal ? 'final-meeting-rehearsal.txt' : 'final-meeting-brief.txt', lines.join('\n'));
   };
   $('council-rehearse').onclick = () => {
     rehearsal = true; person = 'Katrina';
