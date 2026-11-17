@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Devpost thumbnails</title>
+<!-- Five Devpost cover options, 1200x800 (3:2, what Devpost asks for).
+     Render one with: chrome --headless --screenshot --window-size=1200,800 "thumbs.html#3"
+     Art: Tvishaa's castle door, maze and alchemy lab drawings (board/art). Fonts are open (OFL) Google Fonts,
+     because Beanzo is personal-use only and Devpost is public. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Grenze+Gotisch:wght@600;800&family=IBM+Plex+Mono:wght@500;600&display=block" rel="stylesheet">
+<style>
+:root {
+  --night: #120d09;
+  --wood: #1d1712;
+  --parch: #f3e6cf;
+  --parch-2: #c9b79e;
+  --torch: #ffc21a;
+  --torch-soft: #ffd77a;
+  --moss: #8fc45a;
+  --title: "Grenze Gotisch", "Times New Roman", serif;
+  --body: "Atkinson Hyperlegible", "Times New Roman", serif;
+  --mono: "IBM Plex Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1200px; height: 800px; overflow: hidden; background: var(--night); }
+.opt { display: none; position: relative; width: 1200px; height: 800px; overflow: hidden; font-family: var(--body); color: var(--parch); }
+.opt.on { display: block; }
+.title { font-family: var(--title); font-weight: 800; color: var(--torch-soft); line-height: .92; letter-spacing: .5px;
+  text-shadow: 0 2px 0 #3a1d00, 0 6px 24px rgba(10, 5, 0, .85); }
+.sub { font-family: var(--title); font-weight: 600; color: var(--parch); }
+.credit { font-family: var(--body); font-weight: 700; font-size: 22px; color: var(--parch-2); letter-spacing: .3px; }
+.art { position: absolute; background: url("../../board/art/tvishaa-door.jpg") center / cover no-repeat; }
+
+/* 1. The door, full frame. Title over the bricks, pitch on the floor. Just GWC. */
+#o1 .art { inset: 0; background-position: center 30%; }
+#o1 .scrim { position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(14,8,4,.92) 0%, rgba(14,8,4,.55) 26%, rgba(14,8,4,0) 44%, rgba(14,8,4,0) 70%, rgba(14,8,4,.88) 100%); }
+#o1 .title { position: absolute; top: 34px; left: 0; right: 0; text-align: center; font-size: 132px; }
+#o1 .sub { position: absolute; top: 166px; left: 0; right: 0; text-align: center; font-size: 50px; }
+#o1 .pitch { position: absolute; bottom: 40px; left: 0; right: 0; text-align: center; font-size: 38px; font-weight: 700; color: var(--parch); }
+#o1 .credit { position: absolute; bottom: 50px; right: 40px; font-size: 18px; }
+
+/* 2. Split: the name on dark wood, the door framed on the right. UCF + GWC. */
+#o2 { background: radial-gradient(120% 90% at 0% 0%, #2a1f16 0%, var(--night) 70%); }
+#o2 .art { top: 56px; right: 56px; width: 560px; height: 688px; background-size: cover; background-position: center;
+  border-radius: 6px; box-shadow: 0 0 0 1px rgba(255, 194, 26, .35), 0 30px 60px -20px rgba(0,0,0,.8); }
+#o2 .text { position: absolute; left: 72px; top: 0; bottom: 0; width: 520px; display: flex; flex-direction: column; justify-content: center; }
+#o2 .title { font-size: 150px; }
+#o2 .sub { font-size: 56px; margin-top: 14px; }
+#o2 .rule { width: 96px; height: 2px; background: var(--torch); opacity: .7; margin: 34px 0 30px; }
+#o2 .pitch { font-size: 32px; font-weight: 700; line-height: 1.25; color: var(--parch); max-width: 460px; }
+#o2 .credit { position: absolute; left: 72px; bottom: 56px; }
+
+/* 3. new Knight().escape(): the door with one line of Java on the floor. GWC. */
+#o3 .art { inset: 0; background-position: center 30%; }
+#o3 .scrim { position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(14,8,4,.9) 0%, rgba(14,8,4,.4) 24%, rgba(14,8,4,0) 40%, rgba(14,8,4,0) 66%, rgba(14,8,4,.75) 100%); }
+#o3 .title { position: absolute; top: 30px; left: 0; right: 0; text-align: center; font-size: 120px; }
+#o3 .sub { position: absolute; top: 150px; left: 0; right: 0; text-align: center; font-size: 44px; }
+#o3 .code { position: absolute; left: 50%; bottom: 52px; transform: translateX(-50%); white-space: nowrap;
+  font-family: var(--mono); font-weight: 600; font-size: 46px; color: var(--parch);
+  padding: 14px 30px; border-radius: 10px; background: rgba(12, 8, 5, .82); box-shadow: 0 0 0 1px rgba(255,194,26,.35); }
+#o3 .code .k { color: var(--torch); } #o3 .code .m { color: var(--moss); }
+#o3 .credit { position: absolute; top: 38px; right: 40px; font-size: 18px; }
+
+/* 4. The quest: the door big, two more chambers beside it. UCF + GWC. */
+#o4 { background: var(--night); }
+#o4 .art { top: 0; left: 0; width: 780px; height: 800px; background-position: center 40%; }
+#o4 .scrim { position: absolute; top: 0; left: 0; width: 780px; height: 800px;
+  background: linear-gradient(180deg, rgba(14,8,4,0) 50%, rgba(14,8,4,.92) 100%); }
+#o4 .title { position: absolute; left: 44px; bottom: 98px; font-size: 112px; }
+#o4 .sub { position: absolute; left: 48px; bottom: 44px; font-size: 44px; }
+#o4 .side { position: absolute; top: 0; right: 0; width: 420px; height: 800px; padding: 28px 28px 28px 24px;
+  display: grid; grid-template-rows: 1fr 1fr; gap: 24px; }
+#o4 .tile { position: relative; border-radius: 6px; overflow: hidden; background-size: cover; background-position: center;
+  box-shadow: 0 0 0 1px rgba(255,194,26,.3); }
+#o4 .tile span { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 18px 14px; font-weight: 700; font-size: 24px;
+  background: linear-gradient(180deg, rgba(14,8,4,0), rgba(14,8,4,.9)); }
+#o4 .tile small { display: block; font-size: 18px; font-weight: 400; color: var(--parch-2); }
+#o4 .maze { background-image: url("../../board/art/tvishaa-maze.jpg"); }
+#o4 .lab { background-image: url("../../board/art/tvishaa-lab.jpg"); }
+#o4 .credit { position: absolute; left: 48px; top: 36px; font-size: 18px; color: var(--parch);
+  padding: 6px 12px; border-radius: 6px; background: rgba(14,8,4,.7); }
+
+/* 5. Torchlit: the whole door small in a dark hall, the name big. No logos. */
+#o5 { background: radial-gradient(60% 70% at 50% 36%, #3b2614 0%, #1a110a 55%, var(--night) 100%); }
+#o5 .art { top: 52px; left: 50%; width: 600px; height: 446px; margin-left: -300px; border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(255,194,26,.25), 0 0 120px 10px rgba(255, 170, 60, .18), 0 40px 60px -30px rgba(0,0,0,.9); }
+#o5 .title { position: absolute; left: 0; right: 0; top: 534px; text-align: center; font-size: 136px; }
+#o5 .sub { position: absolute; left: 0; right: 0; top: 676px; text-align: center; font-size: 50px; }
+</style>
+</head>
+<body>
+
+<section class="opt" id="o1">
+  <div class="art"></div><div class="scrim"></div>
+  <h1 class="title">Knight’s Escape</h1>
+  <p class="sub">An OOP Quest</p>
+  <p class="pitch">Every door is a concept.</p>
+  <p class="credit">Girls Who Code</p>
+</section>
+
+<section class="opt" id="o2">
+  <div class="text">
+    <h1 class="title">Knight’s<br>Escape</h1>
+    <p class="sub">An OOP Quest</p>
+    <div class="rule"></div>
+    <p class="pitch">Every locked door is an OOP concept. Escape the warlock’s castle by thinking in objects.</p>
+  </div>
+  <p class="credit">UCF Knights · Girls Who Code</p>
+  <div class="art"></div>
+</section>
+
+<section class="opt" id="o3">
+  <div class="art"></div><div class="scrim"></div>
+  <h1 class="title">Knight’s Escape</h1>
+  <p class="sub">An OOP Quest</p>
+  <p class="code"><span class="k">new</span> Knight().<span class="m">escape</span>();</p>
+  <p class="credit">Girls Who Code</p>
+</section>
+
+<section class="opt" id="o4">
+  <div class="art"></div><div class="scrim"></div>
+  <p class="credit">UCF Knights · Girls Who Code</p>
+  <h1 class="title">Knight’s Escape</h1>
+  <p class="sub">An OOP Quest</p>
+  <div class="side">
+    <div class="tile maze"><span>LabyrinthLearn<small>Classes and objects</small></span></div>
+    <div class="tile lab"><span>The Alchemy Lab<small>Methods and encapsulation</small></span></div>
+  </div>
+</section>
+
+<section class="opt" id="o5">
+  <div class="art"></div>
+  <h1 class="title">Knight’s Escape</h1>
+  <p class="sub">An OOP Quest</p>
+</section>
+
+<script>
+  const n = (location.hash || "#1").slice(1);
+  document.getElementById("o" + n).classList.add("on");
+</script>
+</body>
+</html>

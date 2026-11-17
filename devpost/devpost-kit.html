@@ -1,0 +1,336 @@
+<title>Knight's Escape Devpost</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Grenze+Gotisch:wght@700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: one reading column; the cover options get a wider grid. Single dark "lantern-lit" theme, same as the team board. */
+:root {
+  --night: #14100d;
+  --wood: #1d1712;
+  --wood-2: #261e18;
+  --line: rgba(246, 232, 207, .10);
+  --parch: #f3e6cf;
+  --parch-2: #c9b79e;
+  --parch-3: #a8977f;
+  --torch: #ffc21a;
+  --torch-soft: #ffd77a;
+  --on-torch: #2a1300;
+  --display: "Grenze Gotisch", "Times New Roman", serif;
+  --body: "Atkinson Hyperlegible", "Times New Roman", Times, serif;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--night); color: var(--parch); font-family: var(--body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 80px; }
+main { max-width: 1040px; margin: 0 auto; display: grid; gap: 56px; }
+.read { max-width: 720px; }
+h1, h2 { font-family: var(--display); font-weight: 800; color: var(--torch-soft); line-height: 1.05; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(44px, 8vw, 72px); }
+h2 { font-size: clamp(32px, 5vw, 44px); }
+h3 { font-size: 20px; margin: 0; }
+p { margin: 0; }
+a { color: var(--torch-soft); }
+code { font-family: Consolas, "Courier New", monospace; font-size: .92em; background: var(--wood-2); padding: 1px 6px; border-radius: 4px; }
+.lede { font-size: 20px; color: var(--parch-2); margin-top: 14px; max-width: 680px; }
+.due { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 18px; color: var(--parch-2); }
+.due b { color: var(--parch); }
+section { display: grid; gap: 20px; }
+.sec-intro { color: var(--parch-2); max-width: 720px; }
+
+/* Vote table */
+.table-wrap { overflow-x: auto; border-radius: 10px; box-shadow: 0 0 0 1px var(--line); }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 16px; }
+th, td { text-align: left; padding: 12px 16px; vertical-align: top; border-bottom: 1px solid var(--line); }
+th { color: var(--parch-3); font-weight: 700; background: var(--wood); }
+tr:last-child td { border-bottom: 0; }
+td b { color: var(--parch); }
+td.won { color: var(--torch-soft); font-weight: 700; white-space: nowrap; }
+td small { color: var(--parch-3); font-size: 15px; }
+
+/* Cover options */
+.covers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+.cover { display: grid; gap: 10px; align-content: start; }
+.cover.pick { grid-column: 1 / -1; }
+.cover img { width: 100%; height: auto; aspect-ratio: 3 / 2; border-radius: 8px; display: block; box-shadow: 0 0 0 1px var(--line), 0 18px 36px -20px rgba(5,3,2,.9); }
+.cover.pick img { box-shadow: 0 0 0 2px var(--torch), 0 18px 36px -20px rgba(5,3,2,.9); }
+.cover-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.tag { font-size: 14px; font-weight: 700; color: var(--on-torch); background: var(--torch); border-radius: 999px; padding: 2px 10px; }
+.cover p { color: var(--parch-2); font-size: 16px; }
+.small-check { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+.small-check figure { margin: 0; display: grid; gap: 6px; }
+.small-check img { width: 200px; max-width: 100%; aspect-ratio: 3 / 2; border-radius: 4px; display: block; }
+.small-check figcaption { font-size: 14px; color: var(--parch-3); }
+.note { color: var(--parch-2); font-size: 16px; max-width: 720px; }
+
+/* Post fields */
+.field { background: var(--wood); border-radius: 10px; box-shadow: 0 0 0 1px var(--line); padding: 20px 22px; display: grid; gap: 12px; min-width: 0; }
+.field-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.field-head span { color: var(--parch-3); font-size: 15px; }
+.field .md { display: grid; gap: 12px; max-width: 70ch; }
+.md h4 { font-size: 19px; margin: 8px 0 0; color: var(--parch); }
+.md ul { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.md blockquote { margin: 0; padding-left: 14px; border-left: 1px solid var(--torch); color: var(--parch); font-style: italic; }
+.md .ask { color: var(--torch-soft); font-style: normal; font-weight: 700; }
+button.copy { font: 700 15px var(--body); color: var(--on-torch); background: var(--torch); border: 0; border-radius: 8px; padding: 8px 16px; cursor: pointer;
+  transition: transform 160ms var(--ease-out), opacity 160ms var(--ease-out); }
+button.copy:active { transform: scale(.97); }
+button.copy:focus-visible { outline: 2px solid var(--parch); outline-offset: 2px; }
+button.copy.ghost { background: transparent; color: var(--torch-soft); box-shadow: inset 0 0 0 1px rgba(255,194,26,.5); }
+.fields { display: grid; gap: 16px; }
+
+/* Checklist */
+ol.todo { margin: 0; padding-left: 24px; display: grid; gap: 10px; max-width: 760px; }
+ol.todo b { color: var(--parch); }
+.credits { color: var(--parch-3); font-size: 15px; max-width: 760px; }
+
+@media (max-width: 640px) {
+  body { font-size: 16px; padding-block: 24px 56px; }
+  .covers { grid-template-columns: minmax(0, 1fr); }
+  .field { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { button.copy { transition: none; } }
+</style>
+
+<main>
+  <header>
+    <h1>Knight’s Escape on Devpost</h1>
+    <p class="lede">Everything for the submission, built from what Leslie, Sanjana, Shirley and Tvishaa voted for in the final Council. All four have answered now, so the ties are settled.</p>
+    <div class="due"><span>Devpost due <b>Wed Nov 18, 11:45pm</b></span><span>Showcase <b>Thu Nov 19, 6pm, HEC 119</b></span></div>
+  </header>
+
+  <section>
+    <h2>What the team picked</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Round</th><th>Result</th><th>Votes</th></tr></thead>
+        <tbody>
+          <tr><td>Name</td><td class="won">Knight’s Escape: An OOP Quest</td><td>3 of 4 <small>· Shirley picked Escape the Warlock’s Castle</small></td></tr>
+          <tr><td>Pitch</td><td class="won">Every door is a concept</td><td>2 <small>(Leslie, Shirley)</small> · By UCF Knights 1 <small>(Sanjana)</small> · Think in objects 1 <small>(Tvishaa)</small></td></tr>
+          <tr><td>Colors</td><td class="won">Tvishaa’s drawings</td><td>4 of 4 <small>· Shirley’s page animations stay</small></td></tr>
+          <tr><td>Thumbnail star</td><td class="won">The castle door</td><td>3 of 4 <small>· Leslie picked a knight vs. the warlock</small></td></tr>
+          <tr><td>Logos</td><td class="won">GWC yes, UCF split</td><td>UCF + GWC 2 <small>(Leslie, Tvishaa)</small> · Just GWC 1 <small>(Sanjana)</small> · None 1 <small>(Shirley)</small></td></tr>
+          <tr><td>Who designs it</td><td class="won">Shirley will help</td><td><small>Leslie, Sanjana and Tvishaa passed</small></td></tr>
+          <tr><td>Video</td><td class="won">Record at home</td><td>3 of 4 <small>· Tvishaa picked in person</small></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Five cover options</h2>
+    <p class="sec-intro">Every option uses the castle door, Tvishaa’s dark colors, the winning name, and an open-license font (Beanzo is personal use only, and Devpost is public). They differ in layout and in which logo vote they follow. All are 1200 × 800, the 3:2 shape Devpost asks for.</p>
+    <div class="covers">
+      <article class="cover pick">
+        <img src="option-1.png" alt="Option 1: Tvishaa's castle door fills the frame. Knight's Escape in gold blackletter over the arch, An OOP Quest under it, and Every door is a concept on the floor, with a small Girls Who Code credit." loading="lazy">
+        <div class="cover-head"><h3>1. The door</h3><span class="tag">My pick</span></div>
+        <p>Exactly what the winning card said: “Tvishaa’s door, with our name over it.” The winning pitch sits on the floor. Small Girls Who Code credit, which 3 of 4 wanted.</p>
+      </article>
+      <article class="cover">
+        <img src="option-2.png" alt="Option 2: the name stacked large on dark wood at left with the pitch under it and a UCF Knights and Girls Who Code credit; the door framed on the right." loading="lazy">
+        <h3>2. Name and door</h3>
+        <p>The easiest to read when Devpost shows it small. Fits the full pitch. Credits UCF Knights and Girls Who Code (the top logo vote, 2 of 4).</p>
+      </article>
+      <article class="cover">
+        <img src="option-3.png" alt="Option 3: the door full frame with the name on top and one line of Java on the floor: new Knight().escape();" loading="lazy">
+        <h3>3. new Knight().escape();</h3>
+        <p>One line of Java on the floor says “code” at a glance, and it’s an object being made with <code>new</code>. Just GWC.</p>
+      </article>
+      <article class="cover">
+        <img src="option-4.png" alt="Option 4: the door large on the left with the name at the bottom; on the right, Tvishaa's maze labeled LabyrinthLearn, classes and objects, and her alchemy lab labeled methods and encapsulation." loading="lazy">
+        <h3>4. The quest</h3>
+        <p>Shows more of Tvishaa’s art and what each chamber teaches. Busier at small sizes. UCF Knights and Girls Who Code.</p>
+      </article>
+      <article class="cover">
+        <img src="option-5.png" alt="Option 5: the whole door drawing, uncropped, glowing in a dark hall, with Knight's Escape and An OOP Quest large underneath. No logos." loading="lazy">
+        <h3>5. Torchlit</h3>
+        <p>The whole drawing, uncropped and sharpest. No logos, for Shirley’s “cleaner” vote.</p>
+      </article>
+    </div>
+    <div class="small-check" aria-label="Options 1, 2 and 5 at the size Devpost shows in its gallery">
+      <figure><img src="option-1.png" alt=""><figcaption>1 at gallery size</figcaption></figure>
+      <figure><img src="option-2.png" alt=""><figcaption>2 at gallery size</figcaption></figure>
+      <figure><img src="option-5.png" alt=""><figcaption>5 at gallery size</figcaption></figure>
+    </div>
+    <p class="note">The logos are written as text. If the showcase rules allow the real GWC or UCF logo, swap it in for the text in the same spot. Leslie’s knight-vs-warlock idea would need a new hand drawing, so it isn’t here. Tvishaa’s original door file would make every option a little sharper; the board copy is 768 pixels wide.</p>
+  </section>
+
+  <section>
+    <h2>A gallery image: how we grew</h2>
+    <p class="sec-intro">Devpost lets you add images after the thumbnail. This one comes from the board’s check-ins and Council votes. It shows team averages only, so nobody’s own ratings are public.</p>
+    <div class="cover"><img src="growth.png" alt="How our team grew. Bar chart of teammates at each meeting: 2, 2 and 2 at the first three, all 4 on Oct 31, then 3 and 3. Line chart of average OOP comfort: 2.5 on Oct 24, 3.0, 4.0 on Nov 8, 3.7 on Nov 14. Stats: average OOP comfort 2.5 to 3.75; 28 of 56 Council answers came from catch-up; 4 Council ideas are in the game." loading="lazy"></div>
+  </section>
+
+  <section>
+    <h2>The post</h2>
+    <p class="sec-intro">A draft in the team’s voice, field by field, in the order Devpost asks. Devpost’s About box takes Markdown, so the Copy buttons copy it that way. The <span style="color:var(--torch-soft);font-weight:700">[gold brackets]</span> are spots to confirm with the girls.</p>
+    <div class="fields" id="fields"></div>
+  </section>
+
+  <section>
+    <h2>Before you submit</h2>
+    <ol class="todo">
+      <li><b>Leslie:</b> her proud line says “I built the ... level.” I filled in the Alchemy Lab, where her encapsulation step is. Check with her.</li>
+      <li><b>Tvishaa:</b> she wrote “I don’t get what this question is asking.” Ask her to finish: “I drew ___ and I’m proud of it because ___.”</li>
+      <li><b>Sanjana</b> asked to write Challenges. Send her that section to change however she wants.</li>
+      <li><b>Shirley</b> said she’d help with the thumbnail. She could pick the option or adjust one.</li>
+      <li><b>Describe the merged game only.</b> Flashcard keys and wrong-answer hints are on Sanjana’s branch; the escape screen and new Alchemy steps are on Leslie’s. After the merge, play it once and cut anything that didn’t make it.</li>
+      <li><b>The warlock’s name:</b> Ravencroft won the poll (2 of 3 votes). If it’s in the game by Wednesday, use it in “What it does.”</li>
+      <li><b>Video:</b> recorded at home, filmed sideways. Devpost wants a YouTube or Vimeo link.</li>
+      <li><b>A play link (optional):</b> turn on GitHub Pages for the group9 repo (Settings, Pages, branch 1.0) so judges can play at kateye31.github.io/group9.</li>
+    </ol>
+    <p class="credits">Numbers: the board’s database, students only, pulled Nov 17, 2026 (12 check-ins over 4 meetings, attendance for 6 meetings, 56 Council answers) and the group9 repo’s commit history. Art by Tvishaa.</p>
+  </section>
+</main>
+
+<script type="text/markdown" data-label="Project name" data-limit="60 characters max">
+Knight's Escape: An OOP Quest
+</script>
+<script type="text/markdown" data-label="Elevator pitch" data-limit="200 characters max">
+A browser escape room where every locked door is an OOP concept. Learn classes, objects and encapsulation by escaping.
+</script>
+<script type="text/markdown" data-label="About: Inspiration">
+## Inspiration
+OOP is confusing at first. Class, object, `new`, `private`: the words don't mean much until something clicks. When we started this project, most of us were brand new to GitHub, VS Code and OOP too. So we asked: what if learning it felt like breaking out of a castle?
+
+Sanjana researched how people remember what they learn, and we voted on what to build from it. That's why the keys you earn are flashcards, the hints explain why an answer is wrong, and the ending tells you which chamber to review.
+</script>
+<script type="text/markdown" data-label="About: What it does">
+## What it does
+A warlock has locked you in his dungeon. Pick your knight (Sir Byte, Dame Loop or Sir Null) and a difficulty: Squire, Knight or Champion. Beginners get more hints. Then escape through four chambers, each built around one OOP idea:
+
+- **LabyrinthLearn:** classes and objects. Five turns in a maze, and the right answer is the right direction.
+- **The Alchemy Lab:** methods and return values. Read each potion's code and guess what it prints. The words join into a spell, and the last potion hides its word inside a class with `private` (encapsulation).
+- **The Hall of Illusions:** inheritance and polymorphism. Three doors look alike, but only one has correct code.
+- **The Final Door:** explain it in your own words. Each answer earns a key, and three keys open the door.
+
+Every puzzle uses real Java code. Pick wrong and the warlock taunts you, and the hint tells you why that answer was wrong. When you escape, the game shows the chamber that gave you the most trouble, so you know what to review.
+</script>
+<script type="text/markdown" data-label="About: How we built it">
+## How we built it
+Knight's Escape is plain HTML, CSS and JavaScript, with no frameworks and nothing to install: open `index.html` in any browser. We started from a small starter game our mentor set up and made it ours. All the puzzles live as data in `rooms.js`, so adding a maze turn never means touching the game logic in `game.js`.
+
+- **Tvishaa** wrote the design roadmap (a warlock and four chambers) and drew the chambers: the castle door, the maze and the alchemy lab.
+- **Shirley** styled the game in `style.css` and made the page animations.
+- **Leslie** wrote new Alchemy Lab steps, including the encapsulation step, renamed the maze to LabyrinthLearn, and built the escape screen.
+- **Sanjana** researched how to teach OOP, wrote maze turns 3 to 5, and built the flashcard keys and the hints that explain mistakes.
+
+Each of us worked on her own GitHub branch, and our mentor merged them. We met on Saturdays and kept everything on a team board:
+
+- **A 20-second check-in** at each meeting: our mood, and how comfortable we felt with GitHub, VS Code and OOP from 1 to 5.
+- **Tasks that say where to start** (which file, what to search for) and what done looks like.
+- **The Council,** a party game for team decisions. Everyone answers on her phone and the answers are revealed together, so every voice counts the same. Missed a meeting? Catch-up mode lets you answer later.
+- **Wednesday check-ins on Discord** between meetings.
+</script>
+<script type="text/markdown" data-label="About: Challenges we ran into" data-limit="Sanjana asked to write this one">
+## Challenges we ran into
+- **Everything was new at once.** GitHub, VS Code and OOP, all in a few weeks. We broke the work into small tasks with numbered steps, and used a help button that gives hints before answers when we got stuck.
+- **Busy schedules.** Only 2 of us made each of our first three meetings. Catch-up mode meant missing a meeting didn't mean missing the decision: half of all our Council answers (28 of 56) came from teammates catching up.
+- **Two looks for one game.** Tvishaa's dark chamber drawings and Shirley's light fall colors were both good. We voted 4 to 0 for the drawings, and Shirley's page animations stayed in.
+- **Four branches, one game.** We each built on our own branch, so the last step was merging everything into one working game.
+</script>
+<script type="text/markdown" data-label="About: Accomplishments that we're proud of">
+## Accomplishments that we're proud of
+- A working escape room with four chambers that teaches real OOP.
+- Every one of us answered every Council round: 14 rounds, 56 answers. Four of our ideas are in the game: the LabyrinthLearn name, flashcard keys, hints that explain mistakes, and the weak-spot review at the end.
+- Oct 31 was our first meeting with all four of us there.
+
+In our own words:
+
+> "I built the [Alchemy Lab] level using encapsulation and I am proud of learning it." (Leslie)
+
+> "I'm proud that my outcome was successful." (Sanjana)
+
+> "Proud of how it all turned out!" (Shirley)
+
+> "[Tvishaa's line]" (Tvishaa)
+</script>
+<script type="text/markdown" data-label="About: What we learned">
+## What we learned
+**OOP.** We rated our comfort with OOP at every check-in. The team average went from 2.5 to 3.75 out of 5, from each person's first check-in to her latest, and everyone who checked in more than once ended higher than she started. The game is what we learned:
+
+- A class is a blueprint. An object is one thing built from it with `new`.
+- A method can return a value, and `private` keeps a field inside its object so only a method like `getTask()` can hand it out. That's encapsulation.
+- `extends` lets a Wizard reuse everything a Character has, and polymorphism means the same call runs the real object's version.
+
+**How to communicate as a team.** Saying when you can't make it. Checking in every week, even when the answer is "meh." Voting so every voice counts, including the people who weren't in the room. Our average mood at check-ins went from 2.5 to 4.0 out of 5 over the project.
+
+**Playing our own game.** Testing is part of building. On Oct 31, some of us had played our game once or never. By Nov 14, everyone who checked in had played it at least 2 or 3 times.
+
+**Git and GitHub.** Branches, commits, pushes and pull requests. We made 16 commits from our own accounts.
+</script>
+<script type="text/markdown" data-label="About: What's next for Knight's Escape">
+## What's next for Knight's Escape: An OOP Quest
+- **The pegasus ending** (Sanjana's idea): get enough answers right and your knight escapes on a pegasus.
+- **Play again** (Leslie's idea): go back through the dungeon after you escape.
+- **Timers and cheers** (Shirley's idea): a timer that changes with difficulty, and cute positive notes when you finish a chamber.
+- **Remember past games** (Tvishaa's idea): save your progress so it's still there next time.
+- **Playtests** with classmates outside our team, and putting the game online so anyone can play.
+</script>
+<script type="text/markdown" data-label="Built with" data-limit="Type each one into Devpost's tag box">
+html5, css3, javascript, git, github, visual-studio-code, discord
+</script>
+<script type="text/markdown" data-label="Try it out links">
+https://github.com/kateye31/group9
+</script>
+
+<script>
+(() => {
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const inline = (s) => esc(s)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+    .replace(/\[([^\]]+)\]/g, '<span class="ask">[$1]</span>');
+  // A tiny Markdown renderer for the few things the post uses: ## headings, - lists, > quotes, **bold**, `code`.
+  function render(md) {
+    const out = []; let list = null;
+    for (const block of md.trim().split(/\n\s*\n/)) {
+      const lines = block.split("\n");
+      if (lines.every((l) => l.startsWith("- "))) { out.push("<ul>" + lines.map((l) => "<li>" + inline(l.slice(2)) + "</li>").join("") + "</ul>"); continue; }
+      if (lines[0].startsWith("## ")) { out.push("<h4>" + inline(lines[0].slice(3)) + "</h4>"); if (lines.length > 1) out.push("<p>" + inline(lines.slice(1).join(" ")) + "</p>"); continue; }
+      if (lines[0].startsWith("> ")) { out.push("<blockquote>" + inline(lines.map((l) => l.replace(/^> /, "")).join(" ")) + "</blockquote>"); continue; }
+      out.push("<p>" + inline(lines.join(" ")) + "</p>");
+    }
+    return out.join("");
+  }
+  async function copyText(text, btn) {
+    const label = btn.textContent;
+    try { await navigator.clipboard.writeText(text); btn.textContent = "Copied"; }
+    catch (e) {
+      // Fallback: select the text so Ctrl+C works
+      const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); btn.textContent = "Copied"; } catch (_) { btn.textContent = "Press Ctrl+C"; }
+      setTimeout(() => ta.remove(), 4000);
+    }
+    setTimeout(() => { btn.textContent = label; }, 1600);
+  }
+  const host = document.getElementById("fields");
+  const blocks = [...document.querySelectorAll('script[type="text/markdown"]')];
+  const about = blocks.filter((b) => b.dataset.label.startsWith("About")).map((b) => b.textContent.trim()).join("\n\n");
+  blocks.forEach((b, i) => {
+    const md = b.textContent.trim();
+    const card = document.createElement("article"); card.className = "field";
+    const head = document.createElement("div"); head.className = "field-head";
+    const h = document.createElement("h3"); h.textContent = b.dataset.label;
+    const meta = document.createElement("span");
+    const len = md.length;
+    meta.textContent = b.dataset.limit ? (b.dataset.limit.includes("characters") ? `${len} characters · ${b.dataset.limit}` : b.dataset.limit) : "";
+    const left = document.createElement("div"); left.append(h, meta); left.style.display = "grid"; left.style.gap = "2px";
+    const btn = document.createElement("button"); btn.className = "copy"; btn.type = "button"; btn.id = "copy-" + i; btn.textContent = "Copy";
+    btn.onclick = () => copyText(md, btn);
+    head.append(left, btn);
+    const body = document.createElement("div"); body.className = "md"; body.innerHTML = render(md);
+    card.append(head, body);
+    if (b.dataset.label === "About: Inspiration") {
+      const all = document.createElement("article"); all.className = "field";
+      all.innerHTML = '<div class="field-head"><div style="display:grid;gap:2px"><h3>About: the whole thing</h3><span>All seven sections at once, for Devpost’s one About box</span></div></div>';
+      const b2 = document.createElement("button"); b2.className = "copy ghost"; b2.type = "button"; b2.id = "copy-all"; b2.textContent = "Copy all of About";
+      b2.onclick = () => copyText(about, b2);
+      all.querySelector(".field-head").append(b2);
+      host.append(all);
+    }
+    host.append(card);
+  });
+})();
+</script>

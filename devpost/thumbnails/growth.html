@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How we grew</title>
+<!-- Devpost gallery image, 1200x800. Numbers come from the board's database (checkins, workshop_sessions,
+     workshop_answers), students only, pulled Nov 17, 2026. Team averages only: no one's own ratings. -->
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Grenze+Gotisch:wght@800&display=block" rel="stylesheet">
+<style>
+:root { --night: #120d09; --panel: #1d1712; --line: rgba(246,232,207,.10); --parch: #f3e6cf; --parch-2: #c9b79e; --muted: #a8977f;
+  --torch: #ffc21a; --torch-soft: #ffd77a; }
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1200px; height: 800px; overflow: hidden; }
+body { background: radial-gradient(90% 70% at 0% 0%, #2a1f16, var(--night) 70%); color: var(--parch);
+  font-family: "Atkinson Hyperlegible", "Times New Roman", serif; padding: 48px 56px; }
+h1 { font-family: "Grenze Gotisch", serif; font-weight: 800; font-size: 76px; line-height: 1; color: var(--torch-soft); }
+.lede { font-size: 22px; color: var(--parch-2); margin-top: 10px; }
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px; }
+.card { background: var(--panel); border-radius: 10px; padding: 22px 24px 14px; box-shadow: 0 0 0 1px var(--line); }
+.card h2 { font-size: 22px; font-weight: 700; }
+.card p { font-size: 17px; color: var(--muted); margin-top: 4px; }
+svg { display: block; margin-top: 8px; }
+svg text { font-family: "Atkinson Hyperlegible", sans-serif; fill: var(--parch-2); font-size: 15px; }
+svg .val { fill: var(--parch); font-weight: 700; font-size: 17px; }
+svg .note { fill: var(--muted); font-size: 14px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 28px; }
+.stat b { display: block; font-size: 40px; font-weight: 700; color: var(--parch); line-height: 1.05; }
+.stat span { display: block; font-size: 18px; color: var(--parch-2); margin-top: 6px; line-height: 1.3; }
+</style>
+</head>
+<body>
+<h1>How our team grew</h1>
+<p class="lede">From our weekly check-ins and Council votes, Oct 24 to Nov 14, 2026. Team averages.</p>
+
+<div class="charts">
+  <div class="card">
+    <h2>Teammates at each meeting</h2>
+    <p>Out of 4. Weekly check-ins started at meeting 3.</p>
+    <svg id="att" width="488" height="290"></svg>
+  </div>
+  <div class="card">
+    <h2>OOP comfort, team average</h2>
+    <p>Self-rated 1 to 5 at each check-in.</p>
+    <svg id="oop" width="488" height="290"></svg>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><b>2.5 → 3.75</b><span>average OOP comfort, from each person’s first check-in to her latest</span></div>
+  <div class="stat"><b>28 of 56</b><span>Council answers came from teammates catching up on a meeting they missed</span></div>
+  <div class="stat"><b>4 ideas</b><span>from our Council votes are in the game, like flashcard keys and hints that explain mistakes</span></div>
+</div>
+
+<script>
+const NS = "http://www.w3.org/2000/svg";
+function el(svg, tag, attrs, text) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; svg.appendChild(e); return e; }
+const GRID = "rgba(246,232,207,.10)", GOLD = "#ffc21a";
+
+// Attendance per meeting (workshop_sessions attend-1..6)
+(function () {
+  const svg = document.getElementById("att");
+  const data = [["Mtg 1", 2], ["Mtg 2", 2], ["Oct 24", 2], ["Oct 31", 4], ["Nov 8", 3], ["Nov 14", 3]];
+  const L = 34, R = 478, T = 34, B = 254, max = 4, y = (v) => B - (v / max) * (B - T);
+  for (let v = 0; v <= max; v++) { el(svg, "line", { x1: L, x2: R, y1: y(v), y2: y(v), stroke: GRID, "stroke-width": v ? 1 : 1.5 }); el(svg, "text", { x: L - 10, y: y(v) + 5, "text-anchor": "end" }, v); }
+  const step = (R - L) / data.length, w = 34;
+  data.forEach(([label, v], i) => {
+    const cx = L + step * (i + .5), top = y(v), h = B - top, r = 4;
+    // bar with rounded data-end, square at the baseline
+    el(svg, "path", { d: `M${cx - w/2},${B} V${top + r} Q${cx - w/2},${top} ${cx - w/2 + r},${top} H${cx + w/2 - r} Q${cx + w/2},${top} ${cx + w/2},${top + r} V${B} Z`, fill: GOLD, opacity: i < 2 ? .45 : 1 });
+    el(svg, "text", { x: cx, y: B + 24, "text-anchor": "middle" }, label);
+    if (i === 3) el(svg, "text", { x: cx, y: top - 8, "text-anchor": "middle", class: "val" }, "All 4");
+  });
+})();
+
+// OOP comfort, students' average per check-in day (checkins collection)
+(function () {
+  const svg = document.getElementById("oop");
+  const data = [["Oct 24", 2.5], ["Oct 31", 3.0], ["Nov 8", 4.0], ["Nov 14", 3.67]];
+  const L = 34, R = 470, T = 34, B = 254, lo = 1, hi = 5, y = (v) => B - ((v - lo) / (hi - lo)) * (B - T);
+  for (let v = lo; v <= hi; v++) { el(svg, "line", { x1: L, x2: R, y1: y(v), y2: y(v), stroke: GRID, "stroke-width": v === lo ? 1.5 : 1 }); el(svg, "text", { x: L - 10, y: y(v) + 5, "text-anchor": "end" }, v); }
+  const x = (i) => L + 30 + i * ((R - L - 60) / (data.length - 1));
+  el(svg, "polyline", { points: data.map(([, v], i) => `${x(i)},${y(v)}`).join(" "), fill: "none", stroke: GOLD, "stroke-width": 2.5, "stroke-linejoin": "round" });
+  data.forEach(([label, v], i) => {
+    el(svg, "circle", { cx: x(i), cy: y(v), r: 6, fill: GOLD, stroke: "#1d1712", "stroke-width": 2 });
+    el(svg, "text", { x: x(i), y: B + 24, "text-anchor": "middle" }, label);
+    if (i === 0 || i === 2) el(svg, "text", { x: x(i), y: y(v) - 14, "text-anchor": "middle", class: "val" }, v.toFixed(1));
+  });
+})();
+</script>
+</body>
+</html>
