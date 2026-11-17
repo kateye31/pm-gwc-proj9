@@ -94,9 +94,12 @@
   ];
   // Shared with the party screen (party.js), which runs the same rounds on a big screen + phones.
   window.P9_ROUNDS = ROUNDS; window.P9_ART = ART; window.P9_SESSION = SESSION;
-  // Can't come to the meeting? These students can answer every round early, on that day only.
-  // Their answers stay hidden until Katrina reveals each round.
-  window.P9_EARLY = { date: '2026-11-14', names: ['Tvishaa', 'Shirley'] };
+  // The meeting day. From this day on, any student can answer the rounds she missed on her own:
+  // no host, no room code, no timer. On the day itself her answers stay hidden until Katrina reveals each round.
+  window.P9_EARLY = { date: '2026-11-14', names: ['Leslie', 'Sanjana', 'Shirley', 'Tvishaa'] };
+  const isoToday = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  // True when this student can answer on her own right now (no live round running).
+  const solo = () => { const E = window.P9_EARLY; return !!E && isoToday() >= E.date && E.names.includes(person) && ['ready', 'revealed'].includes(state.phase); };
 
   let person = '';
   try { person = JSON.parse(localStorage.getItem('p9-council-person')) || ''; } catch {}
@@ -229,8 +232,8 @@
     $('council-pause').disabled = hostDisabled || !running;
     $('council-extend').disabled = hostDisabled || !['running', 'paused'].includes(state.phase);
     $('council-next').textContent = state.round === ROUNDS.filter((x) => !x.optional).length - 1 ? 'Finish core rounds ↓' : state.round === ROUNDS.length - 1 ? 'View our brief ↓' : 'Next round →';
-    $('council-submit').disabled = !canAnswer();
-    $('council-submit').textContent = busy ? 'Saving…' : !person ? 'Pick your name first' : host() ? 'Host listens · students answer' : !connected() ? 'Waiting for shared connection' : canAnswer() ? savedAnswer() ? 'Update my answer' : 'Lock in my answer' : state.phase === 'paused' ? 'Round paused · draft kept' : 'Wait for the host to open';
+    $('council-submit').disabled = !canAnswer() && !solo();
+    $('council-submit').textContent = solo() ? 'Answer the questions I missed' : busy ? 'Saving…' : !person ? 'Pick your name first' : host() ? 'Host listens · students answer' : !connected() ? 'Waiting for shared connection' : canAnswer() ? savedAnswer() ? 'Update my answer' : 'Lock in my answer' : state.phase === 'paused' ? 'Round paused · draft kept' : 'Wait for the host to open';
     // Writing a draft is allowed while paused or closed. Only submission is gated.
     $('council-answer').querySelectorAll('input, textarea').forEach((el) => { el.disabled = !STUDENTS.includes(person) || busy; });
     $('council-decision').querySelectorAll('button, textarea').forEach((el) => { el.disabled = hostDisabled; });
@@ -306,7 +309,10 @@
 
   $('council-idea').oninput = rememberDraft; $('council-due').oninput = rememberDraft;
   $('council-answer').onsubmit = async (event) => {
-    event.preventDefault(); if (!canAnswer()) return;
+    event.preventDefault();
+    // No host needed: open the phone screen, which asks only the questions she hasn't answered yet.
+    if (solo()) { if (window.P9_PARTY) window.P9_PARTY('play', true); return; }
+    if (!canAnswer()) return;
     rememberDraft(); const draft = drafts[draftKey()]; const r = round();
     if (!r.free && !draft.pick) { error('Choose a direction, or choose “I have another idea.”'); return; }
     if ((r.free || draft.pick === 'own') && !draft.idea.trim()) { error('Write your idea before sending.'); $('council-idea').focus(); return; }

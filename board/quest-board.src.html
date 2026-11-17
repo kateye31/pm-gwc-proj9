@@ -2363,9 +2363,11 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     const core = (window.P9_ROUNDS || []).filter((r) => !r.optional);
     // The host's round pointer can move backward (Back, to review a round), so it's not a safe
     // "is the Council over" check. Go by which rounds have actually been revealed instead.
-    const over = session && core.length > 0 && core.every((r) => (session.revealed || []).includes(r.id));
-    // Away today (window.P9_EARLY in council.js)? She can answer before the meeting.
-    const E = window.P9_EARLY, early = !!E && E.date === iso(day0()) && E.names.includes(me);
+    // The day after the meeting counts as over too, even if this board never ran the rounds.
+    const E = window.P9_EARLY;
+    const over = (!!E && iso(day0()) > E.date) || (session && core.length > 0 && core.every((r) => (session.revealed || []).includes(r.id)));
+    // Meeting day (window.P9_EARLY in council.js)? She can answer on her own, before or without the live rounds.
+    const early = !!E && iso(day0()) >= E.date && E.names.includes(me);
     const left = me && me !== "Katrina" && !PREVIEW ? core.filter((r) => !answers.some((a) => a.round === r.id && a.name === me)) : [];
     box.hidden = !(over || early) || !left.length;
     const due = iso(day0()) === "2026-11-14" ? " Please send them by tonight (Saturday)." : "";

@@ -2842,9 +2842,11 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     const core = (window.P9_ROUNDS || []).filter((r) => !r.optional);
     // The host's round pointer can move backward (Back, to review a round), so it's not a safe
     // "is the Council over" check. Go by which rounds have actually been revealed instead.
-    const over = session && core.length > 0 && core.every((r) => (session.revealed || []).includes(r.id));
-    // Away today (window.P9_EARLY in council.js)? She can answer before the meeting.
-    const E = window.P9_EARLY, early = !!E && E.date === iso(day0()) && E.names.includes(me);
+    // The day after the meeting counts as over too, even if this board never ran the rounds.
+    const E = window.P9_EARLY;
+    const over = (!!E && iso(day0()) > E.date) || (session && core.length > 0 && core.every((r) => (session.revealed || []).includes(r.id)));
+    // Meeting day (window.P9_EARLY in council.js)? She can answer on her own, before or without the live rounds.
+    const early = !!E && iso(day0()) >= E.date && E.names.includes(me);
     const left = me && me !== "Katrina" && !PREVIEW ? core.filter((r) => !answers.some((a) => a.round === r.id && a.name === me)) : [];
     box.hidden = !(over || early) || !left.length;
     const due = iso(day0()) === "2026-11-14" ? " Please send them by tonight (Saturday)." : "";
@@ -3511,9 +3513,12 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   ];
   // Shared with the party screen (party.js), which runs the same rounds on a big screen + phones.
   window.P9_ROUNDS = ROUNDS; window.P9_ART = ART; window.P9_SESSION = SESSION;
-  // Can't come to the meeting? These students can answer every round early, on that day only.
-  // Their answers stay hidden until Katrina reveals each round.
-  window.P9_EARLY = { date: '2026-11-14', names: ['Tvishaa', 'Shirley'] };
+  // The meeting day. From this day on, any student can answer the rounds she missed on her own:
+  // no host, no room code, no timer. On the day itself her answers stay hidden until Katrina reveals each round.
+  window.P9_EARLY = { date: '2026-11-14', names: ['Leslie', 'Sanjana', 'Shirley', 'Tvishaa'] };
+  const isoToday = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  // True when this student can answer on her own right now (no live round running).
+  const solo = () => { const E = window.P9_EARLY; return !!E && isoToday() >= E.date && E.names.includes(person) && ['ready', 'revealed'].includes(state.phase); };
 
   let person = '';
   try { person = JSON.parse(localStorage.getItem('p9-council-person')) || ''; } catch {}
@@ -3646,8 +3651,8 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
     $('council-pause').disabled = hostDisabled || !running;
     $('council-extend').disabled = hostDisabled || !['running', 'paused'].includes(state.phase);
     $('council-next').textContent = state.round === ROUNDS.filter((x) => !x.optional).length - 1 ? 'Finish core rounds ↓' : state.round === ROUNDS.length - 1 ? 'View our brief ↓' : 'Next round →';
-    $('council-submit').disabled = !canAnswer();
-    $('council-submit').textContent = busy ? 'Saving…' : !person ? 'Pick your name first' : host() ? 'Host listens · students answer' : !connected() ? 'Waiting for shared connection' : canAnswer() ? savedAnswer() ? 'Update my answer' : 'Lock in my answer' : state.phase === 'paused' ? 'Round paused · draft kept' : 'Wait for the host to open';
+    $('council-submit').disabled = !canAnswer() && !solo();
+    $('council-submit').textContent = solo() ? 'Answer the questions I missed' : busy ? 'Saving…' : !person ? 'Pick your name first' : host() ? 'Host listens · students answer' : !connected() ? 'Waiting for shared connection' : canAnswer() ? savedAnswer() ? 'Update my answer' : 'Lock in my answer' : state.phase === 'paused' ? 'Round paused · draft kept' : 'Wait for the host to open';
     // Writing a draft is allowed while paused or closed. Only submission is gated.
     $('council-answer').querySelectorAll('input, textarea').forEach((el) => { el.disabled = !STUDENTS.includes(person) || busy; });
     $('council-decision').querySelectorAll('button, textarea').forEach((el) => { el.disabled = hostDisabled; });
@@ -3723,7 +3728,10 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
 
   $('council-idea').oninput = rememberDraft; $('council-due').oninput = rememberDraft;
   $('council-answer').onsubmit = async (event) => {
-    event.preventDefault(); if (!canAnswer()) return;
+    event.preventDefault();
+    // No host needed: open the phone screen, which asks only the questions she hasn't answered yet.
+    if (solo()) { if (window.P9_PARTY) window.P9_PARTY('play', true); return; }
+    if (!canAnswer()) return;
     rememberDraft(); const draft = drafts[draftKey()]; const r = round();
     if (!r.free && !draft.pick) { error('Choose a direction, or choose “I have another idea.”'); return; }
     if ((r.free || draft.pick === 'own') && !draft.idea.trim()) { error('Write your idea before sending.'); $('council-idea').focus(); return; }
@@ -3856,7 +3864,8 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   // only grows, so it stays true once the Council is done no matter where the host's screen sits.
   const CORE_IDS = ALL.filter((r) => !r.optional).map((r) => r.id);
   const finished = () => state.round >= CORE;
-  const councilOver = () => CORE_IDS.length > 0 && CORE_IDS.every((id) => (state.revealed || []).includes(id));
+  // The day after the meeting it's over too, even if this board never ran the rounds (they may have run on the other site).
+  const councilOver = () => (!!window.P9_EARLY && today > window.P9_EARLY.date) || (CORE_IDS.length > 0 && CORE_IDS.every((id) => (state.revealed || []).includes(id)));
   const secsLeft = () => state.phase === "running" ? Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000)) : (state.remaining || round().seconds);
   const mmss = (s) => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
   const roundAnswers = () => answers.filter((a) => a.round === round().id && STUDENTS.includes(a.name));
@@ -3987,8 +3996,8 @@ How to answer: the student is a beginner. Use simple words and short steps. Poin
   let draft = { round: "", pick: "", idea: "", due: "" };
   // After the live Council ends, a player who missed rounds answers them on her own, no host or timer.
   const missing = () => ALL.filter((r) => !r.optional && !answers.some((a) => a.round === r.id && a.name === me));
-  // Away today (window.P9_EARLY in council.js)? She answers early, before the live rounds.
-  const early = (n) => { const e = window.P9_EARLY; return !!e && e.date === today && e.names.includes(n); };
+  // Meeting day (window.P9_EARLY in council.js)? She can answer on her own, before or without the live rounds.
+  const early = (n) => { const e = window.P9_EARLY; return !!e && today >= e.date && e.names.includes(n); };
   const catchUp = () => (councilOver() || early(me)) && missing().length > 0;
   const playRound = () => catchUp() ? missing()[0] : round();
   function renderPlay() {

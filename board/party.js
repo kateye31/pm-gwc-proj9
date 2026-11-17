@@ -34,7 +34,8 @@
   // only grows, so it stays true once the Council is done no matter where the host's screen sits.
   const CORE_IDS = ALL.filter((r) => !r.optional).map((r) => r.id);
   const finished = () => state.round >= CORE;
-  const councilOver = () => CORE_IDS.length > 0 && CORE_IDS.every((id) => (state.revealed || []).includes(id));
+  // The day after the meeting it's over too, even if this board never ran the rounds (they may have run on the other site).
+  const councilOver = () => (!!window.P9_EARLY && today > window.P9_EARLY.date) || (CORE_IDS.length > 0 && CORE_IDS.every((id) => (state.revealed || []).includes(id)));
   const secsLeft = () => state.phase === "running" ? Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000)) : (state.remaining || round().seconds);
   const mmss = (s) => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
   const roundAnswers = () => answers.filter((a) => a.round === round().id && STUDENTS.includes(a.name));
@@ -165,8 +166,8 @@
   let draft = { round: "", pick: "", idea: "", due: "" };
   // After the live Council ends, a player who missed rounds answers them on her own, no host or timer.
   const missing = () => ALL.filter((r) => !r.optional && !answers.some((a) => a.round === r.id && a.name === me));
-  // Away today (window.P9_EARLY in council.js)? She answers early, before the live rounds.
-  const early = (n) => { const e = window.P9_EARLY; return !!e && e.date === today && e.names.includes(n); };
+  // Meeting day (window.P9_EARLY in council.js)? She can answer on her own, before or without the live rounds.
+  const early = (n) => { const e = window.P9_EARLY; return !!e && today >= e.date && e.names.includes(n); };
   const catchUp = () => (councilOver() || early(me)) && missing().length > 0;
   const playRound = () => catchUp() ? missing()[0] : round();
   function renderPlay() {
