@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>More Devpost covers</title>
+<!-- Five more Devpost cover ideas (#6-#10), 1200x800, using the art from the merged game (group9 branch 1.0).
+     All art is Tvishaa's (art/, copied from group9/art; the sketch is cropped from her IMG_4046 page).
+     Logo: the Girls Who Code UCF chapter logo from group9. Fonts: open (OFL) Google Fonts, same as thumbs.html.
+     Render: sh render2.sh -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Grenze+Gotisch:wght@600;800&family=IBM+Plex+Mono:wght@500;600&display=block" rel="stylesheet">
+<style>
+:root {
+  --night: #120d09;
+  --wood: #1d1712;
+  --parch: #f3e6cf;
+  --parch-2: #c9b79e;
+  --torch: #ffc21a;
+  --torch-soft: #ffd77a;
+  --moss: #8fc45a;
+  --purple: #b48cff;
+  --title: "Grenze Gotisch", "Times New Roman", serif;
+  --body: "Atkinson Hyperlegible", "Times New Roman", serif;
+  --mono: "IBM Plex Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1200px; height: 800px; overflow: hidden; background: var(--night); }
+.opt { display: none; position: relative; width: 1200px; height: 800px; overflow: hidden; font-family: var(--body); color: var(--parch); }
+.opt.on { display: block; }
+.title { font-family: var(--title); font-weight: 800; color: var(--torch-soft); line-height: .92; letter-spacing: .5px;
+  text-shadow: 0 2px 0 #3a1d00, 0 6px 24px rgba(10, 5, 0, .85); }
+.sub { font-family: var(--title); font-weight: 600; color: var(--parch); }
+.pitch { font-weight: 700; color: var(--parch); }
+.art { position: absolute; background-position: center; background-size: cover; background-repeat: no-repeat; }
+.logo { position: absolute; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; color: var(--parch-2); }
+.logo img { width: 64px; height: 64px; border-radius: 10px; box-shadow: 0 0 0 1px rgba(255,194,26,.35); }
+
+/* 6. Knight vs. the warlock (Leslie's pick): the name on dark wood, the warlock on the right. GWC UCF logo. */
+#o6 { background: radial-gradient(120% 90% at 0% 0%, #2a1f16 0%, var(--night) 70%); }
+#o6 .art { top: 0; right: 0; width: 760px; height: 800px; background-image: url("art/tvishaa-warlock.jpg"); background-position: 50% 40%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 200px); mask-image: linear-gradient(90deg, transparent 0, #000 200px); }
+#o6 .text { position: absolute; left: 64px; top: 0; bottom: 0; width: 400px; display: flex; flex-direction: column; justify-content: center; }
+#o6 .title { font-size: 128px; }
+#o6 .sub { font-size: 50px; margin-top: 14px; }
+#o6 .rule { width: 96px; height: 2px; background: var(--torch); opacity: .7; margin: 30px 0 26px; }
+#o6 .pitch { font-size: 30px; line-height: 1.25; }
+#o6 .logo { left: 64px; bottom: 48px; }
+
+/* 7. Three doors: the Hall of Illusions with real code on each door; the right one glows. */
+#o7 .art { inset: 0; background-image: url("art/tvishaa-hall.jpg"); background-position: center 70%; }
+#o7 .scrim { position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(14,8,4,.94) 0%, rgba(14,8,4,.7) 22%, rgba(14,8,4,0) 40%, rgba(14,8,4,0) 78%, rgba(14,8,4,.9) 100%); }
+#o7 .title { position: absolute; top: 26px; left: 0; right: 0; text-align: center; font-size: 112px; }
+#o7 .sub { position: absolute; top: 136px; left: 0; right: 0; text-align: center; font-size: 42px; }
+#o7 .door { position: absolute; top: 440px; width: 250px; padding: 10px 12px; border-radius: 8px; text-align: center;
+  font-family: var(--mono); font-weight: 600; font-size: 19px; line-height: 1.3; color: var(--parch); background: rgba(12,8,5,.86); }
+#o7 .d1 { left: 98px; } #o7 .d2 { left: 475px; } #o7 .d3 { left: 852px; }
+#o7 .d2 { box-shadow: 0 0 0 2px var(--purple), 0 0 50px 8px rgba(180,140,255,.55); }
+#o7 .d1, #o7 .d3 { opacity: .78; }
+#o7 .k { color: var(--torch); }
+#o7 .pitch { position: absolute; bottom: 34px; left: 0; right: 0; text-align: center; font-size: 38px; }
+
+/* 8. Four chambers: four tall slices of her drawings, each with what it teaches. */
+#o8 { background: var(--night); }
+#o8 .head { position: absolute; top: 0; left: 0; right: 0; height: 210px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+#o8 .title { font-size: 116px; }
+#o8 .sub { font-size: 40px; margin-top: 8px; }
+#o8 .row { position: absolute; top: 222px; left: 32px; right: 32px; bottom: 32px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+#o8 .ch { position: relative; border-radius: 8px; overflow: hidden; background-size: cover; box-shadow: 0 0 0 1px rgba(255,194,26,.3); }
+#o8 .ch span { position: absolute; left: 0; right: 0; bottom: 0; padding: 70px 16px 18px; font-weight: 700; font-size: 25px; line-height: 1.15;
+  background: linear-gradient(180deg, rgba(14,8,4,0), rgba(14,8,4,.95) 55%); }
+#o8 .ch small { display: block; font-size: 17px; font-weight: 700; color: var(--torch); margin-bottom: 4px; }
+#o8 .ch em { display: block; font-style: normal; font-size: 18px; font-weight: 400; color: var(--parch-2); margin-top: 4px; }
+#o8 .c1 { background-image: url("art/tvishaa-maze.jpg"); background-position: 30% center; }
+#o8 .c2 { background-image: url("art/tvishaa-lab.jpg"); background-position: 50% center; }
+#o8 .c3 { background-image: url("art/tvishaa-hall.jpg"); background-position: 50% center; }
+#o8 .c4 { background-image: url("art/tvishaa-warlock.jpg"); background-position: 50% center; }
+
+/* 9. Sketch to game: her red-pencil page next to the finished door. */
+#o9 { background: radial-gradient(90% 80% at 50% 60%, #2a1f16 0%, var(--night) 75%); }
+#o9 .title { position: absolute; top: 30px; left: 0; right: 0; text-align: center; font-size: 104px; }
+#o9 .sub { position: absolute; top: 132px; left: 0; right: 0; text-align: center; font-size: 38px; }
+#o9 .paper { position: absolute; left: 80px; top: 230px; width: 450px; height: 465px; background: url("art/tvishaa-sketch.jpg") center / cover;
+  transform: rotate(-3deg); border-radius: 3px; box-shadow: 0 30px 50px -20px rgba(0,0,0,.9); }
+#o9 .final { position: absolute; right: 70px; top: 262px; width: 560px; height: 414px; background: url("art/tvishaa-door.jpg") center / cover;
+  transform: rotate(1.5deg); border-radius: 4px; box-shadow: 0 0 0 1px rgba(255,194,26,.35), 0 30px 60px -20px rgba(0,0,0,.9); }
+#o9 .arrow { position: absolute; left: 534px; top: 430px; font-size: 64px; color: var(--torch); font-weight: 700; }
+#o9 .cap { position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 26px; font-weight: 700; color: var(--parch-2); }
+
+/* 10. A question to answer: the game's own question box, over the door. */
+#o10 .art { inset: 0; background-image: url("art/tvishaa-door.jpg"); background-position: center 40%; filter: brightness(.55); }
+#o10 .title { position: absolute; top: 28px; left: 0; right: 0; text-align: center; font-size: 104px; }
+#o10 .box { position: absolute; left: 190px; right: 190px; top: 170px; padding: 28px 40px 30px; border-radius: 14px;
+  background: rgba(24,17,11,.94); box-shadow: 0 0 0 2px rgba(255,194,26,.55), 0 30px 60px -20px rgba(0,0,0,.9); }
+#o10 .box .spiral { position: absolute; top: 50%; width: 34px; height: 34px; margin-top: -17px; background: url("art/spiral.png") center / contain no-repeat; }
+#o10 .box .l { left: -17px; } #o10 .box .r { right: -17px; }
+#o10 .who { font-size: 22px; font-weight: 700; color: var(--moss); }
+#o10 pre { margin: 14px 0 16px; padding: 16px 22px; border-radius: 8px; background: #0d0906; font-family: var(--mono); font-weight: 500; font-size: 27px; line-height: 1.35; color: var(--parch); }
+#o10 pre .k { color: var(--torch); }
+#o10 .q { font-size: 40px; font-weight: 700; }
+#o10 .choices { position: absolute; left: 0; right: 0; top: 590px; display: flex; justify-content: center; gap: 22px; }
+#o10 .choices span { display: flex; align-items: center; gap: 12px; padding: 12px 26px; border-radius: 10px; font-family: var(--mono); font-weight: 600; font-size: 32px;
+  background: rgba(24,17,11,.94); box-shadow: 0 0 0 2px rgba(143,196,90,.6); }
+#o10 .choices img { width: 32px; height: 32px; }
+#o10 .pitch { position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 30px; }
+</style>
+</head>
+<body>
+
+<section class="opt" id="o6">
+  <div class="art"></div>
+  <div class="text">
+    <h1 class="title">Knight’s<br>Escape</h1>
+    <p class="sub">An OOP Quest</p>
+    <div class="rule"></div>
+    <p class="pitch">Every door is a concept. Answer the warlock, and the keys are yours.</p>
+  </div>
+  <p class="logo"><img src="art/gwc-ucf-logo.jpg" alt="">Girls Who Code UCF</p>
+</section>
+
+<section class="opt" id="o7">
+  <div class="art"></div><div class="scrim"></div>
+  <h1 class="title">Knight’s Escape</h1>
+  <p class="sub">An OOP Quest</p>
+  <p class="door d1">class Wizard<br><span class="k">implements</span><br>Character</p>
+  <p class="door d2">class Wizard<br><span class="k">extends</span><br>Character</p>
+  <p class="door d3">class Wizard<br><span class="k">inherits</span><br>Character</p>
+  <p class="pitch">Every door is a concept. Only one is real.</p>
+</section>
+
+<section class="opt" id="o8">
+  <div class="head">
+    <h1 class="title">Knight’s Escape</h1>
+    <p class="sub">Four chambers. One way out.</p>
+  </div>
+  <div class="row">
+    <div class="ch c1"><span><small>Chamber 1</small>LabyrinthLearn<em>Classes and objects</em></span></div>
+    <div class="ch c2"><span><small>Chamber 2</small>The Alchemy Lab<em>Methods and encapsulation</em></span></div>
+    <div class="ch c3"><span><small>Chamber 3</small>Hall of Illusions<em>Inheritance and polymorphism</em></span></div>
+    <div class="ch c4"><span><small>Chamber 4</small>The Final Door<em>Explain it yourself</em></span></div>
+  </div>
+</section>
+
+<section class="opt" id="o9">
+  <h1 class="title">Knight’s Escape</h1>
+  <p class="sub">An OOP Quest</p>
+  <div class="paper"></div>
+  <div class="final"></div>
+  <p class="arrow">→</p>
+  <p class="cap">Drawn on paper first, then in the game. Art by Tvishaa.</p>
+</section>
+
+<section class="opt" id="o10">
+  <div class="art"></div>
+  <h1 class="title">Knight’s Escape</h1>
+  <div class="box">
+    <i class="spiral l"></i><i class="spiral r"></i>
+    <p class="who">The Warlock asks:</p>
+<pre><span class="k">class</span> Knight { String name; }
+
+Knight k = <span class="k">new</span> Knight();</pre>
+    <p class="q">Which one is the OBJECT?</p>
+  </div>
+  <div class="choices">
+    <span><img src="art/arrow-left.png" alt="">Knight</span>
+    <span><img src="art/arrow-up.png" alt="">k</span>
+    <span><img src="art/arrow-right.png" alt="">class</span>
+  </div>
+  <p class="pitch">An escape room where every door is an OOP concept.</p>
+</section>
+
+<script>
+  const n = (location.hash || "#6").slice(1);
+  document.getElementById("o" + n).classList.add("on");
+</script>
+</body>
+</html>

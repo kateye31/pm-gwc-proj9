@@ -33,7 +33,7 @@ The girls are brand new to GitHub, VS Code and OOP. Every task must be doable wi
 - Define each code word the first time it appears, and say why (which concept; link the Charter table).
 - Hints, not answers. Never paste the finished code.
 - Check the search text exists on the student's branch in github.com/kateye31/group9 (the source of truth), and don't rely on notes from unmerged PRs.
-- Write tasks to both the Claude artifact DB and Firebase.
+- Write tasks to the Claude artifact DB (Firebase is unlinked; the public site runs in demo mode).
 
 ## Board design rules (Katrina's)
 - Art must be real, human-made work: public-domain paintings/manuscripts (Wikimedia Commons) or the students' own drawings. No AI-generated images. Credit every image on the page.

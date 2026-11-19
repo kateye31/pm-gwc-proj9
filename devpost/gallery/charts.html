@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Devpost gallery charts</title>
+<!-- Two Devpost gallery images, 1200x800, styled like the game's own screens (game style.css tokens and fonts).
+     #oop: OOP comfort from the board's check-ins (students only; dots are anonymous).
+     #ideas: the Oct 24 brainstorm Council (workshop_answers, session meeting-1) and what's in the merged game on 1.0.
+     Render: chrome --headless --window-size=1200,800 --screenshot "charts.html#oop" -->
+<style>
+:root {
+  --stone: #17110a; --panel: #21170e; --ink: #0b0806; --text: #f3e6cf; --muted: #bba586;
+  --torch: #ffce33; --moss: #74b84f; --warlock: #86c6c1;
+  --font-title: "Castellar", "Constantia", Georgia, serif;
+  --font-body: "Constantia", "Palatino Linotype", Georgia, serif;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1200px; height: 800px; overflow: hidden; background: var(--stone); }
+.screen { display: none; position: relative; width: 1200px; height: 800px; font-family: var(--font-body); color: var(--text);
+  background-size: cover; background-position: center; }
+.screen.on { display: block; }
+#oop { background-image: url("art/tvishaa-lab.jpg"); }
+#ideas { background-image: url("art/tvishaa-maze.jpg"); }
+#ideas .panel { bottom: auto; top: 50%; transform: translateY(-50%); padding-bottom: 40px; }
+.panel { position: absolute; left: 64px; right: 64px; top: 44px; bottom: 44px; background: var(--panel); border: 3px solid var(--ink);
+  border-radius: 18px; box-shadow: 0 8px 0 var(--ink), 0 24px 48px rgba(0,0,0,.5); padding: 36px 48px; }
+h1 { font-family: var(--font-title); font-weight: 400; color: var(--torch); font-size: 46px; letter-spacing: 1px; line-height: 1.1; }
+.sub { color: var(--muted); font-size: 22px; margin-top: 8px; }
+.foot { position: absolute; left: 48px; right: 48px; bottom: 30px; font-size: 22px; color: var(--text); }
+.credit { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); font-size: 15px; color: var(--text);
+  background: rgba(11,8,6,.75); padding: 4px 12px; border-radius: 6px; white-space: nowrap; }
+
+/* OOP chart */
+#oop svg { display: block; margin-top: 18px; }
+svg text { font-family: var(--font-body); fill: var(--muted); font-size: 19px; }
+svg .val { fill: var(--text); font-size: 24px; font-weight: 700; }
+.legend { position: absolute; right: 48px; top: 44px; display: grid; gap: 6px; font-size: 18px; color: var(--muted); }
+.legend span { display: flex; align-items: center; gap: 10px; }
+.legend i { display: inline-block; }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(243,230,207,.45); }
+.line { width: 28px; height: 3px; background: var(--torch); border-radius: 2px; }
+
+/* Ideas */
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 26px; }
+.cols h2 { font-size: 26px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: baseline; gap: 10px; }
+.cols .in h2 { color: var(--moss); }
+.cols .next h2 { color: var(--warlock); }
+.cols h2 small { font-size: 18px; color: var(--muted); font-weight: 400; }
+ul { list-style: none; padding: 0; display: grid; gap: 0; }
+li { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 0; border-top: 1px solid rgba(243,230,207,.12); font-size: 21px; line-height: 1.25; }
+li:last-child { border-bottom: 1px solid rgba(243,230,207,.12); }
+.who { flex: none; font-size: 17px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.pip { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--torch); }
+.pip.y { background: var(--torch); }
+.who b { font-weight: 400; margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<section class="screen" id="oop">
+  <div class="panel">
+    <h1>Our OOP comfort</h1>
+    <p class="sub">At every check-in, each of us rated how comfortable we felt with OOP, from 1 to 5.</p>
+    <div class="legend"><span><i class="dot"></i>one of us</span><span><i class="line"></i>team average</span></div>
+    <svg id="oop-svg" width="1000" height="440"></svg>
+    <p class="foot">The team average went from 2.5 to 3.7. Everyone who checked in more than once ended higher than she started.</p>
+  </div>
+  <p class="credit">Drawing by Tvishaa</p>
+</section>
+
+<section class="screen" id="ideas">
+  <div class="panel">
+    <h1>Where our ideas went</h1>
+    <p class="sub">We brainstormed on Oct 24: six questions, everyone answered all of them, plus our own ideas.</p>
+    <div class="cols">
+      <div class="in">
+        <h2>In the game <small>5 ideas</small></h2>
+        <ul>
+          <li>Each answer is a direction in the maze<span class="who" data-v="4"></span></li>
+          <li>A weak-spot scroll at the end<span class="who" data-v="3"></span></li>
+          <li>Keys are flashcards<span class="who" data-v="2"></span></li>
+          <li>Wrong answers explain the mistake<span class="who" data-v="2"></span></li>
+          <li>The name LabyrinthLearn<span class="who">Leslie’s idea</span></li>
+        </ul>
+      </div>
+      <div class="next">
+        <h2>Still to come <small>5 ideas</small></h2>
+        <ul>
+          <li>A sly trickster warlock<span class="who" data-v="2"></span></li>
+          <li>Naming him Ravencroft<span class="who">won our poll</span></li>
+          <li>A pegasus ending<span class="who">Sanjana’s idea</span></li>
+          <li>Timers and cheers<span class="who">Shirley’s idea</span></li>
+          <li>Saving past games<span class="who">Tvishaa’s idea</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <p class="credit">Drawing by Tvishaa</p>
+</section>
+
+<script>
+const id = (location.hash || "#oop").slice(1);
+document.getElementById(id).classList.add("on");
+
+// Vote pips: filled = teammates who picked it, out of 4
+document.querySelectorAll(".who[data-v]").forEach((el) => {
+  const v = +el.dataset.v;
+  for (let i = 0; i < 4; i++) { const p = document.createElement("i"); p.className = "pip" + (i < v ? " y" : ""); el.append(p); }
+  const b = document.createElement("b"); b.textContent = v + " of 4 votes"; el.append(b);
+});
+
+// OOP comfort: each check-in's ratings (anonymous, same order each day so the small offsets keep a person in place)
+(function () {
+  const svg = document.getElementById("oop-svg"), NS = "http://www.w3.org/2000/svg";
+  const el = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; svg.appendChild(e); return e; };
+  const days = ["Oct 24", "Oct 31", "Nov 8", "Nov 14"];
+  // [person0, person1, person2, person3] per day; null = didn't check in
+  const r = [[2, 3, null, null], [3, 4, 1, 4], [4, 4, 4, null], [4, 4, 3, null]];
+  const avg = r.map((d) => { const v = d.filter((x) => x != null); return v.reduce((a, b) => a + b, 0) / v.length; });
+  const L = 48, R = 960, T = 30, B = 380, y = (v) => B - ((v - 1) / 4) * (B - T), x = (i) => L + 70 + i * ((R - L - 140) / 3);
+  for (let v = 1; v <= 5; v++) {
+    el("line", { x1: L, x2: R, y1: y(v), y2: y(v), stroke: "rgba(243,230,207,.12)", "stroke-width": 1 });
+    el("text", { x: L - 14, y: y(v) + 7, "text-anchor": "end" }, v);
+  }
+  const off = [-15, -5, 5, 15];
+  r.forEach((d, i) => d.forEach((v, p) => { if (v != null) el("circle", { cx: x(i) + off[p], cy: y(v), r: 7, fill: "rgba(243,230,207,.45)", stroke: "#21170e", "stroke-width": 2 }); }));
+  el("polyline", { points: avg.map((v, i) => `${x(i)},${y(v)}`).join(" "), fill: "none", stroke: "#ffce33", "stroke-width": 4, "stroke-linejoin": "round", "stroke-linecap": "round" });
+  avg.forEach((v, i) => {
+    el("circle", { cx: x(i), cy: y(v), r: 9, fill: "#ffce33", stroke: "#21170e", "stroke-width": 3 });
+    el("text", { x: x(i), y: B + 40, "text-anchor": "middle" }, days[i]);
+    if (i === 0 || i === 3) el("text", { x: x(i) + (i === 0 ? -34 : 34), y: y(v) + 8, "text-anchor": i === 0 ? "end" : "start", class: "val" }, v.toFixed(1));
+  });
+})();
+</script>
+</body>
+</html>
